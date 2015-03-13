@@ -1,0 +1,12 @@
+*.pyc
+*~
+*.log
+*.swp
+tags
+cscope.out
+make_build.sh
+old_python_stuff/
+build/
+.ycm_extra_conf.py
+
+/python/norma/#CMakeLists.txt#

@@ -1,0 +1,17 @@
+# -*- encoding: utf-8 -*-
+
+from setuptools import setup
+setup(
+    name = "norma",
+    version = "@CMAKE_PROJECT_VERSION@",
+    packages = ['norma'],
+
+    # Well, this is not what it's intended for...
+    package_data = {
+        'norma': ['*.so']
+    },
+
+    author = "Marcel Bollmann",
+    author_email = "bollmann@linguistics.rub.de",
+    url = "http://www.linguistics.rub.de/clhist/resources/norma/"
+)

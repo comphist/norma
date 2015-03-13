@@ -1,0 +1,42 @@
+#!/usr/bin/python
+
+import sys
+from numbers import Number
+sys.path.insert(0, "../../python")
+from norma import NormaInitError
+from norma.LexiconWrapper import Lexicon
+import norma.NormalizerWrapper as Normalizer
+import unittest
+
+TEST_BASE_DIR = "@NORMA_TEST_BASE_DIR@"
+STRING_IMPL = "@STRING_IMPL@"
+test_vars = {}
+
+class AssertFloat:
+    precision = 0.001
+    def assertClose(self, tuple1, tuple2):
+        for (x, y) in zip(tuple1, tuple2):
+            if isinstance(x, Number) and isinstance(y, Number):
+                try:
+                    self.assertTrue((x-self.precision) < y < (x+self.precision))
+                except AssertionError as e:
+                    msg = "%s\n\n%f != %f within the precision boundary of %f"
+                    msg = msg % (e.message, x, y, self.precision)
+                    raise AssertionError, AssertionError(msg), sys.exc_info()[2]
+            else:
+                self.assertEquals(x, y)
+
+execfile("test_lexicon.py")
+execfile("test_base.py")
+execfile("test_mapper.py")
+execfile("test_rulebased.py")
+execfile("test_wld.py")
+execfile("test_chain.py")
+
+if STRING_IMPL == "ICU":
+    execfile("test_lexicon_icu.py")
+elif STRING_IMPL == "STD":
+    execfile("test_lexicon_std.py")
+
+if __name__ == '__main__':
+    unittest.main()

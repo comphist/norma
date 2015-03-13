@@ -1,0 +1,5 @@
+vnd	und	25
+vnnd	und	10
+jn	ihn	20
+jn	in	75
+jn	inne	5

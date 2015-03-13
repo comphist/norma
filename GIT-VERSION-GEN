@@ -1,0 +1,26 @@
+#!/bin/sh
+# based on GIT-VERSION-GEN from linux kernel
+
+DEF_VER=v0.2.0.GIT
+LF='
+'
+
+if [ -f version ]; then
+    VN=$(<version)
+elif test -d ${GIT_DIR:-.git} -o -f .git &&
+    VN=$(git describe --match "v[0-9]*" --abbrev=7 HEAD 2>/dev/null) &&
+        case "$VN" in
+            *$LF*) (exit 1) ;;
+            v[0-9]*)
+                git update-index -q --refresh
+                [ -z "$(git diff-index --name-only HEAD --)" ] || \
+                    VN="$VN-dirty" ;;
+        esac
+then
+    VN=$(echo "$VN" | sed -e"s/-/./g");
+else
+    VN="$DEF_VER"
+fi
+
+echo $VN
+
