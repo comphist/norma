@@ -25,6 +25,7 @@
 #include<functional>
 #include"string_impl.h"
 #include"training_data.h"
+#include"normalizer/result.h"
 
 namespace Norma {
 class Input;
@@ -90,6 +91,7 @@ class Cycle {
           _norm  = true,
           _prob  = true,
           _thread = false;
+     Normalizer::LogLevel _max_log_level = Normalizer::LogLevel::WARN;
      TrainingData* _data;
      Input*  _in;
      Output* _out;

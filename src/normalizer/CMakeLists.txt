@@ -1,1 +1,1 @@
-add_sources(mapper.cpp lexicon.cpp)
+add_sources(mapper.cpp lexicon.cpp result.cpp)
