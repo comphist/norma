@@ -107,7 +107,8 @@ add_executable(norma_lexicon src/normalizer/lexicon_main.cpp)
 target_link_libraries(norma_lexicon norma ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 ############################### tests ##########################################
-add_subdirectory(src/tests)
+add_custom_target(buildtests)
+add_subdirectory(src/tests EXCLUDE_FROM_ALL)
 
 if (CMAKE_CONFIGURATION_TYPES)
     add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
@@ -117,6 +118,7 @@ else()
     add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
         --force-new-ctest-process --output-on-failure)
 endif()
+add_dependencies(check buildtests)
 
 ############################ installation ######################################
 # library
