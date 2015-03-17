@@ -16,8 +16,9 @@ else()
     set(CTAGS false)
 endif()
 if(NOT CSCOPE STREQUAL "CSCOPE-NOTFOUND")
+    file(GLOB_RECURSE ALL_FILES ${CMAKE_SOURCE_DIR} *.cpp *.h)
     add_custom_target(cscope
-        COMMAND ${CSCOPE} -bR ${CMAKE_SOURCE_DIR}/*.cpp ${CMAKE_SOURCE_DIR}/*.h
+        COMMAND ${CSCOPE} -bR ${ALLFILES}
         COMMAND cp cscope.out ${CMAKE_SOURCE_DIR}/
     )
 else()
