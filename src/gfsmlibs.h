@@ -20,6 +20,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-pedantic"
+#pragma GCC diagnostic ignored "-Wpointer-arith"
 extern "C" {
 #include<gfsm.h>
 #include<gfsmxl.h>
