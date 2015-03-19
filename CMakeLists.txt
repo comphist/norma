@@ -11,11 +11,18 @@ execute_process(
 set(STRING_IMPL "ICU" CACHE STRING "String implementation to use (ICU|STD)")
 set(DESTINATION "/usr/local/" CACHE STRING "Install destination")
 set(USE_PYTHON OFF CACHE BOOL "Whether to make Python buildings/embed")
+set(USE_TAGS OFF CACHE BOOL "Whether to generate ctags/cscope in build")
+set(USE_LINT OFF CACHE BOOL "Whether to include a lint (code check) target")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules")
 include(AddSources)
-include(cpplint)
-include(CTAGS)
+
+if (USE_LINT)
+    include(cpplint)
+endif()
+if (USE_TAGS)
+    include(CTAGS)
+endif()
 enable_testing()
 
 find_package(Boost 1.50
