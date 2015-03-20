@@ -55,10 +55,12 @@ Result Rulebased::operator()(const string_impl& word) const {
         return _cache.at(word);
     ResultSet resultset = this->operator()(word, 1);
     Result result;
-    if (resultset.size() == 0)
+    if (resultset.size() == 0) {
         result = make_result(word, 0.0);
-    else
+        log_message(&result, LogLevel::TRACE, "no candidate found");
+    } else {
         result = resultset.front();
+    }
     if (_caching) {
         std::lock_guard<std::mutex> guard(*cache_mutex);
         _cache[word] = result;

@@ -529,8 +529,11 @@ BOOST_AUTO_TEST_CASE(rulebased_normalize_best) {
     BOOST_CHECK_EQUAL(vnd.word, "und");
     BOOST_CHECK(vnd.score > 0);
     Result foo = (*r)("fvo");
+    BOOST_REQUIRE(foo.messages.size() > 0);
+    std::string message = std::get<2>(foo.messages.front());
     BOOST_CHECK_EQUAL(foo.word, "fvo");
     BOOST_CHECK_EQUAL(foo.score, 0);
+    BOOST_CHECK_EQUAL(message, "no candidate found");
 }
 
 BOOST_AUTO_TEST_CASE(rulebased_normalize_n_best) {
