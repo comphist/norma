@@ -48,14 +48,16 @@ Result CandidateFinder::operator()() {
         const RAState current = _q.top();
         _q.pop();
         if (current.end_of_word()) {
-            if (!_lex->contains(current.norm))
+            if (!_lex->contains(current.norm)) {
                 continue;
-            else {  // success!
-                Result result = Result(current.norm, cost_to_probability(current.cost));
+            } else {  // success!
+                Result result = Result(current.norm,
+                                       cost_to_probability(current.cost));
                 for (const Rule& rule : current.history) {
                     std::ostringstream message;
                     message << "applied rule: " << rule;
-                    result.messages.push(make_message(LogLevel::TRACE, "RuleBased",
+                    result.messages.push(make_message(LogLevel::TRACE,
+                                                      "RuleBased",
                                                       message.str()));
                 }
                 return result;

@@ -27,7 +27,7 @@
 namespace Norma {
 namespace Normalizer {
 enum class LogLevel {
-    TRACE=0,
+    TRACE = 0,
     WARN,
     ERROR,
     SILENT

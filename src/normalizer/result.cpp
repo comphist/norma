@@ -27,7 +27,7 @@ LogMessage make_message(LogLevel loglevel,
 }
 
 std::string level_string(LogLevel loglevel) {
-    switch(loglevel) {
+    switch (loglevel) {
         case LogLevel::TRACE:
             return "TRACE";
         case LogLevel::WARN:

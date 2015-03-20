@@ -43,7 +43,7 @@ void Output::log_messages(Normalizer::Result* result,
     while (!result->messages.empty()) {
         Normalizer::LogLevel level;
         std::string origin, message;
-        std::tie (level, origin, message) = result->messages.front();
+        std::tie(level, origin, message) = result->messages.front();
         if (level >= max_level)
             *_output << "[" << Normalizer::level_string(level) << "]:"
                      << message << " Origin: " << origin << std::endl;

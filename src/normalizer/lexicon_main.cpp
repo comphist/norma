@@ -164,9 +164,11 @@ int main(int argc, char* argv[]) {
 void check_if_file_exists(const std::string& name, bool status) {
     if (boost::filesystem::exists(name) == status)
         return;
+    std::ostringstream err_msg;
     if (status) {
-        throw std::runtime_error("required file does not exist: " + name);
+        err_msg << "required file does not exist: " << name;
     } else {
-        throw std::runtime_error("file already exists and --force not specified: " + name);
+        err_msg << "file already exists and --force not specified: " << name;
     }
+    throw std::runtime_error(err_msg.str());
 }
