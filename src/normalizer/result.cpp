@@ -34,6 +34,9 @@ std::string level_string(LogLevel loglevel) {
             return "WARNING";
         case LogLevel::ERROR:
             return "ERROR";
+        case LogLevel::SILENT:
+        default:
+            return "SILENT";
     }
 }
 }  // namespace Normalizer
