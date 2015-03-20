@@ -17,9 +17,11 @@
  */
 #include"candidate_finder.h"
 #include<algorithm>
+#include<sstream>
 #include<vector>
 #include"symbols.h"
 #include"lexicon.h"
+#include"result.h"
 #include"rule.h"
 #include"rule_collection.h"
 
@@ -33,6 +35,8 @@ CandidateFinder::CandidateFinder(const string_impl& word,
     : _rules(&rules), _lex(&lex) {
     word_bound = word + Symbols::BOUNDARY;
     unchanged_result = Result(word, 0.0);
+    unchanged_result.messages.push(make_message(LogLevel::TRACE, "RuleBased",
+                                                "no candidate found"));
     _total_steps = (2 * word.length()) + 1;
     // this is experimental -- not clear what the best setting is:
     _minimum_combined_frequency = 2 * _rules->get_average_freq();
@@ -46,8 +50,16 @@ Result CandidateFinder::operator()() {
         if (current.end_of_word()) {
             if (!_lex->contains(current.norm))
                 continue;
-            else  // success!
-                return Result(current.norm, cost_to_probability(current.cost));
+            else {  // success!
+                Result result = Result(current.norm, cost_to_probability(current.cost));
+                for (const Rule& rule : current.history) {
+                    std::ostringstream message;
+                    message << "applied rule: " << rule;
+                    result.messages.push(make_message(LogLevel::TRACE, "RuleBased",
+                                                      message.str()));
+                }
+                return result;
+            }
         }
 
         string_impl current_back;

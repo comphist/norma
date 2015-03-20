@@ -20,6 +20,8 @@
 #include<algorithm>
 #include<initializer_list>
 #include<map>
+#include<queue>
+#include<sstream>
 #include<string>
 #include<tuple>
 #include<vector>
@@ -356,19 +358,26 @@ BOOST_AUTO_TEST_SUITE_END()
 struct CandidateFinderFixture {
     MockLexicon lex;
     RuleCollection rules;
+    std::vector<Rule> vnd_rules;
 
     CandidateFinderFixture() {
         // rules for vnd -> und
-        rules.learn_rule(Rule("E", "E", "#", "v"), 1);
-        rules.learn_rule(Rule("v", "u", "#", "n"), 10);
-        rules.learn_rule(Rule("v", "v", "#", "n"), 2);  // distractor rule
-        rules.learn_rule(Rule("E", "E", "u", "n"), 1);
+        vnd_rules.push_back(Rule("E", "E", "#", "v"));
+        vnd_rules.push_back(Rule("v", "u", "#", "n"));
+        vnd_rules.push_back(Rule("E", "E", "u", "n"));
+        vnd_rules.push_back(Rule("n", "n", "u", "d"));
+        vnd_rules.push_back(Rule("E", "E", "n", "d"));
+        vnd_rules.push_back(Rule("d", "d", "n", "#"));
+        vnd_rules.push_back(Rule("E", "E", "d", "#"));
+        // learn rules
+        for (const Rule& vnd_rule : vnd_rules)
+            rules.learn_rule(vnd_rule, 1);
+        // distractor rules
+        rules.learn_rule(Rule("v", "v", "#", "n"), 2);
         rules.learn_rule(Rule("E", "E", "v", "n"), 1);
-        rules.learn_rule(Rule("n", "n", "u", "d"), 1);
         rules.learn_rule(Rule("n", "n", "v", "d"), 1);
-        rules.learn_rule(Rule("E", "E", "n", "d"), 1);
-        rules.learn_rule(Rule("d", "d", "n", "#"), 1);
-        rules.learn_rule(Rule("E", "E", "d", "#"), 1);
+        // make "correct" rule more frequent than distractor rule
+        rules.learn_rule(Rule("v", "u", "#", "n"), 9);
     }
     ~CandidateFinderFixture() {}
 };
@@ -376,17 +385,36 @@ struct CandidateFinderFixture {
 BOOST_FIXTURE_TEST_SUITE(CandidateFinder1, CandidateFinderFixture)
 
 BOOST_AUTO_TEST_CASE(candidate_finder_vnd) {
+    // set up expected log messages
+    std::queue<std::string> expected_messages;
+    for (const Rule& rule : vnd_rules) {
+        std::ostringstream msg;
+        msg << "applied rule: " << rule;
+        expected_messages.push(msg.str());
+    }
+    // check
     CandidateFinder finder("vnd", rules, lex);
     Result result = finder();
     BOOST_CHECK_EQUAL(result.word, "und");
     BOOST_CHECK_CLOSE(result.score, 0.277777778, 0.001);
+    BOOST_REQUIRE_EQUAL(result.messages.size(), expected_messages.size());
+    while (!result.messages.empty()) {
+        std::string actual = std::get<2>(result.messages.front());
+        std::string expected = expected_messages.front();
+        BOOST_CHECK_EQUAL(actual, expected);
+        result.messages.pop();
+        expected_messages.pop();
+    }
 }
 
 BOOST_AUTO_TEST_CASE(candidate_finder_vnt) {
     CandidateFinder finder("vnt", rules, lex);
     Result result = finder();
+    BOOST_REQUIRE(result.messages.size() > 0);
+    std::string message = std::get<2>(result.messages.front());
     BOOST_CHECK_EQUAL(result.word, "vnt");
     BOOST_CHECK_CLOSE(result.score, 0.0, 0.001);
+    BOOST_CHECK_EQUAL(message, "no candidate found");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
