@@ -74,9 +74,7 @@ StringCascade::find_map_nbest(const LabelVector& vec) const {
     std::set<StringPath> results;
     std::set<Path> paths = Cascade::lookup_nbest(vec);
     for (const Path& p : paths) {
-        results.insert(StringPath(_alph_in.map_labels_to_vector(p.input),
-                                  _alph_out.map_labels_to_vector(p.output),
-                                  p.weight));
+        results.insert(StringPath::from(p, _alph_in, _alph_out));
     }
     return results;
 }

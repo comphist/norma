@@ -19,6 +19,7 @@
 #define GFSM_PATH_H_
 #include<tuple>
 #include<vector>
+#include"alphabet.h"
 #include"labelvector.h"
 #include"string_impl.h"
 
@@ -58,6 +59,13 @@ struct StringPath : Path {
     StringPath(std::vector<string_impl> i, std::vector<string_impl> o,
                double w)
         : input(i), output(o) { weight = w; }
+
+    static StringPath from(const Path& p, const Alphabet& alph_in,
+                           const Alphabet& alph_out) {
+        return StringPath(alph_in.map_labels_to_vector(p.input),
+                          alph_out.map_labels_to_vector(p.output),
+                          p.weight);
+    }
 };
 
 }  // namespace Gfsm

@@ -77,9 +77,7 @@ StringTransducer::transduce_vector_to_string(const LabelVector& vec) const {
     auto results = Transducer::transduce(vec);
     for (const Path& p : results) {
         try {
-            auto i = _alph_in.map_labels_to_vector(p.input);
-            auto o = _alph_out.map_labels_to_vector(p.output);
-            x.insert(StringPath(i, o, p.weight));
+            x.insert(StringPath::from(p, _alph_in, _alph_out));
         }
         catch (const std::out_of_range& err) {}
     }
