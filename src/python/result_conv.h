@@ -19,12 +19,20 @@
 #define NORMA_PYTHON_RESULT_CONV_H_
 #include<string>
 #include<boost/python.hpp>  //NOLINT[build/include_order]
+#include"string_impl.h"
 #include"normalizer/result.h"
 
 namespace Norma {
 namespace Python {
-struct Result_to_python_tuple {
-    static PyObject* convert(Norma::Normalizer::Result const& r);
+typedef boost::python::converter::rvalue_from_python_stage1_data
+    py_stage1_data;
+typedef boost::python::converter::rvalue_from_python_storage<string_impl>
+    py_storage;
+
+struct Result_from_python_tuple {
+    static void* convertible(PyObject* obj_ptr);
+    static void  construct(PyObject* obj_ptr,
+                           py_stage1_data* data);
 };
 
 struct ResultSet_to_python_list {
@@ -32,6 +40,11 @@ struct ResultSet_to_python_list {
 };
 
 void register_result_converters();
+
+struct result_wrapper {
+    static string_impl repr(const Norma::Normalizer::Result& result);
+    static void wrap();
+};
 }  // namespace Python
 }  // namespace Norma
 

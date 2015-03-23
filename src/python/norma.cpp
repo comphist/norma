@@ -42,6 +42,7 @@ BOOST_PYTHON_MODULE(norma) {
     bp::class_<std::vector<string_impl>>("StringVector")
         .def(bp::vector_indexing_suite<std::vector<string_impl>, true>());
 
+    result_wrapper::wrap();                // Result
     lexicon_wrapper::wrap();               // Lexicon
     normalizer_wrapper::wrap_Mapper();     // Mapper normalizer
     normalizer_wrapper::wrap_Rulebased();  // Rulebased normalizer

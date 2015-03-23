@@ -18,6 +18,9 @@
 # with Norma.  If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
 
+from operator import attrgetter
+from norma import Result
+
 class ChainNormalizer(list):
     """Normalizer that represents a chain of other normalizers.
 
@@ -35,7 +38,7 @@ class ChainNormalizer(list):
                    chain (set this after adding all normalizers)
 
     """
-    
+
     _name = "Chain"
     _lexicon = None
 
@@ -48,7 +51,7 @@ class ChainNormalizer(list):
           Any number of normalizers that should be appended to the chain.
         """
         self.init(*normalizers)
-            
+
     def init(self, *normalizers):
         """Initialize a chain of normalizers.
 
@@ -71,17 +74,16 @@ class ChainNormalizer(list):
     def _normalize_best(self, word):
         for norm in self:
             r = norm(word)
-            if r[1] > self.threshold:
+            if r.score > self.threshold:
                 return r
-        return (word, 0.0, '[None]')
-            
+        return Result(word, 0.0, "[None]")
+
     def _normalize_n_best(self, word, n):
-        from operator import itemgetter
         results = []
         for norm in self:
             results.extend(norm(word, n))
-        results = [r for r in results if r[1] > self.threshold]
-        return sorted(results, key=itemgetter(1), reverse=True)[:n]
+        results = [r for r in results if r.score > self.threshold]
+        return sorted(results, key=attrgetter('score'), reverse=True)[:n]
 
     def normalize(self, word, n=None):
         """Normalize a word and return the best (or n best) candidate(s).
@@ -90,7 +92,7 @@ class ChainNormalizer(list):
         first normalizer returns a result with score > self.threshold;
         otherwise, calls all normalizers and returns the n best
         candidates in descending order of their scores.
-        
+
         Arguments:
           word -- The string that should be normalized
              n -- (optional) How many candidates to return
@@ -104,7 +106,7 @@ class ChainNormalizer(list):
             return self._normalize_best(word)
         else:
             return self._normalize_n_best(word, n)
-    
+
     def __call__(self, word, n=None):
         """Alias for normalize(word, n=None)"""
         return self.normalize(word, n)
@@ -121,7 +123,7 @@ class ChainNormalizer(list):
     @property
     def name(self):
         return self._name
-    
+
     @property
     def lexicon(self):
         return self._lexicon
