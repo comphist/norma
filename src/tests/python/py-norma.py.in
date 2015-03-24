@@ -32,6 +32,7 @@ class AssertFloat:
 
 execfile("test_lexicon.py")
 execfile("test_base.py")
+execfile("test_result.py")
 execfile("test_mapper.py")
 execfile("test_rulebased.py")
 execfile("test_wld.py")

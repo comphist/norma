@@ -19,8 +19,6 @@
 # with Norma.  If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
 
-import norma.NormalizerWrapper as Normalizer
-
 class ChainTest(unittest.TestCase, AssertFloat):
     rulesfile = TEST_BASE_DIR + "/test-rulesfile.txt"
     mapfile = TEST_BASE_DIR + "/test-mapfile.txt"
