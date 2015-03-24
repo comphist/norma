@@ -43,7 +43,7 @@ void* Result_from_python_tuple::convertible(PyObject* obj_ptr) {
     PyObject* result_word = PyTuple_GetItem(obj_ptr, 0);
     PyObject* result_score = PyTuple_GetItem(obj_ptr, 1);
     if (!(PyString_Check(result_word) || PyUnicode_Check(result_word))
-        || !PyFloat_Check(result_score))
+        || !(PyFloat_Check(result_score) || PyInt_Check(result_score)))
         return 0;
     if (size == 3) {
         PyObject* result_origin = PyTuple_GetItem(obj_ptr, 2);
@@ -61,8 +61,15 @@ void Result_from_python_tuple::construct(PyObject* obj_ptr,
     // Extract data from the python tuple
     PyObject* ptr_word = PyTuple_GetItem(obj_ptr, 0);
     PyObject* ptr_score = PyTuple_GetItem(obj_ptr, 1);
+    // .word
     string_impl result_word = bp::extract<string_impl>(ptr_word);
-    double result_score = PyFloat_AsDouble(ptr_score);
+    // .score
+    double result_score;
+    if(PyFloat_Check(ptr_score))
+        result_score = PyFloat_AsDouble(ptr_score);
+    else
+        result_score = PyInt_AsLong(ptr_score);
+    // .origin
     Result* result = new (storage) Result(result_word, result_score);
     if(PyTuple_Size(obj_ptr) > 2) {
         PyObject* ptr_origin = PyTuple_GetItem(obj_ptr, 2);
