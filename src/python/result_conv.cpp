@@ -20,6 +20,7 @@
 // Result and ResultSet into native Python tuples or lists of tuples.
 // ----------------------------------------------------------------------------
 #include"result_conv.h"
+#include<queue>
 #include<sstream>
 #include<string>
 #include<boost/python.hpp>  //NOLINT[build/include_order]
@@ -29,6 +30,8 @@
 namespace bp = boost::python;
 using Norma::Normalizer::Result;
 using Norma::Normalizer::ResultSet;
+using Norma::Normalizer::LogMessage;
+using Norma::Normalizer::level_string;
 
 namespace Norma {
 namespace Python {
@@ -88,6 +91,20 @@ PyObject* ResultSet_to_python_list::convert(ResultSet const& rs) {
     return bp::incref(l.ptr());
 }
 
+PyObject* LogMessageQueue_to_python_list::convert(LogMessageQueue const& lmq) {
+    bp::list l;
+    // copy queue because we need to pop() to get all elements
+    LogMessageQueue queue(lmq);
+    while (!queue.empty()) {
+        const LogMessage& msg = queue.front();
+        std::string log_level = level_string(std::get<0>(msg));
+        auto tuple = bp::make_tuple(log_level, std::get<1>(msg), std::get<2>(msg));
+        l.append(tuple);
+        queue.pop();
+    }
+    return bp::incref(l.ptr());
+}
+
 void register_result_converters() {
     bp::converter::registry::push_back(
         &Result_from_python_tuple::convertible,
@@ -95,6 +112,7 @@ void register_result_converters() {
         bp::type_id<Result>());
 
     bp::to_python_converter<ResultSet, ResultSet_to_python_list>();
+    bp::to_python_converter<LogMessageQueue, LogMessageQueue_to_python_list>();
 }
 
 string_impl result_wrapper::repr(const Result& result) {
@@ -128,6 +146,13 @@ void result_wrapper::wrap() {
                       ),
                       bp::make_setter(&Result::origin),
                       "Name of the normalizer that produced this result."
+                     )
+        .add_property("messages",
+                      bp::make_getter(
+                          &Result::messages,
+                          bp::return_value_policy<bp::return_by_value>()
+                      ),
+                      "A list of log messages concerning this result."
                      )
         .def("__eq__", &Result::operator==)
         .def("__neq__", &Result::operator!=)

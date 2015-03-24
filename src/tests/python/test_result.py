@@ -40,3 +40,12 @@ class ResultTest(unittest.TestCase, AssertFloat):
         self.assertEquals(result_cpp, result_tuple)
         self.assertEquals(result_cpp, result_py)
         self.assertEquals(result_py, result_tuple)
+
+    def testLogMessages(self):
+        self.norm.init()
+        result = self.norm("vrouwe")
+        self.assertTrue(isinstance(result.messages, list))
+        self.assertTrue(len(result.messages) > 0)
+        message = result.messages[0]
+        self.assertTrue(isinstance(message, tuple))
+        self.assertEquals(len(message), 3)
