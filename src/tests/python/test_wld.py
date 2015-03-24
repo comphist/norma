@@ -59,6 +59,14 @@ class WLDTest(unittest.TestCase, AssertFloat):
         self.assertClose(self.norm("jhn"), ("ihn", 0.818, "WLD"))
         self.assertClose(self.norm("jm"),  ("ihm", 0.449, "WLD"))
 
+    def testLogMessages1(self):
+        self.norm.paramfile = self.paramfile
+        self.norm.lexicon = make_wld_lexicon()
+        self.norm.init()
+        result = self.norm("jn")
+        # no trace logging implemented yet
+        self.assertEquals(len(result.messages), 0)
+
     def testNormalize2(self):
         self.norm.paramfile = self.paramfile
         self.norm.lexicon = make_wld_lexicon()
