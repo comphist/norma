@@ -10,11 +10,6 @@
 # It is likely to contain errors/bugs.
 #
 
-## Dependencies
-find_package(GLIB2 REQUIRED)
-
-## Find via pkg-config
-find_package(PkgConfig)
 pkg_check_modules(PC_LIBGFSM REQUIRED gfsm>=0.0.11)
 pkg_check_modules(PC_LIBGFSMXL REQUIRED gfsmxl>=0.0.11)
 set(LIBGFSM_DEFINITIONS ${PC_LIBGFSM_CFLAGS_OTHER} )
