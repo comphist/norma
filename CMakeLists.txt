@@ -7,24 +7,36 @@ execute_process(
     OUTPUT_VARIABLE CMAKE_PROJECT_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-# read command line arguments to cmake
+
+########## command line arguments {{{
 set(STRING_IMPL "ICU" CACHE STRING "String implementation to use (ICU|STD)")
-set(DESTINATION "/usr/local/" CACHE STRING "Install destination")
-set(USE_PYTHON OFF CACHE BOOL "Whether to make Python buildings/embed")
-
+set(WITH_PYTHON OFF CACHE BOOL "Whether to make Python buildings/embed")
+set(WITH_TAGS OFF CACHE BOOL "Whether to generate ctags/cscope in build")
+set(WITH_LINT OFF CACHE BOOL "Whether to include a lint (code check) target")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules")
-include(AddSources)
-include(cpplint)
-include(CTAGS)
+if (WITH_LINT)
+    include(cpplint)
+endif()
+if (WITH_TAGS)
+    include(CTAGS)
+endif()
 enable_testing()
-
+include(AddSources)
+# }}}
+########## find dependencies {{{
 find_package(Boost 1.50
     COMPONENTS program_options unit_test_framework regex system filesystem
     REQUIRED)
+if(NOT PKG_CONFIG STREQUAL "")
+    set(PKG_CONFIG_EXECUTABLE ${PKG_CONFIG})
+endif()
+find_package(PkgConfig REQUIRED)
+find_package(GLIB2 REQUIRED)
+include_directories(${GLIB2_INCLUDE_DIR})
 find_package(Gfsm REQUIRED)
 include_directories(${LIBGFSM_INCLUDE_DIRS})
-
-############################ string implementation #############################
+# }}}
+########## string implementation {{{
 if (STRING_IMPL STREQUAL "ICU")
     find_package(ICU 49)
     if (NOT ICU_FOUND)
@@ -41,24 +53,24 @@ elseif(STRING_IMPL STREQUAL "STD")
 else()
     message(FATAL_ERROR "string implementation ${STRING_IMPL} not recognized!")
 endif()
-
-########################## python bindings #####################################
-if(USE_PYTHON)
+# }}}
+########## python bindings {{{
+if(WITH_PYTHON)
     find_package(PythonLibs 2.7 REQUIRED)
     find_package(PythonInterp 2.7 REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
     set (EMBED_PYTHON TRUE)
 endif()
-
-######################### configured headers ###################################
+# }}}
+########## configure headers {{{
 set( NORMA_TEST_BASE_DIR "${CMAKE_SOURCE_DIR}/src/tests/data" )
 configure_file( "${CMAKE_SOURCE_DIR}/src/config.h.in"
                 "${CMAKE_BINARY_DIR}/src/config.h" )
 configure_file( "${CMAKE_SOURCE_DIR}/src/defines.h.in"
                 "${CMAKE_BINARY_DIR}/src/defines.h")
 include_directories( "${CMAKE_BINARY_DIR}/src" )
-
-############################ compiler flags  ###################################
+# }}}
+########## compiler setting and flags {{{
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -pedantic")
     if(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "4.7.99")
@@ -72,8 +84,8 @@ endif()
 if (MSVC)
     message(FATAL_ERROR "Sorry, compilation won't work with MSVC due to incomplete C++11 support")
 endif()
-
-####################### main source directories ################################
+# }}}
+########## main source directories {{{
 add_subdirectory(src)
 add_subdirectory(src/interface)
 add_subdirectory(src/normalizer)
@@ -82,12 +94,12 @@ add_subdirectory(src/normalizer/rulebased)
 add_subdirectory(src/gfsm)
 include_directories(src src/normalizer src/interface src/gfsm)
 
-if(USE_PYTHON)
+if(WITH_PYTHON)
     add_subdirectory(src/normalizer/external)
     add_subdirectory(src/python)
 endif()
-
-############################## library #########################################
+# }}}
+########## library and executables {{{
 add_library(norma SHARED ${SRCS})
 target_link_libraries(norma
     LINK_PUBLIC
@@ -99,14 +111,12 @@ target_link_libraries(norma
     ${Boost_REGEX_LIBRARY}
     ${LIBGFSM_LIBRARIES}
 )
-
-############################ executables #######################################
 add_executable(normalize src/main.cpp)
 target_link_libraries(normalize norma ${Boost_PROGRAM_OPTIONS_LIBRARY})
 add_executable(norma_lexicon src/normalizer/lexicon_main.cpp)
 target_link_libraries(norma_lexicon norma ${Boost_PROGRAM_OPTIONS_LIBRARY})
-
-############################### tests ##########################################
+# }}}
+########## tests {{{
 add_custom_target(buildtests)
 add_subdirectory(src/tests EXCLUDE_FROM_ALL)
 
@@ -119,27 +129,35 @@ else()
         --force-new-ctest-process --output-on-failure)
 endif()
 add_dependencies(check buildtests)
-
-############################ installation ######################################
+# }}}
+########## install {{{
+if (NOT CMAKE_INSTALL_LIBDIR)
+    set(CMAKE_INSTALL_LIBDIR "lib")
+endif()
+if (NOT CMAKE_INSTALL_BINDIR)
+    set(CMAKE_INSTALL_BINDIR "bin")
+endif()
+set(NORMA_LIBDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+set(NORMA_BINDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
+set(NORMA_DOCDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}/doc/${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}")
 # library
-install(TARGETS norma DESTINATION "${DESTINATION}/lib")
+install(TARGETS norma DESTINATION "${NORMA_LIBDIR}")
 # binary
-install(TARGETS normalize DESTINATION "${DESTINATION}/bin")
-install(TARGETS norma_lexicon DESTINATION "${DESTINATION}/bin")
+install(TARGETS normalize norma_lexicon DESTINATION "${NORMA_BINDIR}")
 # docs/examples
 set(docdest "${DESTINATION}/share/doc/norma-${CMAKE_PROJECT_VERSION}")
 install(FILES "${CMAKE_SOURCE_DIR}/README.md"
               "${CMAKE_SOURCE_DIR}/doc/UserGuide.md"
               "${CMAKE_SOURCE_DIR}/doc/PythonBindings.md"
               "${CMAKE_SOURCE_DIR}/doc/acrh-paper.pdf"
-        DESTINATION "${docdest}")
+              DESTINATION "${NORMA_DOCDIR}")
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/doc/example/"
-        DESTINATION "${docdest}/example")
+                  DESTINATION "${NORMA_DOCDIR}/example")
 # headers
 # this is kind of a hack. it would probably be best to somehow move the header installation
 # to the subdirectory's CMakeLists.txt TODO(fpetran)
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/src/"
-        DESTINATION "${DESTINATION}/include/norma"
+        DESTINATION "${CMAKE_INSTALL_PREFIX}/include/norma"
         FILES_MATCHING
             PATTERN "*.h"
             PATTERN "doc" EXCLUDE
@@ -151,9 +169,9 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/src/"
             PATTERN "data" EXCLUDE
             PATTERN ".git" EXCLUDE)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/src/defines.h"
-        DESTINATION "${DESTINATION}/include/norma")
-
-############################### docs ###########################################
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/include/norma")
+# }}}
+########## documentation {{{
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in"
@@ -165,3 +183,5 @@ if(DOXYGEN_FOUND)
         COMMENT "Generating API documentation..."
     )
 endif()
+# }}}
+# vim: set fdm=marker fmr={,}: fdls=1
