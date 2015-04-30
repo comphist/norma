@@ -22,11 +22,12 @@ Norma is licensed under the
     * CMake >= 2.8.10
     * Boost >= 1.50
         * in particular these libraries: Filesystem, Program Options, Regex, System, Test
+    * pkg-config
     * gfsm >= 0.0.11 and gfsmxl >= 0.0.11,
       available from http://kaskade.dwds.de/~moocow/mirror/projects/gfsm/
     * GLib >= 2.0
 * Optionally:
-    * ICU >= 1.49 (finding ICU will only work on OS that have pkgconfig)
+    * ICU >= 1.49
     * Doxygen (for generating the documentation)
     * Python 2 >= 2.7 and Boost::Python (for Python bindings/embeddings)
 
@@ -37,8 +38,8 @@ Norma is licensed under the
     cmake <pathtosource>
     make
 
-There is a test suite included that can be run with `make test` (or `make check`, which reveals more detailed error messages), as well as some
-rudimentary documentation that is generated via `make doc` (requires Doxygen).
+There is a test suite included that can be run with `make test` (or `make check`, which reveals more detailed error
+messages), as well as API documentation that is generated via `make doc` (requires Doxygen).
 
 #### Configuration options (for CMake)
 
@@ -49,9 +50,9 @@ rudimentary documentation that is generated via `make doc` (requires Doxygen).
 * Build type (default: Release):
     `-DCMAKE_BUILD_TYPE=(Debug|Release):`
 * Install prefix (default: /usr/local/)
-    `-DDESTINATION=<prefix>`
+    `-DCMAKE_INSTALL_PREFIX=<prefix>`
 * To make Python bindings/embeddings (default: disabled), set
-    `-DUSE_PYTHON`
+    `-DWITH_PYTHON=TRUE`
 
 #### Other platforms
 
