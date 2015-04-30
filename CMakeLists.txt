@@ -145,7 +145,6 @@ install(TARGETS norma DESTINATION "${NORMA_LIBDIR}")
 # binary
 install(TARGETS normalize norma_lexicon DESTINATION "${NORMA_BINDIR}")
 # docs/examples
-set(docdest "${DESTINATION}/share/doc/norma-${CMAKE_PROJECT_VERSION}")
 install(FILES "${CMAKE_SOURCE_DIR}/README.md"
               "${CMAKE_SOURCE_DIR}/doc/UserGuide.md"
               "${CMAKE_SOURCE_DIR}/doc/PythonBindings.md"
@@ -153,23 +152,11 @@ install(FILES "${CMAKE_SOURCE_DIR}/README.md"
               DESTINATION "${NORMA_DOCDIR}")
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/doc/example/"
                   DESTINATION "${NORMA_DOCDIR}/example")
-# headers
-# this is kind of a hack. it would probably be best to somehow move the header installation
-# to the subdirectory's CMakeLists.txt TODO(fpetran)
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/src/"
-        DESTINATION "${CMAKE_INSTALL_PREFIX}/include/norma"
-        FILES_MATCHING
-            PATTERN "*.h"
-            PATTERN "doc" EXCLUDE
-            PATTERN "tests" EXCLUDE
-            PATTERN "example" EXCLUDE
-            PATTERN "scripts" EXCLUDE
-            PATTERN "CMakeModules" EXCLUDE
-            PATTERN "python" EXCLUDE
-            PATTERN "data" EXCLUDE
-            PATTERN ".git" EXCLUDE)
+# headers are installed from the source directory they live in
+# except for configured headers. config.h only contains
+# build related stuff and doesn't need to be installed
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/src/defines.h"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/include/norma")
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/include/${CMAKE_PROJECT_NAME}")
 # }}}
 ########## documentation {{{
 find_package(Doxygen)
