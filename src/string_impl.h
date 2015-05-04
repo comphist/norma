@@ -30,7 +30,30 @@
 #include<unicode/unistr.h> // NOLINT[build/include_order]
 #include<unicode/uchar.h>  // NOLINT[build/include_order]
 
-typedef UnicodeString string_impl;
+/// Wrapper class for UnicodeString.
+/// this class is necessary because we assume that non-ICU
+/// strings are always UTF encoded already, which is not an
+/// assumption ICU shares, so we have to explicitly call
+/// UnicodeString::fromUTF8 a few times.
+class unicode_string_impl : public UnicodeString {
+ public:
+     unicode_string_impl() = default;
+     unicode_string_impl(const char* that)
+         : UnicodeString(UnicodeString::fromUTF8(that)) {}
+     unicode_string_impl(char that) {
+         char tmp[2];
+         tmp[0] = that; tmp[1] = '\0';
+         UnicodeString(UnicodeString::fromUTF8(tmp));
+     }
+     unicode_string_impl(const std::string& that)
+         : UnicodeString(UnicodeString::fromUTF8(that)) {}
+     unicode_string_impl(const UChar32& that)
+        : UnicodeString(that) {}
+     unicode_string_impl(const UnicodeString& that)
+        : UnicodeString(that) {}
+};
+
+typedef unicode_string_impl string_impl;
 typedef UChar32 char_impl;
 typedef int string_size;
 
