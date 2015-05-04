@@ -25,47 +25,60 @@
 
 namespace Gfsm {
 
+class StringPath;
 /// A weighted path in a finite-state automaton.
-struct Path {
-    LabelVector input;  /**< Input label sequence.  */
-    LabelVector output; /**< Output label sequence. */
-    double      weight; /**< Weight of the path.    */
+class Path {
+     friend class StringPath;
+ public:
+     Path() = default;
+     Path(LabelVector i, LabelVector o, double w)
+         : input(i), output(o), weight(w) {}
 
-    Path() {}
-    Path(LabelVector i, LabelVector o, double w)
-        : input(i), output(o), weight(w) {}
-
-    bool operator==(const Path& that) const {
-        return (input == that.input &&
-                output == that.output &&
-                weight == that.weight);
-    }
-    inline bool operator!=(const Path& that) const {
-        return !(*this == that);
-    }
-    bool operator<(const Path& that) const {
-        return (std::make_tuple(input, output, weight)
-                < std::make_tuple(that.input, that.output, that.weight));
-    }
+     bool operator==(const Path& that) const {
+         return (input == that.input &&
+                 output == that.output &&
+                 weight == that.weight);
+     }
+     inline bool operator!=(const Path& that) const {
+         return !(*this == that);
+     }
+     bool operator<(const Path& that) const {
+         return (std::make_tuple(input, output, weight)
+                 < std::make_tuple(that.input, that.output, that.weight));
+     }
+     const LabelVector& get_output() const { return output; }
+     const LabelVector& get_input() const { return input; }
+     const double& get_weight() const { return weight; }
+ protected:
+     LabelVector input;  /**< Input label sequence.  */
+     LabelVector output; /**< Output label sequence. */
+     double      weight; /**< Weight of the path.    */
 };
 
 /// A weighted path in a string-based finite-state automaton.
 /** Also stores symbol sequences in addition to label sequences.
  */
-struct StringPath : Path {
-    std::vector<string_impl> input;  /**< Input symbol sequence.  */
-    std::vector<string_impl> output; /**< Output symbol sequence. */
+class StringPath : public Path {
+ public:
+     StringPath(std::vector<string_impl> i, std::vector<string_impl> o,
+                double w)
+         : input(i), output(o) { weight = w; }
 
-    StringPath(std::vector<string_impl> i, std::vector<string_impl> o,
-               double w)
-        : input(i), output(o) { weight = w; }
-
-    static StringPath from(const Path& p, const Alphabet& alph_in,
-                           const Alphabet& alph_out) {
-        return StringPath(alph_in.map_labels_to_vector(p.input),
-                          alph_out.map_labels_to_vector(p.output),
-                          p.weight);
-    }
+     static StringPath from(const Path& p, const Alphabet& alph_in,
+                            const Alphabet& alph_out) {
+         return StringPath(alph_in.map_labels_to_vector(p.input),
+                           alph_out.map_labels_to_vector(p.output),
+                           p.weight);
+     }
+     const std::vector<string_impl>& get_output() const {
+         return output;
+     }
+     const std::vector<string_impl>& get_input() const {
+         return input;
+     }
+ private:
+     std::vector<string_impl> input;  /**< Input symbol sequence.  */
+     std::vector<string_impl> output; /**< Output symbol sequence. */
 };
 
 }  // namespace Gfsm

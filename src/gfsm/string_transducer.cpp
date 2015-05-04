@@ -95,9 +95,9 @@ void StringTransducer::add_path(const string_impl& str_in,
 
 void StringTransducer::add_path(const StringPath& path,
                                 bool cyclic, bool final) {
-    Transducer::add_path(Path(_alph_in.map_symbols(path.input),
-                              _alph_out.map_symbols(path.output),
-                              path.weight),
+    Transducer::add_path(Path(_alph_in.map_symbols(path.get_input()),
+                              _alph_out.map_symbols(path.get_output()),
+                              path.get_weight()),
                          cyclic, final);
 }
 

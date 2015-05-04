@@ -158,11 +158,11 @@ ResultSet WLD::operator()(const string_impl& word, unsigned int n) const {
     // convert cascade output to Result
     ResultSet resultset;
     for (auto stringpath : results) {
-        std::vector<string_impl> output = stringpath.output;
+        std::vector<string_impl> output = stringpath.get_output();
         strip_boundary_symbol(&output);
-        resultset
-            .push_back(make_result(Gfsm::implode(output),
-                                   calculate_probability(stringpath.weight)));
+        resultset.push_back(
+                   make_result(Gfsm::implode(output),
+                               calculate_probability(stringpath.get_weight())));
         resultset.back().origin = std::string(name());
     }
     return resultset;

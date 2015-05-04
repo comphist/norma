@@ -53,13 +53,13 @@ void Transducer::add_path(const Path& p, bool cyclic, bool final) {
     std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsmStateId from = root();
     gfsmStateId to   = gfsm_automaton_n_states(_fsm);
-    gfsmWeight  w    = p.weight;
-    unsigned int input_size  = p.input.size(),
-                 output_size = p.output.size(),
+    gfsmWeight  w    = p.get_weight();
+    unsigned int input_size  = p.get_input().size(),
+                 output_size = p.get_output().size(),
                  max_size    = std::max(input_size, output_size);
     for (unsigned int i = 0; i < max_size; ++i) {
-        gfsmLabelVal from_val = (i < input_size) ? p.input.get(i) : 0;
-        gfsmLabelVal to_val   = (i < output_size) ? p.output.get(i) : 0;
+        gfsmLabelVal from_val = (i < input_size) ? p.get_input().get(i) : 0;
+        gfsmLabelVal to_val   = (i < output_size) ? p.get_output().get(i) : 0;
         if (cyclic && (i == max_size - 1)) {
             to = root();  // cyclic: back to the root
         }

@@ -42,7 +42,7 @@ std::set<LabelVector> Acceptor::accepted() const {
     std::set<Path> paths = accepted_paths();
     std::set<LabelVector> acc;
     for (const Path& p : paths) {
-        acc.insert(p.input);
+        acc.insert(p.get_input());
     }
     return acc;
 }
