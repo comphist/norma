@@ -68,11 +68,8 @@ class Automaton {
     /// Find all paths that are accepted by this automaton.
     /** If the automaton is cyclic, an empty set is returned, as the
         set of accepted paths would be infinite in this case.
-
-        @param eps_remove If true, epsilon labels are excluded from
-                          the returned paths.
      */
-    std::set<Path> accepted_paths(bool eps_remove = false) const;
+    std::set<Path> accepted_paths() const;
 
     /// Make sure automaton has a root state
     void ensure_root() { root(); }
@@ -95,7 +92,7 @@ class Automaton {
         under mutex-lock.
         @see accepted_paths()
      */
-    std::set<Path> find_accepted_paths(bool eps_remove = false) const;
+    std::set<Path> find_accepted_paths() const;
 };
 
 }  // namespace Gfsm

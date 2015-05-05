@@ -142,22 +142,18 @@ LabelVector
 
 string_impl Alphabet::map_labels(const LabelVector& labels) const {
     string_impl s = "";
-    for (auto lab : labels) {
-        if (contains(lab)) {
+    for (auto lab : labels)
+        if (lab != EPSILON_LABEL)
             s += get_symbol(lab);
-        }
-    }
     return s;
 }
 
 std::vector<string_impl>
         Alphabet::map_labels_to_vector(const LabelVector& labels) const {
     std::vector<string_impl> v;
-    for (auto lab : labels) {
-        if (contains(lab)) {
+    for (auto lab : labels)
+        if (lab != EPSILON_LABEL)
             v.push_back(get_symbol(lab));
-        }
-    }
     return v;
 }
 

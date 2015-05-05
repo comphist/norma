@@ -42,7 +42,7 @@ std::set<Path> Transducer::transduce(const LabelVector& input) const {
     if (gfsm_automaton_n_final_states(result) > 0) {
         Transducer a(&dummy);
         a.set_gfsm_automaton(result);
-        tr = a.find_accepted_paths(true);
+        tr = a.find_accepted_paths();
     } else {
         gfsm_automaton_free(result);
     }

@@ -26,7 +26,8 @@
 namespace Gfsm {
 
 class StringPath;
-/// A weighted path in a finite-state automaton.
+
+/// A weight.ed path in a finite-state automaton.
 class Path {
      friend class StringPath;
  public:

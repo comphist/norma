@@ -129,12 +129,12 @@ void Automaton::minimize(bool remove_eps) {
     gfsm_automaton_minimize_full(_fsm, static_cast<gboolean>(remove_eps));
 }
 
-std::set<Path> Automaton::accepted_paths(bool eps_remove) const {
+std::set<Path> Automaton::accepted_paths() const {
     std::lock_guard<std::mutex> guard(*gfsm_mutex);
-    return find_accepted_paths(eps_remove);
+    return find_accepted_paths();
 }
 
-std::set<Path> Automaton::find_accepted_paths(bool eps_remove) const {
+std::set<Path> Automaton::find_accepted_paths() const {
     std::set<Path> acc;
     if (gfsm_automaton_is_cyclic(_fsm))  // sanity check
         return acc;
@@ -144,13 +144,11 @@ std::set<Path> Automaton::find_accepted_paths(bool eps_remove) const {
         LabelVector vin, vout;  // should be identical in an Acceptor
         double w = 0.0;
         gfsmArcPath* path = reinterpret_cast<gfsmArcPath*>(arcpaths->data);
-        for (unsigned int i = 0; i+1 < path->len; i++) {
+        for (size_t i = 0; i+1 < path->len; i++) {
             gfsmArc* arc = reinterpret_cast<gfsmArc*>(g_ptr_array_index(path,
                                                                         i));
-            if (!eps_remove || arc->lower != EPSILON_LABEL)
-                vin.push_back(arc->lower);
-            if (!eps_remove || arc->upper != EPSILON_LABEL)
-                vout.push_back(arc->upper);
+            vin.push_back(arc->lower);
+            vout.push_back(arc->upper);
             w += arc->weight;
         }
         /* // check with the original source what this was supposed to do

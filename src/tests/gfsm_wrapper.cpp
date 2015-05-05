@@ -692,7 +692,7 @@ BOOST_AUTO_TEST_CASE(transducer_add_nonfinal_2) {
 
 BOOST_AUTO_TEST_CASE(transducer_accepted_paths) {
     fsm->add_path(Path(v, mu, 0.5));
-    std::set<Path> accepted = fsm->accepted_paths(true);
+    std::set<Path> accepted = fsm->accepted_paths();
     BOOST_REQUIRE_EQUAL(accepted.size(), 1);
     auto it = accepted.begin();
     BOOST_CHECK((*it).get_input()  == v);

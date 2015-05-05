@@ -121,7 +121,7 @@ std::set<Path> Cascade::lookup_nbest(const LabelVector& v) const {
     std::mutex dummy;
     Gfsm::Automaton result(&dummy, static_cast<SemiringType>(_csc->sr->type));
     result.set_gfsm_automaton(result_fsm);
-    return result.find_accepted_paths(true);
+    return result.find_accepted_paths();
 }
 
 std::set<Path> Cascade::lookup_nbest(const LabelVector& v,
