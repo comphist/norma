@@ -103,7 +103,6 @@ target_link_libraries(norma
     ${STRING_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
-    ${NORMALIZER_LIBRARIES}
     LINK_PRIVATE
     ${PYTHON_LIBRARIES}
     ${Boost_REGEX_LIBRARY}
@@ -112,7 +111,6 @@ target_link_libraries(norma
 add_executable(normalize src/main.cpp)
 target_link_libraries(normalize
                       norma
-                      ${NORMALIZER_LIBRARIES}
                       ${Boost_PROGRAM_OPTIONS_LIBRARY})
 # }}}
 ########## tests {{{

@@ -27,6 +27,7 @@
 
 namespace Norma {
 namespace Normalizer {
+namespace Mapper {
 class Mapper : public Base {
  public:
      void init();
@@ -57,8 +58,16 @@ class Mapper : public Base {
      std::map<string_impl, std::map<string_impl, int>> _map;
      std::string _mapfile;
 };
+}  // namespace Mapper
 }  // namespace Normalizer
 }  // namespace Norma
+
+extern "C" Norma::Normalizer::Base* create_normalizer() {
+    return new Norma::Normalizer::Mapper::Mapper;
+}
+extern "C" void destroy_normalizer(Norma::Normalizer::Base* n) {
+    delete n;
+}
 
 #endif  // NORMALIZER_MAPPER_H_
 

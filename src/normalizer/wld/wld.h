@@ -126,4 +126,13 @@ class WLD : public Base {
 }  // namespace Normalizer
 }  // namespace Norma
 
+extern "C" Norma::Normalizer::Base* create_normalizer() {
+    return new Norma::Normalizer::WLD::WLD;
+}
+
+extern "C" void destroy_normalizer(Norma::Normalizer::Base* n) {
+    delete n;
+}
+
 #endif  // NORMALIZER_WLD_WLD_H_
+

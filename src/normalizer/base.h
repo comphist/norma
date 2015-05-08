@@ -115,5 +115,8 @@ class Base {
 }  // namespace Normalizer
 }  // namespace Norma
 
+typedef Norma::Normalizer::Base* create_t();
+typedef void destroy_t(Norma::Normalizer::Base*);
+
 #endif  // NORMALIZER_BASE_H_
 

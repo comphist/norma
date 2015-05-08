@@ -23,6 +23,7 @@
 #include<functional>
 #include"string_impl.h"
 #include"normalizer/result.h"
+#include"normalizer/base.h"
 
 namespace Norma {
 class TrainingData;
@@ -57,13 +58,8 @@ class Applicator : private std::list<Normalizer::Base*> {
      const Applicator& operator=(const Applicator& a) = delete;
      ~Applicator();
 
-     /// register a normalizer with the applicator
-     void register_method(Normalizer::Base* n);
-
      /// add a normalizer to the back of the chain
-     inline void push_chain(Normalizer::Base* n) {
-         push_back(n);
-     }
+     inline void push_chain(Normalizer::Base* n);
      /// start all normalizers for a word in parallel
      /// then select the best result as soon as all are
      /// ready
@@ -89,7 +85,9 @@ class Applicator : private std::list<Normalizer::Base*> {
      void init_chain();
 
  private:
-     std::map<std::string, Normalizer::Base*> normalizers;
+     Normalizer::Base* create_plugin(const std::string& name);
+     std::list<std::pair<destroy_t*, Normalizer::Base*>> created_normalizers;
+     std::list<void*> loaded_plugins;
      const std::map<std::string, std::string>& config_vars;
      std::string chain_def;
      Normalizer::LexiconInterface* _lex;

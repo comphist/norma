@@ -93,5 +93,13 @@ class External : public Base {
 }  // namespace Normalizer
 }  // namespace Norma
 
+extern "C" Norma::Normalizer::Base* create_normalizer() {
+    return new Norma::Normalizer::External::External;
+}
+
+extern "C" void destroy_normalizer(Norma::Normalizer::Base* n) {
+    delete n;
+}
+
 #endif  // NORMALIZER_EXTERNAL_EXTERNAL_H_
 

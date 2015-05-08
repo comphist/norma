@@ -16,11 +16,13 @@
  * with Norma.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include"applicator.h"
+#include<dlfcn.h>  // linux specific XXX
 #include<string>
 #include<stdexcept>
 #include<cctype>
 #include<map>
 #include<list>
+#include<utility>
 #include<algorithm>
 #include<future>
 #include<thread>
@@ -29,7 +31,7 @@
 #include"training_data.h"
 #include"normalizer/exceptions.h"
 #include"lexicon/lexicon.h"
-#include"normalizer.h"
+#include"normalizer/base.h"
 
 using std::map;
 using std::string;
@@ -47,23 +49,18 @@ Applicator::Applicator(const string& chain_definition,
         std::cerr << "*** WARNING: while initializing Lexicon: "
                   << e.what() << std::endl;
     }
-    register_method(new Normalizer::Rulebased::Rulebased());
-    register_method(new Normalizer::Mapper());
-    register_method(new Normalizer::WLD::WLD());
-#ifdef EMBED_PYTHON
-    register_method(new Normalizer::External::External());
-#endif  // EMBED_PYTHON
 }
 
 Applicator::~Applicator() {
     delete _lex;
-    for (auto n : normalizers) {
-        delete n.second;
-    }
+    for (auto normalizer : created_normalizers)
+        normalizer.first(normalizer.second);
+    for (auto plugin : loaded_plugins)
+        dlclose(plugin);
 }
 
-void Applicator::register_method(Normalizer::Base* n) {
-    normalizers[n->name()] = n;
+void Applicator::push_chain(Normalizer::Base* n) {
+    push_back(n);
 }
 
 void Applicator::init_chain() {
@@ -73,21 +70,25 @@ void Applicator::init_chain() {
     do {
         size_t len = (right != std::string::npos)
                      ? right - left : std::string::npos;
+        Normalizer::Base* normalizer = nullptr;
         std::string norm_name = nlist.substr(left, len);
         // strip whitespace
         norm_name.erase(std::remove_if(norm_name.begin(), norm_name.end(),
                                        isspace), norm_name.end());
-        if (normalizers.find(norm_name) == normalizers.end())
-          throw std::runtime_error("Unknown normalizer specified: "
-                                   + norm_name);
         try {
-            normalizers[norm_name]->init(config_vars, _lex);
+            normalizer = create_plugin(norm_name);
+            normalizer->init(config_vars, _lex);
         } catch(Normalizer::init_error e) {
             std::cerr << "*** WARNING: while initializing normalizer "
                       << norm_name << ": "
                       << e.what() << std::endl;
+        } catch (std::runtime_error e) {
+            std::cerr << "*** ERROR: while loading plugin "
+                      << norm_name << ": "
+                      << e.what() << std::endl;
         }
-        push_chain(normalizers[norm_name]);
+        if (normalizer != nullptr)
+            push_chain(normalizer);
         left = right;
         right = nlist.find(",", right + 1);
     } while (left++ != std::string::npos);
@@ -187,4 +188,30 @@ void Applicator::save_params() {
                   << std::endl << e.what() << std::endl;
     }
 }
+
+Normalizer::Base* Applicator::create_plugin(const std::string& name) {
+    // this is linux specific now
+    std::string plugin_name = "./lib";
+    plugin_name += name + ".so";
+    void* plugin = dlopen(plugin_name.c_str(), RTLD_LAZY);
+    if (!plugin)
+        throw std::runtime_error("Normalizer plugin not found: "
+                                 + plugin_name);
+    dlerror();
+    create_t* create_plugin = (create_t*) dlsym(plugin, "create_normalizer");
+    const char* dlsym_error = dlerror();
+    if (dlsym_error)
+        throw std::runtime_error("Error loading symbol 'create_normalizer': "
+                                 + std::string(dlsym_error));
+    destroy_t* destroy_plugin
+        = (destroy_t*) dlsym(plugin, "destroy_normalizer");
+    dlsym_error = dlerror();
+    if (dlsym_error)
+        throw std::runtime_error("Error loading symbol 'destroy_normalizer': "
+                                 + std::string(dlsym_error));
+    Normalizer::Base* normalizer = create_plugin();
+    created_normalizers.push_back(std::make_pair(destroy_plugin, normalizer));
+    return normalizer;
+}
+
 }  // namespace Norma

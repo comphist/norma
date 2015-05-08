@@ -32,6 +32,7 @@ using std::string;
 
 namespace Norma {
 namespace Normalizer {
+namespace Mapper {
 
 void Mapper::set_from_params(const std::map<std::string, std::string>& params) {
     if (params.count("Mapper.mapfile") != 0)
@@ -155,5 +156,7 @@ bool Mapper::write_mapfile(const std::string& fname) {
     file.close();
     return true;
 }
+}  // namespace Mapper
 }  // namespace Normalizer
 }  // namespace Norma
+

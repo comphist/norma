@@ -70,5 +70,12 @@ class Rulebased : public Base {
 }  // namespace Normalizer
 }  // namespace Norma
 
+extern "C" Norma::Normalizer::Base* create_normalizer() {
+    return new Norma::Normalizer::Rulebased::Rulebased;
+}
+extern "C" void destroy_normalizer(Norma::Normalizer::Base* n) {
+    delete n;
+}
+
 #endif  // NORMALIZER_RULEBASED_RULEBASED_H_
 
