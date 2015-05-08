@@ -26,7 +26,7 @@
 #include"result.h"
 #include"rule_collection.h"
 #include"rule_learn.h"
-#include"lexicon.h"
+#include"lexicon/lexicon.h"
 #include"candidate_finder.h"
 
 namespace Norma {

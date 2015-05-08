@@ -23,7 +23,7 @@
 #include<boost/filesystem.hpp>  // NOLINT[build/include_order]
 #include"gfsm_wrapper.h"
 #include"string_impl.h"
-#include"normalizer/lexicon_interface.h"
+#include"lexicon/lexicon_interface.h"
 
 namespace Norma {
 namespace Normalizer {

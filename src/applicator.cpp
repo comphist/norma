@@ -28,7 +28,7 @@
 #include<iostream>
 #include"training_data.h"
 #include"normalizer/exceptions.h"
-#include"normalizer/lexicon.h"
+#include"lexicon/lexicon.h"
 #include"normalizer.h"
 
 using std::map;

@@ -26,7 +26,7 @@
 #include"string_acceptor.h"
 #include"string_transducer.h"
 #include"path.h"
-#include"lexicon.h"
+#include"lexicon/lexicon.h"
 
 using Norma::Normalizer::Lexicon;
 

@@ -20,7 +20,7 @@
 #include<sstream>
 #include<vector>
 #include"symbols.h"
-#include"lexicon.h"
+#include"lexicon/lexicon.h"
 #include"result.h"
 #include"rule.h"
 #include"rule_collection.h"

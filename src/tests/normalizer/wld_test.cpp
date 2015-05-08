@@ -26,7 +26,7 @@
 #include"tests/tests.h"
 #include"config.h"
 #include"normalizer/exceptions.h"
-#include"normalizer/lexicon.h"
+#include"lexicon/lexicon.h"
 #include"normalizer/result.h"
 #include"normalizer/wld.h"
 #include"normalizer/wld/levenshtein_algorithm.h"

@@ -23,7 +23,7 @@
 #include<boost/filesystem.hpp>       //NOLINT[build/include_order]
 #include"config.h"
 #include"normalizer/exceptions.h"
-#include"normalizer/lexicon.h"
+#include"lexicon/lexicon.h"
 
 namespace cfg = boost::program_options;
 

@@ -29,7 +29,7 @@
 #include"config.h"
 #include"mock_lexicon.h"
 #include"normalizer/exceptions.h"
-#include"normalizer/lexicon.h"
+#include"lexicon/lexicon.h"
 
 using Norma::Normalizer::Lexicon;
 

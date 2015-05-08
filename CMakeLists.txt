@@ -92,6 +92,7 @@ add_subdirectory(src/normalizer)
 add_subdirectory(src/normalizer/wld)
 add_subdirectory(src/normalizer/rulebased)
 add_subdirectory(src/gfsm)
+add_subdirectory(src/lexicon)
 include_directories(src src/normalizer src/interface src/gfsm)
 
 if(WITH_PYTHON)
@@ -113,8 +114,6 @@ target_link_libraries(norma
 )
 add_executable(normalize src/main.cpp)
 target_link_libraries(normalize norma ${Boost_PROGRAM_OPTIONS_LIBRARY})
-add_executable(norma_lexicon src/normalizer/lexicon_main.cpp)
-target_link_libraries(norma_lexicon norma ${Boost_PROGRAM_OPTIONS_LIBRARY})
 # }}}
 ########## tests {{{
 add_custom_target(buildtests)
@@ -143,7 +142,7 @@ set(NORMA_DOCDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}/doc/${CMA
 # library
 install(TARGETS norma DESTINATION "${NORMA_LIBDIR}")
 # binary
-install(TARGETS normalize norma_lexicon DESTINATION "${NORMA_BINDIR}")
+install(TARGETS normalize DESTINATION "${NORMA_BINDIR}")
 # docs/examples
 install(FILES "${CMAKE_SOURCE_DIR}/README.md"
               "${CMAKE_SOURCE_DIR}/doc/UserGuide.md"

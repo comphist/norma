@@ -22,7 +22,7 @@
 #include<string>
 #include<vector>
 #include"string_impl.h"
-#include"normalizer/lexicon_interface.h"
+#include"lexicon/lexicon_interface.h"
 
 using Norma::Normalizer::LexiconInterface;
 

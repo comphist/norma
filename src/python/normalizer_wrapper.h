@@ -23,7 +23,7 @@
 #include"training_data.h"
 #include"normalizer/base.h"
 #include"normalizer/result.h"
-#include"normalizer/lexicon.h"
+#include"lexicon/lexicon.h"
 
 namespace Norma {
 namespace Python {

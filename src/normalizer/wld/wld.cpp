@@ -29,7 +29,7 @@
 #include"string_impl.h"
 #include"iobase.h"
 #include"levenshtein_aligner.h"
-#include"lexicon.h"
+#include"lexicon/lexicon.h"
 #include"symbols.h"
 #include"weight_set.h"
 

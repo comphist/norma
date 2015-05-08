@@ -30,7 +30,7 @@
 #include"config.h"
 #include"gfsm_wrapper.h"
 #include"string_impl.h"
-#include"normalizer/lexicon.h"
+#include"lexicon/lexicon.h"
 #include"normalizer/result.h"
 
 using Norma::Normalizer::Result;
