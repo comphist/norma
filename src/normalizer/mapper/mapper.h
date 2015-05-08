@@ -15,27 +15,20 @@
  * You should have received a copy of the GNU Lesser General Public License along
  * with Norma.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef NORMALIZER_RULEBASED_RULEBASED_H_
-#define NORMALIZER_RULEBASED_RULEBASED_H_
+#ifndef NORMALIZER_MAPPER_MAPPER_H_
+#define NORMALIZER_MAPPER_MAPPER_H_
 #include<map>
 #include<string>
-#include<mutex>
-#include<memory>
+#include<fstream>
+#include<tuple>
 #include"string_impl.h"
 #include"normalizer/base.h"
 #include"normalizer/result.h"
-#include"lexicon/lexicon.h"
-#include"rule_collection.h"
-#include"rule_learn.h"
-#include"candidate_finder.h"
 
 namespace Norma {
 namespace Normalizer {
-namespace Rulebased {
-
-class Rulebased : public Base {
+class Mapper : public Base {
  public:
-     Rulebased();
      void init();
      using Base::init;
      void set_from_params(const std::map<std::string, std::string>& params);
@@ -43,32 +36,29 @@ class Rulebased : public Base {
      Result operator()(const string_impl& word) const;
      ResultSet operator()(const string_impl& word, unsigned int n) const;
      bool train(TrainingData* data);
+     void train(const string_impl& word, const string_impl& modern,
+                int count);
      void save_params();
-     const char* name() const { return "RuleBased"; }
+     const char* name() const { return "Mapper"; }
 
-     /// Get filename of the current rules file
-     const std::string& get_rulesfile() const { return _rulesfile; }
-     /// Set filename for the rules file
-     Rulebased& set_rulesfile(const std::string& rulesfile) {
-         _rulesfile = rulesfile;
+     /// Get filename of the current mappings file
+     const std::string& get_mapfile() const { return _mapfile; }
+     /// Set filename for the mappings file
+     Mapper& set_mapfile(const std::string& mapfile) {
+         _mapfile = mapfile;
          return *this;
      }
 
-     void set_caching(bool value) const;
-     void clear_cache() const;
-     bool is_caching() const { return _caching; }
-
  private:
-     std::string _rulesfile;
-     RuleCollection _rules;
+     ResultSet make_all_results(const string_impl& word) const;
+     bool write_mapfile(const std::string& fname);
+     bool read_mapfile(const std::string& fname);
 
-     mutable bool _caching = true;
-     mutable std::map<string_impl, Result> _cache;
-     mutable std::unique_ptr<std::mutex> cache_mutex;
+     std::map<string_impl, std::map<string_impl, int>> _map;
+     std::string _mapfile;
 };
-}  // namespace Rulebased
 }  // namespace Normalizer
 }  // namespace Norma
 
-#endif  // NORMALIZER_RULEBASED_RULEBASED_H_
+#endif  // NORMALIZER_MAPPER_H_
 

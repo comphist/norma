@@ -24,10 +24,10 @@
 #include<vector>
 #include<cmath>
 #include<stdexcept>
-#include"result.h"
+#include"normalizer/result.h"
 #include"gfsm_wrapper.h"
 #include"string_impl.h"
-#include"iobase.h"
+#include"interface/iobase.h"
 #include"levenshtein_aligner.h"
 #include"lexicon/lexicon.h"
 #include"symbols.h"

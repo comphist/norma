@@ -24,8 +24,8 @@
 #include<string>
 #include<tuple>
 #include<vector>
-#include"exceptions.h"
-#include"result.h"
+#include"normalizer/exceptions.h"
+#include"normalizer/result.h"
 
 using std::map;
 using std::string;
@@ -59,7 +59,6 @@ Result Mapper::operator()(const string_impl& word) const {
     ResultSet resultset = make_all_results(word);
     if (resultset.size() == 0) {
         Result not_found = make_result(word, 0.0);
-        log_message(&not_found, LogLevel::TRACE, "word not found");
         return not_found;
     }
     return resultset.front();
@@ -81,9 +80,6 @@ ResultSet Mapper::make_all_results(const string_impl& word) const {
 
     for (auto& entry : row) {
         Result result = make_result(entry.first, entry.second);
-        std::ostringstream message;
-        message << "absolute count: " << entry.second;
-        log_message(&result, LogLevel::TRACE, message.str());
         resultset.push_back(result);
         total_count += entry.second;
     }

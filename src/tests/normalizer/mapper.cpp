@@ -56,26 +56,20 @@ BOOST_AUTO_TEST_CASE(name_check) {
 
 BOOST_AUTO_TEST_CASE(normalize_best_vnd) {
     Result result = (*m)("vnd");
-    auto message = std::get<2>(result.messages.front());
     BOOST_CHECK_EQUAL(result.word, "und");
     BOOST_CHECK_EQUAL(result.score, 1);
-    BOOST_CHECK_EQUAL(message, "absolute count: 25");
 }
 
 BOOST_AUTO_TEST_CASE(normalize_best_vnnd) {
     Result result = (*m)("vnnd");
-    auto message = std::get<2>(result.messages.front());
     BOOST_CHECK_EQUAL(result.word, "und");
     BOOST_CHECK_EQUAL(result.score, 1);
-    BOOST_CHECK_EQUAL(message, "absolute count: 10");
 }
 
 BOOST_AUTO_TEST_CASE(normalize_best_jn) {
     Result result = (*m)("jn");
-    auto message = std::get<2>(result.messages.front());
     BOOST_CHECK_EQUAL(result.word, "in");
     BOOST_CHECK_CLOSE(result.score, 0.75, 0.001);
-    BOOST_CHECK_EQUAL(message, "absolute count: 75");
 }
 
 BOOST_AUTO_TEST_CASE(normalizer_n_best_1) {
@@ -113,10 +107,8 @@ BOOST_AUTO_TEST_CASE(normalizer_n_best_3) {
 
 BOOST_AUTO_TEST_CASE(normalize_best_2) {
     Result result = (*m)("foo");
-    auto message = std::get<2>(result.messages.front());
     BOOST_CHECK_EQUAL(result.word, "foo");
     BOOST_CHECK_EQUAL(result.score, 0);
-    BOOST_CHECK_EQUAL(message, "word not found");
 }
 
 BOOST_AUTO_TEST_CASE(normalizer_clear) {

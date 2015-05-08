@@ -385,36 +385,18 @@ struct CandidateFinderFixture {
 BOOST_FIXTURE_TEST_SUITE(CandidateFinder1, CandidateFinderFixture)
 
 BOOST_AUTO_TEST_CASE(candidate_finder_vnd) {
-    // set up expected log messages
-    std::queue<std::string> expected_messages;
-    for (const Rule& rule : vnd_rules) {
-        std::ostringstream msg;
-        msg << "applied rule: " << rule;
-        expected_messages.push(msg.str());
-    }
     // check
     CandidateFinder finder("vnd", rules, lex);
     Result result = finder();
     BOOST_CHECK_EQUAL(result.word, "und");
     BOOST_CHECK_CLOSE(result.score, 0.277777778, 0.001);
-    BOOST_REQUIRE_EQUAL(result.messages.size(), expected_messages.size());
-    while (!result.messages.empty()) {
-        std::string actual = std::get<2>(result.messages.front());
-        std::string expected = expected_messages.front();
-        BOOST_CHECK_EQUAL(actual, expected);
-        result.messages.pop();
-        expected_messages.pop();
-    }
 }
 
 BOOST_AUTO_TEST_CASE(candidate_finder_vnt) {
     CandidateFinder finder("vnt", rules, lex);
     Result result = finder();
-    BOOST_REQUIRE(result.messages.size() > 0);
-    std::string message = std::get<2>(result.messages.front());
     BOOST_CHECK_EQUAL(result.word, "vnt");
     BOOST_CHECK_CLOSE(result.score, 0.0, 0.001);
-    BOOST_CHECK_EQUAL(message, "no candidate found");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -529,11 +511,8 @@ BOOST_AUTO_TEST_CASE(rulebased_normalize_best) {
     BOOST_CHECK_EQUAL(vnd.word, "und");
     BOOST_CHECK(vnd.score > 0);
     Result foo = (*r)("fvo");
-    BOOST_REQUIRE(foo.messages.size() > 0);
-    std::string message = std::get<2>(foo.messages.front());
     BOOST_CHECK_EQUAL(foo.word, "fvo");
     BOOST_CHECK_EQUAL(foo.score, 0);
-    BOOST_CHECK_EQUAL(message, "no candidate found");
 }
 
 BOOST_AUTO_TEST_CASE(rulebased_normalize_n_best) {

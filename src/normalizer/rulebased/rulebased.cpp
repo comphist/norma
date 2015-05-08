@@ -19,8 +19,8 @@
 #include<map>
 #include<mutex>
 #include<string>
-#include"result.h"
-#include"iobase.h"
+#include"normalizer/result.h"
+#include"interface/iobase.h"
 #include"rule.h"
 #include"candidate_finder.h"
 
@@ -57,7 +57,6 @@ Result Rulebased::operator()(const string_impl& word) const {
     Result result;
     if (resultset.size() == 0) {
         result = make_result(word, 0.0);
-        log_message(&result, LogLevel::TRACE, "no candidate found");
     } else {
         result = resultset.front();
     }

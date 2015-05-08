@@ -82,7 +82,7 @@ void Cycle::start() {
         else  // NOLINT[whitespace/newline]
             result = Normalizer::Result(line, 0.0);
         if (!_thread)
-            _out->put_line(&result, _prob, _max_log_level);
+            _out->put_line(&result, _prob);
         if (_train)
             each_applicator([&](Applicator* app) {
                 app->train(_data);
@@ -91,7 +91,7 @@ void Cycle::start() {
     if (_thread) {
         for (auto& fr : *future_results) {
             Normalizer::Result result = fr.get();
-            _out->put_line(&result, _prob, _max_log_level);
+            _out->put_line(&result, _prob);
         }
         delete future_results;
     } else {

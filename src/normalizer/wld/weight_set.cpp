@@ -22,7 +22,7 @@
 #include<string>
 #include<tuple>
 #include<vector>
-#include"exceptions.h"
+#include"normalizer/exceptions.h"
 #include"gfsm_wrapper.h"
 #include"string_impl.h"
 #include"levenshtein_algorithm.h"

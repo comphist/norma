@@ -22,8 +22,8 @@
 #include<string>
 #include<memory>
 #include<mutex>
-#include"base.h"
-#include"result.h"
+#include"normalizer/base.h"
+#include"normalizer/result.h"
 
 namespace Norma {
 namespace Normalizer {

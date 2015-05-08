@@ -23,8 +23,8 @@
 #include<memory>
 #include"gfsm_wrapper.h"
 #include"string_impl.h"
-#include"base.h"
-#include"result.h"
+#include"normalizer/base.h"
+#include"normalizer/result.h"
 #include"typedefs.h"
 #include"weight_set.h"
 

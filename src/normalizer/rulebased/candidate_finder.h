@@ -23,7 +23,7 @@
 #include<functional>
 #include"string_impl.h"
 #include"symbols.h"
-#include"result.h"
+#include"normalizer/result.h"
 #include"rule.h"
 
 namespace Norma {

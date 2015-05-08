@@ -91,10 +91,6 @@ class Base {
      std::mutex mutex;
 
  protected:
-     void log_message(Result* result,
-                      LogLevel level, std::string message) const {
-         result->messages.push(make_message(level, name(), message));
-     }
      std::string to_absolute(const std::string& path,
                              const std::map<std::string,
                              std::string>& params) const {

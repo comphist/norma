@@ -89,14 +89,10 @@ endif()
 add_subdirectory(src)
 add_subdirectory(src/interface)
 add_subdirectory(src/normalizer)
-add_subdirectory(src/normalizer/wld)
-add_subdirectory(src/normalizer/rulebased)
 add_subdirectory(src/gfsm)
 add_subdirectory(src/lexicon)
 include_directories(src src/normalizer src/interface src/gfsm)
-
 if(WITH_PYTHON)
-    add_subdirectory(src/normalizer/external)
     add_subdirectory(src/python)
 endif()
 # }}}
@@ -107,13 +103,17 @@ target_link_libraries(norma
     ${STRING_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
+    ${NORMALIZER_LIBRARIES}
     LINK_PRIVATE
     ${PYTHON_LIBRARIES}
     ${Boost_REGEX_LIBRARY}
     ${LIBGFSM_LIBRARIES}
 )
 add_executable(normalize src/main.cpp)
-target_link_libraries(normalize norma ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(normalize
+                      norma
+                      ${NORMALIZER_LIBRARIES}
+                      ${Boost_PROGRAM_OPTIONS_LIBRARY})
 # }}}
 ########## tests {{{
 add_custom_target(buildtests)
