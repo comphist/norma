@@ -22,12 +22,14 @@
 #include<cctype>
 #include<map>
 #include<list>
+#include<set>
 #include<utility>
 #include<algorithm>
 #include<future>
 #include<thread>
 #include<chrono>
 #include<iostream>
+#include<sstream>
 #include"training_data.h"
 #include"normalizer/exceptions.h"
 #include"lexicon/lexicon.h"
@@ -39,10 +41,10 @@ using std::string;
 namespace Norma {
 
 Applicator::Applicator(const string& chain_definition,
-                       const std::string& plugin_base,
+                       const string& plugin_base_param,
                        const map<string, string>& params)
-    : config_vars(params) {
-    chain_def = chain_definition;
+    : config_vars(params), chain_def(chain_definition),
+      plugin_base(plugin_base_param) {
     _lex = new Normalizer::Lexicon();
     try {
         _lex->init(params);
@@ -65,34 +67,47 @@ void Applicator::push_chain(Normalizer::Base* n) {
 }
 
 void Applicator::init_chain() {
-    const std::string& nlist = chain_def;
-    size_t left = 0,
-           right = nlist.find(",");
-    do {
-        size_t len = (right != std::string::npos)
-                     ? right - left : std::string::npos;
+    std::set<std::string> aliases;
+    std::istringstream chain_stream(chain_def);
+    string element;
+    while(std::getline(chain_stream, element, ',')) {
+        std::istringstream element_stream(element);
+        string lib_name, alias;
+        std::getline(element_stream, lib_name, ':');
+        std::getline(element_stream, alias);
+        auto trim = [](string* str) {
+            str->erase(std::remove_if(str->begin(), str->end(),
+                                     isspace), str->end());
+        };
+        trim(&lib_name);
+        trim(&alias);
+        alias = alias != "" ? alias : lib_name;
+        if (aliases.count(alias) != 0) {
+            std::cerr << "*** ERROR: alias '" << alias
+                      << "' was already used! "
+                      << "Skipping this instance of '"
+                      << lib_name << "'" << std::endl;
+            continue;
+        } else {
+            aliases.insert(alias);
+        }
+
         Normalizer::Base* normalizer = nullptr;
-        std::string norm_name = nlist.substr(left, len);
-        // strip whitespace
-        norm_name.erase(std::remove_if(norm_name.begin(), norm_name.end(),
-                                       isspace), norm_name.end());
         try {
-            normalizer = create_plugin(norm_name);
+            normalizer = create_plugin(lib_name, alias);
             normalizer->init(config_vars, _lex);
-        } catch(Normalizer::init_error e) {
+        } catch (Normalizer::init_error e) {
             std::cerr << "*** WARNING: while initializing normalizer "
-                      << norm_name << ": "
+                      << lib_name << ": "
                       << e.what() << std::endl;
         } catch (std::runtime_error e) {
             std::cerr << "*** ERROR: while loading plugin "
-                      << norm_name << ": "
+                      << lib_name << ": "
                       << e.what() << std::endl;
         }
         if (normalizer != nullptr)
             push_chain(normalizer);
-        left = right;
-        right = nlist.find(",", right + 1);
-    } while (left++ != std::string::npos);
+    }
 }
 
 Normalizer::Result Applicator::normalize(const string_impl& word) const {

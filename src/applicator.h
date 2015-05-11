@@ -52,7 +52,7 @@ class Base;
 class Applicator : private std::list<Normalizer::Base*> {
  public:
      explicit Applicator(const std::string& chain_definition,
-                         const std::string& plugin_base,
+                         const std::string& plugin_base_param,
                          const std::map<std::string, std::string>& params);
      Applicator() = delete;
      Applicator(const Applicator& a) = delete;
