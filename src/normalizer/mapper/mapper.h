@@ -40,7 +40,6 @@ class Mapper : public Base {
      void train(const string_impl& word, const string_impl& modern,
                 int count);
      void save_params();
-     const char* name() const { return "Mapper"; }
 
      /// Get filename of the current mappings file
      const std::string& get_mapfile() const { return _mapfile; }

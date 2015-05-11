@@ -32,11 +32,11 @@ Rulebased::Rulebased() : cache_mutex(new std::mutex()) {}
 
 void Rulebased::set_from_params(const std::map<std::string, std::string>&
                                                                        params) {
-    if (params.count("RuleBased.rulesfile") != 0)
-        set_rulesfile(to_absolute(params.at("RuleBased.rulesfile"), params));
+    if (params.count(_name + ".rulesfile") != 0)
+        set_rulesfile(to_absolute(params.at(_name + ".rulesfile"), params));
     else if (params.count("perfilemode.input") != 0)
         set_rulesfile(with_extension(params.at("perfilemode.input"),
-                                     "RuleBased.rulesfile"));
+                                     _name + ".rulesfile"));
 }
 
 void Rulebased::init() {

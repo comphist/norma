@@ -85,9 +85,9 @@ class Base {
                                   unsigned int n) const = 0;
      /// Save parameters to file(s)
      virtual void save_params() = 0;
-     /// This must return a unique name as const char*
-     /// Note that uniqueness of the name is not enforced.
-     virtual const char* name() const = 0;
+     /// This must return a name which is used as a namespace for params
+     virtual const std::string& name() const { return _name; }
+     virtual void set_name(const std::string& n) { _name = n; }
      std::mutex mutex;
 
  protected:
@@ -108,6 +108,7 @@ class Base {
          return p.string();
      }
      LexiconInterface* _lex = nullptr;
+     std::string _name = "Normalizer";
 
      inline Result make_result(const string_impl& word, double score) const
      { return Result(word, score, name()); }

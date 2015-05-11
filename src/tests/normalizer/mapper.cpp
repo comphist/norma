@@ -27,7 +27,7 @@
 #include"normalizer/mapper.h"
 #include"normalizer/result.h"
 
-using Norma::Normalizer::Mapper;
+using Norma::Normalizer::Mapper::Mapper;
 using Norma::Normalizer::Result;
 using Norma::Normalizer::ResultSet;
 
@@ -41,6 +41,7 @@ struct MapperFixture {
 
     MapperFixture() {
         m = new Mapper();
+        m->set_name("Mapper");
         m->set_mapfile(TEST_MAPFILE);
         m->init();
     }

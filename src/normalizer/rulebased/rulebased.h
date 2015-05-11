@@ -44,7 +44,6 @@ class Rulebased : public Base {
      ResultSet operator()(const string_impl& word, unsigned int n) const;
      bool train(TrainingData* data);
      void save_params();
-     const char* name() const { return "RuleBased"; }
 
      /// Get filename of the current rules file
      const std::string& get_rulesfile() const { return _rulesfile; }

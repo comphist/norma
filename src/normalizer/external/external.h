@@ -65,12 +65,10 @@ class External : public Base {
      ResultSet operator()(const string_impl& word, unsigned int n) const;
      bool train(TrainingData* data);
      void save_params();
-     const char* name() const { return _name.c_str(); }
 
  private:
      /// clean up stuff that was set in initialization.
      void tear_down();
-     std::string _name = "External";
      std::unique_ptr<std::mutex> python_mutex;
      const std::map<std::string, std::string>* _params;
      bool _initialized = false;

@@ -35,7 +35,7 @@ struct Result {
 
     Result() {}
     Result(const string_impl& w, double s) : word(w), score(s) {}
-    Result(const string_impl& w, double s, const char* c)
+    Result(const string_impl& w, double s, const std::string& c)
     : word(w), score(s), origin(c) {}
     bool operator<(const Result& that) const {
         return this->score < that.score;

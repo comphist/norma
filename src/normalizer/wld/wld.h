@@ -45,7 +45,6 @@ class WLD : public Base {
      ResultSet operator()(const string_impl& word, unsigned int n) const;
      bool train(TrainingData* data);
      void save_params();
-     const char* name() const { return "WLD"; }
 
      void set_lexicon(LexiconInterface* lexicon);
 

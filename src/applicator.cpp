@@ -190,9 +190,11 @@ void Applicator::save_params() {
     }
 }
 
-Normalizer::Base* Applicator::create_plugin(const std::string& name) {
+Normalizer::Base* Applicator::create_plugin(const std::string& lib_name,
+                                            const std::string& alias) {
     // this is linux specific now
-    std::string plugin_name = plugin_base + "/lib" + name + ".so";
+    std::string plugin_name = plugin_base + "/lib" + lib_name + ".so";
+    std::string my_alias = alias == "" ? lib_name : alias;
     void* plugin = dlopen(plugin_name.c_str(), RTLD_LAZY);
     if (!plugin)
         throw std::runtime_error("Normalizer plugin not found: "
@@ -210,6 +212,7 @@ Normalizer::Base* Applicator::create_plugin(const std::string& name) {
         throw std::runtime_error("Error loading symbol 'destroy_normalizer': "
                                  + std::string(dlsym_error));
     Normalizer::Base* normalizer = create_plugin();
+    normalizer->set_name(my_alias);
     created_normalizers.push_back(std::make_pair(destroy_plugin, normalizer));
     return normalizer;
 }

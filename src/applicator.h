@@ -86,7 +86,8 @@ class Applicator : private std::list<Normalizer::Base*> {
      void init_chain();
 
  private:
-     Normalizer::Base* create_plugin(const std::string& name);
+     Normalizer::Base* create_plugin(const std::string& lib_name,
+                                     const std::string& alias = "");
      std::list<std::pair<destroy_t*, Normalizer::Base*>> created_normalizers;
      std::list<void*> loaded_plugins;
      const std::map<std::string, std::string>& config_vars;

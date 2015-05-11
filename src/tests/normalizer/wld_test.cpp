@@ -285,6 +285,7 @@ struct WLDFixture {
         lex->add("ihm");
         lex->add("und");
         w = new WLD();
+        w->set_name("WLD");
         w->init(params, lex);
     }
     ~WLDFixture() {

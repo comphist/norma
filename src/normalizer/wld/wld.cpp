@@ -50,37 +50,37 @@ void strip_boundary_symbol(std::vector<string_impl>* vec) {
 WLD::WLD() : cache_mutex(new std::mutex()) {}
 
 void WLD::set_from_params(const std::map<std::string, std::string>& params) {
-    if (params.count("WLD.paramfile") != 0) {
-        set_paramfile(to_absolute(params.at("WLD.paramfile"), params));
+    if (params.count(_name + ".paramfile") != 0) {
+        set_paramfile(to_absolute(params.at(_name + ".paramfile"), params));
     } else if (params.count("perfilemode.input") != 0) {
         set_paramfile(with_extension(params.at("perfilemode.input"),
-                                     "WLD.paramfile"));
+                                     _name + ".paramfile"));
     }
-    if (params.count("WLD.train_ngrams") != 0) {
+    if (params.count(_name + ".train_ngrams") != 0) {
         std::stringstream ss;
         unsigned int n;
-        ss << params.at("WLD.train_ngrams");
+        ss << params.at(_name + ".train_ngrams");
         if (ss >> n)
             set_train_ngrams(n);
     }
-    if (params.count("WLD.train_divisor") != 0) {
+    if (params.count(_name + ".train_divisor") != 0) {
         std::stringstream ss;
         unsigned int div;
-        ss << params.at("WLD.train_divisor");
+        ss << params.at(_name + ".train_divisor");
         if (ss >> div)
             set_train_divisor(div);
     }
-    if (params.count("WLD.max_weight") != 0) {
+    if (params.count(_name + ".max_weight") != 0) {
         std::stringstream ss;
         double w;
-        ss << params.at("WLD.max_weight");
+        ss << params.at(_name + ".max_weight");
         if (ss >> w)
             set_maximum_weight(w);
     }
-    if (params.count("WLD.max_ops") != 0) {
+    if (params.count(_name + ".max_ops") != 0) {
         std::stringstream ss;
         unsigned int ops;
-        ss << params.at("WLD.max_ops");
+        ss << params.at(_name + ".max_ops");
         if (ss >> ops)
             set_maximum_ops(ops);
     }

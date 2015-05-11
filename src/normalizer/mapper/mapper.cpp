@@ -35,11 +35,11 @@ namespace Normalizer {
 namespace Mapper {
 
 void Mapper::set_from_params(const std::map<std::string, std::string>& params) {
-    if (params.count("Mapper.mapfile") != 0)
-        set_mapfile(to_absolute(params.at("Mapper.mapfile"), params));
+    if (params.count(_name + ".mapfile") != 0)
+        set_mapfile(to_absolute(params.at(_name + ".mapfile"), params));
     else if (params.count("perfilemode.input") != 0)
         set_mapfile(with_extension(params.at("perfilemode.input"),
-                                   "Mapper.mapfile"));
+                                   _name + ".mapfile"));
 }
 
 void Mapper::init() {

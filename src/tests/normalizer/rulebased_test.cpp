@@ -491,6 +491,7 @@ struct RulebasedFixture {
         params["RuleBased.rulesfile"] = TEST_RULESFILE;
         lex = new MockLexicon();
         r = new Rulebased();
+        r->set_name("RuleBased");
         r->init(params, lex);
     }
     ~RulebasedFixture() {
