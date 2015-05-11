@@ -55,6 +55,9 @@ int main(int argc, char* argv[]) {
          "Enable verbose status output to stderr")
         ("sync,s", cfg::bool_switch()->default_value(false),
          "Run synchronously (don't start multiple threads).")
+        ("plugin-base,P", cfg::value<std::string>()->default_value("."),
+         "Base directory for the normalizer plugins."
+         "Default value: current directory")
         ;  //NOLINT[whitespace/semicolon]
     cfg::options_description desc_config("Normalization options");
     desc_config.add_options()
@@ -144,6 +147,7 @@ int main(int argc, char* argv[]) {
             output = new Norma::InteractiveOutput();
         Norma::Cycle c(input, output,
                        m["normalizers"].as<std::string>(),
+                       m["plugin-base"].as<std::string>(),
                        file_opts);
         if (m["sync"].as<bool>())
             c.set_thread(false);

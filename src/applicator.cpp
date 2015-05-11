@@ -39,6 +39,7 @@ using std::string;
 namespace Norma {
 
 Applicator::Applicator(const string& chain_definition,
+                       const std::string& plugin_base,
                        const map<string, string>& params)
     : config_vars(params) {
     chain_def = chain_definition;
@@ -191,8 +192,7 @@ void Applicator::save_params() {
 
 Normalizer::Base* Applicator::create_plugin(const std::string& name) {
     // this is linux specific now
-    std::string plugin_name = "./lib";
-    plugin_name += name + ".so";
+    std::string plugin_name = plugin_base + "/lib" + name + ".so";
     void* plugin = dlopen(plugin_name.c_str(), RTLD_LAZY);
     if (!plugin)
         throw std::runtime_error("Normalizer plugin not found: "

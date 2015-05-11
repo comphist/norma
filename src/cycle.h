@@ -47,6 +47,7 @@ class Cycle {
  public:
      Cycle(Input* in, Output* out,
            const std::string& chain_definition,
+           const std::string& plugin_base,
            const std::map<std::string, std::string>& params);
      Cycle() = delete;
      Cycle(const Cycle& c) = delete;

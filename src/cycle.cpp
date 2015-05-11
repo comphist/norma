@@ -36,9 +36,11 @@ using std::string;
 namespace Norma {
 Cycle::Cycle(Input *in, Output *out,
              const string& chain_definition,
+             const string& plugin_base,
              const map<string, string>& params)
     : _in(in), _out(out) {
-    _applicators.push_back(new Applicator(chain_definition, params));
+    _applicators.push_back(new Applicator(chain_definition,
+                                          plugin_base, params));
     _data = new TrainingData();
     for (auto app : _applicators)
         app->init_chain();
