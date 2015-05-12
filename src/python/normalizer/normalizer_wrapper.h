@@ -30,11 +30,17 @@ namespace Python {
 namespace bp = boost::python;
 
 /// a wrapper for normalizer functions inherited from Base
-/** All normalizers inherit from Base, which is a pure virtual class.
- * This is supposedly difficult to model with Boost::Python, and
- * Python has duck typing anyway, hence I do the next best thing: make
- * a wrapper template that can be specialized for any normalizer, and
- * that defines all functions that a normalizer inherited from Base.
+/**
+ * How to write Python bindings for your normalizer:
+ * 1. include this file
+ * 2. include your normalizer header
+ * 3. derive a struct from normalizer_wrapper
+ * 4. define a static function that wraps the additional methods and properties
+ *    of your normalizer.
+ * 5. afterwards, call the macro BOOST_PYTHON_MODULE(NAME) in which you
+ *    call the wrapper function
+ *
+ * for an instructive example, refer to mapper.cpp
  **/
 template <typename T>
 struct base_wrapper {
@@ -44,7 +50,19 @@ struct base_wrapper {
     static Norma::Normalizer::Lexicon& get_lexicon(T* t);
     static void set_lexicon(T* t, Norma::Normalizer::Lexicon* lexicon);
     static bool train(T* t, TrainingData data);
+    static const std::string& name(T* t);
+    static void set_name(T* t, const std::string& s);
 };
+
+template<typename T>
+const std::string& base_wrapper<T>::name(T* t) {
+    return t->name();
+}
+
+template<typename T>
+void base_wrapper<T>::set_name(T* t, const std::string& s) {
+    t->set_name(s);
+}
 
 /// wrapper function for Base::get_lexicon
 template <typename T>
@@ -127,7 +145,13 @@ base_wrapper<T>::make_class(char const* name) {
                       "A lexicon used to restrict the list of possible "
                       "normalization candidates."
                       )
-        .add_property("name", &T::name);
+        .add_property("name",
+                      bp::make_function(&base_wrapper<T>::name,
+                          bp::return_value_policy<bp::return_by_value>()),
+                      bp::make_function(&base_wrapper<T>::set_name),
+                      "Name of the normalizer and namespace of the "
+                      "parameter hash.")
+        ;
 }
 
 /// a wrapper for the specific normalizers
@@ -139,10 +163,6 @@ struct normalizer_wrapper {
     static void init_nolex(T* t, std::string paramfile);
     template <typename T, T& (T::*SetParameterFile)(const std::string&)>
     static void save(T* t, std::string paramfile);
-
-    static void wrap_Mapper();
-    static void wrap_Rulebased();
-    static void wrap_WLD();
 };
 
 /// wrapper functions for convenient "init" overloads which set
@@ -174,3 +194,4 @@ void normalizer_wrapper::save(T* t, std::string paramfile) {
 }  // namespace Norma
 
 #endif  // NORMA_PYTHON_NORMALIZER_WRAPPER_H_
+

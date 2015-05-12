@@ -23,7 +23,6 @@
 #include"training_conv.h"
 #include"exception_wrapper.h"
 #include"lexicon_wrapper.h"
-#include"normalizer_wrapper.h"
 
 namespace bp = boost::python;
 
@@ -44,9 +43,6 @@ BOOST_PYTHON_MODULE(norma) {
 
     result_wrapper::wrap();                // Result
     lexicon_wrapper::wrap();               // Lexicon
-    normalizer_wrapper::wrap_Mapper();     // Mapper normalizer
-    normalizer_wrapper::wrap_Rulebased();  // Rulebased normalizer
-    normalizer_wrapper::wrap_WLD();        // WLD normalizer
 }
 
 }  // namespace Python
