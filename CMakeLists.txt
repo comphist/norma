@@ -10,6 +10,9 @@ execute_process(
 
 ########## command line arguments {{{
 set(STRING_IMPL "ICU" CACHE STRING "String implementation to use (ICU|STD)")
+set(NORMA_DEFAULT_PLUGIN_BASE
+    "/usr/share/norma/plugins" CACHE STRING
+    "Default directory for normalizer plugins")
 set(WITH_PYTHON OFF CACHE BOOL "Whether to make Python buildings/embed")
 set(WITH_TAGS OFF CACHE BOOL "Whether to generate ctags/cscope in build")
 set(WITH_LINT OFF CACHE BOOL "Whether to include a lint (code check) target")

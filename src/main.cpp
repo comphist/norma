@@ -55,7 +55,8 @@ int main(int argc, char* argv[]) {
          "Enable verbose status output to stderr")
         ("sync,s", cfg::bool_switch()->default_value(false),
          "Run synchronously (don't start multiple threads).")
-        ("plugin-base,P", cfg::value<std::string>()->default_value("."),
+        ("plugin-base,P",
+         cfg::value<std::string>()->default_value(NORMA_DEFAULT_PLUGIN_BASE),
          "Base directory for the normalizer plugins."
          "Default value: current directory")
         ;  //NOLINT[whitespace/semicolon]

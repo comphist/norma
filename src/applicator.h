@@ -91,7 +91,7 @@ class Applicator : private std::list<Normalizer::Base*> {
      std::list<std::pair<destroy_t*, Normalizer::Base*>> created_normalizers;
      std::list<void*> loaded_plugins;
      const std::map<std::string, std::string>& config_vars;
-     std::string chain_def, plugin_base = ".";
+     std::string chain_def, plugin_base;
      Normalizer::LexiconInterface* _lex;
 };
 }  // namespace Norma
