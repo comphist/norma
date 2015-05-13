@@ -25,19 +25,20 @@ install(TARGETS norma-python DESTINATION ${NORMA_PYTHON_INSTALL_DIR})
 ### decide to do this via setuptools
 #configure_file(setup.py.in setup.py)
 
-macro(add_normalizer_bindings _NORM_NAME)
+macro(add_normalizer_bindings _NORM_LIB_NAME)
+    string(TOLOWER ${_NORM_LIB_NAME} _NORM_NAME)
     add_library("${_NORM_NAME}-python" MODULE normalizer/${_NORM_NAME}.cpp)
     set_target_properties("${_NORM_NAME}-python"
                           PROPERTIES PREFIX ""
                                      OUTPUT_NAME ${_NORM_NAME}
                                      LIBRARY_OUTPUT_DIRECTORY "norma/")
-    target_link_libraries("${_NORM_NAME}-python" LINK_PUBLIC ${_NORM_NAME} ${NORMA_PYTHON_LIBRARIES})
+    target_link_libraries("${_NORM_NAME}-python" LINK_PUBLIC ${_NORM_LIB_NAME} ${NORMA_PYTHON_LIBRARIES})
     install(TARGETS "${_NORM_NAME}-python" DESTINATION ${NORMA_PYTHON_INSTALL_DIR})
 endmacro(add_normalizer_bindings)
 
-add_normalizer_bindings(rulebased)
-add_normalizer_bindings(wld)
-add_normalizer_bindings(mapper)
+add_normalizer_bindings(RuleBased)
+add_normalizer_bindings(WLD)
+add_normalizer_bindings(Mapper)
 
 ### native Python files that complement the bindings
 add_subdirectory(norma)
