@@ -57,6 +57,7 @@ Result Rulebased::operator()(const string_impl& word) const {
     Result result;
     if (resultset.size() == 0) {
         result = make_result(word, 0.0);
+        log_message(&result, LogLevel::TRACE, "no candidate found");
     } else {
         result = resultset.front();
     }

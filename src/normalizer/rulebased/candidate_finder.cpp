@@ -35,6 +35,7 @@ CandidateFinder::CandidateFinder(const string_impl& word,
     : _rules(&rules), _lex(&lex) {
     word_bound = word + Symbols::BOUNDARY;
     unchanged_result = Result(word, 0.0);
+    unchanged_result.messages.push(make_message(LogLevel::TRACE, "RuleBased", "no candidate found"));
     _total_steps = (2 * word.length()) + 1;
     // this is experimental -- not clear what the best setting is:
     _minimum_combined_frequency = 2 * _rules->get_average_freq();
@@ -51,6 +52,13 @@ Result CandidateFinder::operator()() {
             } else {  // success!
                 Result result = Result(current.norm,
                                        cost_to_probability(current.cost));
+                for (const Rule& rule : current.history) {
+                    std::ostringstream message;
+                    message << "applied rule: " << rule;
+                    result.messages.push(make_message(LogLevel::TRACE,
+                                                      "RuleBased",
+                                                      message.str()));
+                }
                 return result;
             }
         }

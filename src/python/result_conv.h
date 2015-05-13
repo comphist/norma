@@ -30,6 +30,9 @@ typedef boost::python::converter::rvalue_from_python_stage1_data
 typedef boost::python::converter::rvalue_from_python_storage<string_impl>
     py_storage;
 
+typedef std::queue<Norma::Normalizer::LogMessage>
+    LogMessageQueue;
+
 struct Result_from_python_tuple {
     static void* convertible(PyObject* obj_ptr);
     static void  construct(PyObject* obj_ptr,
@@ -38,6 +41,10 @@ struct Result_from_python_tuple {
 
 struct ResultSet_to_python_list {
     static PyObject* convert(Norma::Normalizer::ResultSet const& rs);
+};
+
+struct LogMessageQueue_to_python_list {
+    static PyObject* convert(LogMessageQueue const& lmq);
 };
 
 void register_result_converters();

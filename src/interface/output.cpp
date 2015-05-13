@@ -29,22 +29,39 @@ Output::Output() {
     _output = &std::cout;
 }
 
-void Output::put_line(Normalizer::Result* result, bool print_prob) {
+void Output::put_line(Normalizer::Result* result,
+                      bool print_prob, Normalizer::LogLevel max_level) {
     *_output << result->word;
     if (print_prob)
         *_output << "\t" << result->score;
     *_output << std::endl;
+    log_messages(result, max_level);
+}
+
+void Output::log_messages(Normalizer::Result* result,
+                          Normalizer::LogLevel max_level) {
+    while (!result->messages.empty()) {
+        Normalizer::LogLevel level;
+        std::string origin, message;
+        std::tie(level, origin, message) = result->messages.front();
+        if (level >= max_level)
+            *_output << "[" << Normalizer::level_string(level) << "]:"
+                     << message << " Origin: " << origin << std::endl;
+        result->messages.pop();
+    }
 }
 
 //////////////////////////// InteractiveOutput ///////////////////////////
 
 void InteractiveOutput::put_line(Normalizer::Result* result,
-                                 bool print_prob) {
+                                 bool print_prob,
+                                 Normalizer::LogLevel max_level) {
     // can't use Output::put_line here, since what's added
     // to the history is conditional on the validation
     *_output << result->word;
     if (print_prob)
         *_output << "\t" << result->score;
+    log_messages(result, max_level);
     *_output << std::endl
              << validate_prompt;
     validate(result->word);

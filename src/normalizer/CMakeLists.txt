@@ -2,6 +2,7 @@
 install_headers(result.h exceptions.h base.h)
 # convenience headers
 install_headers(exceptions.h rulebased.h wld.h mapper.h)
+add_sources(result.cpp)
 
 add_subdirectory(mapper)
 add_subdirectory(wld)

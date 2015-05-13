@@ -26,12 +26,23 @@
 
 namespace Norma {
 namespace Normalizer {
+enum class LogLevel {
+    TRACE = 0,
+    WARN,
+    ERROR,
+    SILENT
+};
+typedef std::tuple<LogLevel, std::string, std::string> LogMessage;
+LogMessage make_message(LogLevel loglevel,
+                        std::string origin, std::string message);
+std::string level_string(LogLevel loglevel);
 
 struct Result {
     string_impl word = "";
     double score = 0.0;
     std::string origin = "<none>";
     unsigned int priority = std::numeric_limits<unsigned int>::max();
+    std::queue<LogMessage> messages;
 
     Result() {}
     Result(const string_impl& w, double s) : word(w), score(s) {}
