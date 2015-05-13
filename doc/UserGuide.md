@@ -127,6 +127,16 @@ general options you can use:
    best when experimenting with historical data from Early New High German, so
    we recommend to use it by default.
 
+   If you want to use multiple instances of the same normalizer with different
+   settings, you can assign each normalizer an alias by following the plugin
+   name by a colon.
+
+   `normalizers=RuleBased:simplerulebased,RuleBased:complicatedrulebased`
+
+   This normalizer will then get its parameters (see below) from the section
+   marked with the alias instead of the plugin name, so e.g. [RuleBased] becomes
+   [simplerulebased] and [complicatedrulebased].
+
 * `saveonexit={False|True}` controls whether parameter files are saved when
   Norma exits.  It defaults to False.  If you want to train normalizers on your
   own training data and keep the results of that training, this should be set to

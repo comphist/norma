@@ -39,13 +39,9 @@ class LexiconInterface;
  *  1. Extend this class. The compiler will tell you if you forgot to implement
  *     a method. For an example, look at the MapperNormalizer, a simple
  *     dictionary lookup normalization method.
- *  2. Create an object on the heap with the settings read from the cfg file
- *     as parameter.
- *  3. Register it somewhere with the Applicator object you're using with
- *     Applicator::register_method. Note that shipped normalizers are
- *     already automatically registered.
- *  4. You can now use the name you defined in Normalizer::name to add it to
- *     the chain in the cfg file.
+ *  2. compile it while linking against libnorma.so
+ *  3. drop it in the plugin directory
+ *  4. You can now use the library name to add it to the chain in the cfg file
  *  5. That's it already. Easy, wasn't it?
  **/
 class Base {

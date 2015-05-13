@@ -56,8 +56,5 @@ messages), as well as API documentation that is generated via `make doc` (requir
 
 #### Other platforms
 
-* Norma was developed on Linux but should theoretically work on other platforms
+* Norma was developed on Linux and will not work on non-Unix platforms
 * Compilation with clang will probably work but is untested.
-* Compilation on OSX will probably work but is untested
-* Compilation on Windows might work if Microsoft ever releases a compiler that fully supports C++11 or if you use gcc.
-* The main problem on either of those platforms will probably be to get the dependencies to build and get cmake to find them in the proper location.
