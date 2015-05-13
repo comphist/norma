@@ -30,6 +30,7 @@ class WLDTest(unittest.TestCase, AssertFloat):
 
     def setUp(self):
         self.norm = Normalizer.WLD()
+        self.norm.name = "WLD"
 
     def testName(self):
         self.assertEquals(self.norm.name, "WLD")
@@ -91,17 +92,20 @@ class WLDTest(unittest.TestCase, AssertFloat):
 
     def testInit2(self):
         self.norm = Normalizer.WLD()
+        self.norm.name = "WLD"
         self.norm.init(self.paramfile, make_wld_lexicon())
         self.assertClose(self.norm("jn"), ("in", 0.818, "WLD"))
 
     def testInit3(self):
         self.norm = Normalizer.WLD()
+        self.norm.name = "WLD"
         self.norm.lexicon = make_wld_lexicon()
         self.norm.init(self.paramfile)
         self.assertClose(self.norm("jn"), ("in", 0.818, "WLD"))
 
     def testInitFactory(self):
         self.norm = Normalizer.WLD(self.paramfile, make_wld_lexicon())
+        self.norm.name = "WLD"
         self.assertClose(self.norm("jn"), ("in", 0.818, "WLD"))
 
     def testNonExistantFilename(self):

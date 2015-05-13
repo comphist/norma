@@ -24,6 +24,7 @@ class RulebasedTest(unittest.TestCase, AssertFloat):
 
     def setUp(self):
         self.norm = Normalizer.Rulebased()
+        self.norm.name = "RuleBased"
 
     def testName(self):
         self.assertEquals(self.norm.name, "RuleBased")

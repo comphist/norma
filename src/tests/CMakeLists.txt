@@ -20,6 +20,6 @@ add_complete_test(gfsm_wrapper gfsm_wrapper.cpp Gfsm ${LIBGFSM_LIBRARIES})
 add_complete_test(training_data training_data.cpp TrainingData)
 add_subdirectory(normalizer)
 
-if(USE_PYTHON)
+if(WITH_PYTHON)
   add_subdirectory(python)
 endif()

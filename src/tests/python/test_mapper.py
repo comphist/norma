@@ -24,6 +24,7 @@ class MapperTest(unittest.TestCase, AssertFloat):
 
     def setUp(self):
         self.norm = Normalizer.Mapper()
+        self.norm.name = "Mapper"
 
     def testName(self):
         self.assertEquals(self.norm.name, "Mapper")
