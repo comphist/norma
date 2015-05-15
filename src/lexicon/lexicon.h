@@ -59,8 +59,6 @@ friend class Gfsm::StringCascade;
      Gfsm::StringAcceptor* get_acceptor() const { return _fsm; }
 
  private:
-     Gfsm::AutomatonBuilder& gfsm_builder
-         = Gfsm::AutomatonBuilder::instance();
      boost::filesystem::path _lexfile;
      boost::filesystem::path _symfile;
      Gfsm::StringAcceptor* _fsm = nullptr;

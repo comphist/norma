@@ -18,7 +18,6 @@
 #ifndef GFSM_AUTOMATON_H_
 #define GFSM_AUTOMATON_H_
 #include<string>
-#include<mutex>
 #include<set>
 #include"gfsmlibs.h"
 #include"semiring.h"
@@ -26,7 +25,6 @@
 
 namespace Gfsm {
 class LabelVector;
-class AutomatonBuilder;
 class Cascade;
 
 /// A finite-state automaton.
@@ -35,9 +33,10 @@ class Cascade;
     use the specialized Acceptor or Transducer classes.
  */
 class Automaton {
-    friend class AutomatonBuilder;
     friend class Cascade;
  public:
+    Automaton() : Automaton(SemiringType::TROPICAL) {}
+    Automaton(SemiringType sr);
     Automaton(const Automaton& a);
     Automaton(Automaton&& a);
     Automaton& operator=(Automaton a);
@@ -75,11 +74,8 @@ class Automaton {
     void ensure_root() { root(); }
 
  protected:
-    Automaton() = delete;
-    Automaton(std::mutex* m, SemiringType sr = SemiringType::TROPICAL);
     gfsmAutomaton* _fsm;             /**< Pointer to automaton object. */
     gfsmStateId _root = gfsmNoState; /**< ID of the root state. */
-    std::mutex* gfsm_mutex;          /**< Mutex for C functions. */
 
     void set_gfsm_automaton(gfsmAutomaton* fsm);
 

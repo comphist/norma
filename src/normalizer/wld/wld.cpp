@@ -201,8 +201,7 @@ void WLD::clear_cache() const {
 
 void WLD::compile_transducer() {
     // initialize objects
-    _wfst = new Gfsm::StringTransducer(gfsm_builder.make_stringtransducer(
-                                                Gfsm::SemiringType::TROPICAL));
+    _wfst = new Gfsm::StringTransducer();
     Gfsm::Alphabet alph_in(_gfsm_lex->get_alphabet()),
                    alph_out(_gfsm_lex->get_alphabet());
     alph_in.cover(_weights.input_symbols());
@@ -237,8 +236,7 @@ void WLD::compile_transducer() {
 }
 
 void WLD::compile_cascade() {
-    _cascade = new Gfsm::StringCascade(gfsm_builder.make_stringcascade(2,
-                                                Gfsm::SemiringType::TROPICAL));
+    _cascade = new Gfsm::StringCascade();
     _cascade->append(*_wfst);
     _cascade->append(_gfsm_lex);
     _cascade->sort();

@@ -17,7 +17,6 @@
  */
 #ifndef GFSM_STRING_TRANSDUCER_H_
 #define GFSM_STRING_TRANSDUCER_H_
-#include<mutex>
 #include<set>
 #include<utility>
 #include<vector>
@@ -27,12 +26,14 @@
 
 namespace Gfsm {
 class Alphabet;
-class AutomatonBuilder;
 
 /// A Transducer with an Alphabet.
 class StringTransducer : public Transducer {
-    friend class AutomatonBuilder;
  public:
+    StringTransducer(const Alphabet& alph_in,
+                     const Alphabet& alph_out)
+        : Transducer(), _alph_in(alph_in), _alph_out(alph_out) {}
+    StringTransducer() : Transducer() {}
     StringTransducer(const StringTransducer& a)
         : Transducer(a), _alph_in(a._alph_in), _alph_out(a._alph_out) {}
     StringTransducer(StringTransducer&& a)
@@ -97,12 +98,6 @@ class StringTransducer : public Transducer {
         { add_path(path, true, final); }
 
  protected:
-    StringTransducer(std::mutex* m, const Alphabet& alph_in,
-                     const Alphabet& alph_out)
-        : Transducer(m), _alph_in(alph_in), _alph_out(alph_out) {}
-    explicit StringTransducer(std::mutex* m)
-        : Transducer(m) {}
-
     Alphabet _alph_in;
     Alphabet _alph_out;
 

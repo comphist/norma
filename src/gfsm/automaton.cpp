@@ -22,7 +22,6 @@
 #include<string>
 #include<sstream>
 #include<algorithm>
-#include<mutex>
 #include<set>
 #include"gfsmlibs.h"
 #include"labelvector.h"
@@ -30,36 +29,29 @@
 #include"path.h"
 
 namespace Gfsm {
-    Automaton::Automaton(std::mutex* m, SemiringType sr) {
-    gfsm_mutex = m;
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
+Automaton::Automaton(SemiringType sr) {
     _fsm = gfsm_automaton_new();
     gfsm_automaton_set_semiring_type(_fsm, static_cast<gfsmSRType>(sr));
 }
 
 Automaton::Automaton(const Automaton& a) {
     _fsm  = gfsm_automaton_clone(a._fsm);
-    this->gfsm_mutex = a.gfsm_mutex;
 }
 
-Automaton::Automaton(Automaton&& a) : Automaton(gfsm_mutex) {
+Automaton::Automaton(Automaton&& a) {
     std::swap(_fsm,  a._fsm);
-    std::swap(gfsm_mutex, a.gfsm_mutex);
 }
 
 Automaton& Automaton::operator=(Automaton a) {
     std::swap(_fsm,  a._fsm);
-    std::swap(gfsm_mutex, a.gfsm_mutex);
     return *this;
 }
 
 Automaton::~Automaton() throw() {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsm_automaton_free(_fsm);
 }
 
 void Automaton::load_binfile(const std::string& filename) {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsmError* err = NULL;
     // _fsm is implicitly cleared, no need to reset manually
     gfsm_automaton_load_bin_filename(_fsm, filename.c_str(), &err);
@@ -72,7 +64,6 @@ void Automaton::load_binfile(const std::string& filename) {
 }
 
 void Automaton::save_binfile(const std::string& filename) {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsmError* err = NULL;
     gfsm_automaton_save_bin_filename(_fsm, filename.c_str(), -1, &err);
     if (err != NULL) {
@@ -83,7 +74,6 @@ void Automaton::save_binfile(const std::string& filename) {
 }
 
 void Automaton::set_semiring_type(SemiringType sr) {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsm_automaton_set_semiring_type(_fsm, static_cast<gfsmSRType>(sr));
 }
 
@@ -103,34 +93,28 @@ gfsmStateId Automaton::root() {
 }
 
 void Automaton::arcsort() {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsm_automaton_arcsort(_fsm, gfsmASMLower);
 }
 
 void Automaton::arcuniq() {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsm_automaton_arcuniq(_fsm);
 }
 
 void Automaton::arith_sr_zero_to_zero() {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsm_automaton_arith_state(_fsm, gfsmNoState, gfsmAOMult, 0,
                                gfsmNoLabel, gfsmNoLabel,
                                FALSE, FALSE, TRUE);
 }
 
 void Automaton::determinize() {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsm_automaton_determinize(_fsm);
 }
 
 void Automaton::minimize(bool remove_eps) {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsm_automaton_minimize_full(_fsm, static_cast<gboolean>(remove_eps));
 }
 
 std::set<Path> Automaton::accepted_paths() const {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     return find_accepted_paths();
 }
 
@@ -165,7 +149,6 @@ std::set<Path> Automaton::find_accepted_paths() const {
 }
 
 void Automaton::set_gfsm_automaton(gfsmAutomaton* fsm) {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsm_automaton_free(_fsm);
     _fsm = fsm;
 }

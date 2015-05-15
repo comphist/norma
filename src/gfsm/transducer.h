@@ -18,7 +18,6 @@
 #ifndef GFSM_TRANSDUCER_H_
 #define GFSM_TRANSDUCER_H_
 #include<utility>
-#include<mutex>
 #include<set>
 #include<tuple>
 #include"automaton.h"
@@ -26,7 +25,6 @@
 
 namespace Gfsm {
 class LabelVector;
-class AutomatonBuilder;
 
 /// A finite-state transducer.
 /** Implements functions specific to a finite-state transducer, i.e.,
@@ -34,8 +32,10 @@ class AutomatonBuilder;
     sequence of labels.
  */
 class Transducer : public Automaton {
-    friend class AutomatonBuilder;
  public:
+    Transducer() : Automaton() {
+        _fsm->flags.is_transducer = TRUE;
+    }
     Transducer(const Transducer& a) : Automaton(a) {}
     Transducer(Transducer&& a) : Automaton(std::move(a)) {}
     Transducer& operator=(Transducer a);
@@ -64,11 +64,6 @@ class Transducer : public Automaton {
      */
     void add_cyclic_path(const Path& p, bool final = true)
         { add_path(p, true, final); }
-
- protected:
-    Transducer() = delete;
-    explicit Transducer(std::mutex* m) : Automaton(m)
-        { _fsm->flags.is_transducer = TRUE; }
 };
 
 }  // namespace Gfsm

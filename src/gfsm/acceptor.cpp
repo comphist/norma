@@ -16,7 +16,6 @@
  * with Norma.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include"acceptor.h"
-#include<mutex>
 #include<set>
 #include"gfsmlibs.h"
 #include"labelvector.h"
@@ -30,7 +29,6 @@ Acceptor& Acceptor::operator=(Acceptor a) {
 }
 
 bool Acceptor::accepts(const LabelVector& vec) const {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsmAutomaton* result = gfsm_automaton_new();
     gfsm_automaton_lookup(_fsm, vec._vec, result);
     bool is_accepted = (gfsm_automaton_n_final_states(result) > 0);
@@ -48,7 +46,6 @@ std::set<LabelVector> Acceptor::accepted() const {
 }
 
 void Acceptor::add_path(const LabelVector& vec, bool set_all_final) {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsmStateId from = root();
     gfsmWeight  one  = _fsm->sr->one;
     for (gfsmLabelVal value : vec) {

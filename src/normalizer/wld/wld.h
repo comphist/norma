@@ -96,8 +96,6 @@ class WLD : public Base {
      Gfsm::StringTransducer* _wfst = nullptr;
 
  private:
-     Gfsm::AutomatonBuilder& gfsm_builder
-         = Gfsm::AutomatonBuilder::instance();
      std::string _paramfile;
      WeightSet _weights;
      TrainSet _pairs;

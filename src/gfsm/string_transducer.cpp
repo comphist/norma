@@ -17,7 +17,6 @@
  */
 #include"string_transducer.h"
 #include<algorithm>
-#include<mutex>
 #include<set>
 #include<vector>
 #include"gfsmlibs.h"

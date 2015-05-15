@@ -316,10 +316,9 @@ BOOST_AUTO_TEST_SUITE_END()
 
 struct GfsmAutomatonFixture {
     Automaton* fsm;
-    Gfsm::AutomatonBuilder& _builder = Gfsm::AutomatonBuilder::instance();
 
     GfsmAutomatonFixture() {
-        fsm = new Automaton(_builder.make_automaton());
+        fsm = new Automaton();
     }
     ~GfsmAutomatonFixture() {
         delete fsm;
@@ -345,7 +344,6 @@ struct GfsmAcceptorFixture {
     Acceptor* fsm;
     Alphabet  alph;
     StringAcceptor* sa;
-    Gfsm::AutomatonBuilder& _builder = Gfsm::AutomatonBuilder::instance();
     const std::string LEXICON_FILE =
         std::string(TEST_BASE_DIR) + "/test-lexicon.gfsa";
     const std::string LABELS_FILE =
@@ -361,8 +359,8 @@ struct GfsmAcceptorFixture {
     const LabelVector invalid_labels {44, 49, 20};
 
     GfsmAcceptorFixture() {
-        fsm = new Acceptor(_builder.make_acceptor());
-        sa = new StringAcceptor(_builder.make_stringacceptor());
+        fsm = new Acceptor();
+        sa = new StringAcceptor();
 
         fsm->load_binfile(LEXICON_FILE);
         alph.load_labfile(LABELS_FILE);
@@ -426,7 +424,7 @@ BOOST_AUTO_TEST_CASE(add_path_set_all_final) {
 }
 
 BOOST_AUTO_TEST_CASE(add_path_on_empty) {
-    Acceptor fsm1 = _builder.make_acceptor();
+    Acceptor fsm1;
     BOOST_CHECK(!fsm1.accepts(eins));
     BOOST_CHECK(!fsm1.accepts(zwei));
     BOOST_CHECK(!fsm1.accepts(zei));
@@ -436,7 +434,7 @@ BOOST_AUTO_TEST_CASE(add_path_on_empty) {
     BOOST_CHECK(fsm1.accepts(eins));
     BOOST_CHECK(fsm1.accepts(zwei));
     BOOST_CHECK(fsm1.accepts(zei));
-    Acceptor fsm2 = _builder.make_acceptor();
+    Acceptor fsm2;
     BOOST_CHECK(!fsm2.accepts(eins));
     BOOST_CHECK(!fsm2.accepts(zwei));
     BOOST_CHECK(!fsm2.accepts(zei));
@@ -515,7 +513,6 @@ BOOST_AUTO_TEST_SUITE_END()
 
 struct GfsmTransducerFixture {
     Transducer* fsm;
-    Gfsm::AutomatonBuilder& _builder = Gfsm::AutomatonBuilder::instance();
     const LabelVector v {4}, n {5}, d {6}, u {8}, s {9}, m {10};
     const LabelVector vn {4, 5}, un {8, 5}, um {8, 10},
                       mu {10, 8}, nd {5, 6};
@@ -528,7 +525,7 @@ struct GfsmTransducerFixture {
     const LabelVector mund {10, 8, 5, 6};
 
     GfsmTransducerFixture() {
-        fsm = new Transducer(_builder.make_transducer());
+        fsm = new Transducer();
     }
     ~GfsmTransducerFixture() {
         delete fsm;
@@ -715,13 +712,12 @@ BOOST_AUTO_TEST_SUITE_END()
 struct GfsmStringTransducerFixture {
     StringTransducer* fsm;
     Alphabet in, out;
-    Gfsm::AutomatonBuilder& _builder = Gfsm::AutomatonBuilder::instance();
     const std::vector<string_impl> vnd {"v", "n", "d"},
         und {"u", "n", "d"}, um {"u", "m"}, mund {"m", "u", "n", "d"},
         vns {"v", "n", "s"}, uns {"u", "n", "s"};
 
     GfsmStringTransducerFixture() {
-        fsm = new StringTransducer(_builder.make_stringtransducer());
+        fsm = new StringTransducer();
         in.cover("abcdefghijklmnopqrstuvwxyzäöü");
         out.cover("dmnsuv");
         fsm->set_input_alphabet(in);
@@ -843,15 +839,14 @@ BOOST_AUTO_TEST_SUITE_END()
 
 struct GfsmCascadeFixture {
     Cascade* csc;
-    Gfsm::AutomatonBuilder& _builder = Gfsm::AutomatonBuilder::instance();
     const LabelVector vec_in {1, 2}, vec_best {3, 2}, vec_alt {5, 2};
     const LabelVector triple_in {1, 1, 1}, triple_best {4, 4, 4},
         triple_alt {3, 3, 3};
 
     GfsmCascadeFixture() {
         // members
-        Transducer fst = _builder.make_transducer();
-        Acceptor   fsa = _builder.make_acceptor();
+        Transducer fst;
+        Acceptor   fsa;
         fst.add_cyclic_path(Path(LabelVector {1}, LabelVector {4}, 0.05));
         fst.add_cyclic_path(Path(LabelVector {1}, LabelVector {5}, 0.7));
         fst.add_cyclic_path(Path(LabelVector {2}, LabelVector {2}, 0.0));
@@ -864,7 +859,7 @@ struct GfsmCascadeFixture {
         fsa.add_path(LabelVector {3, 3, 3});
         fsa.add_path(LabelVector {4, 4, 4});
         // cascade
-        csc = new Cascade(_builder.make_cascade(2));
+        csc = new Cascade();
         csc->append(&fst);
         csc->append(&fsa);
         csc->sort();
@@ -955,14 +950,13 @@ BOOST_AUTO_TEST_SUITE_END()
 
 struct GfsmStringCascadeFixture {
     StringCascade* csc;
-    Gfsm::AutomatonBuilder& _builder = Gfsm::AutomatonBuilder::instance();
     const std::vector<string_impl> str_jn {"j", "n"}, str_in {"i", "n"},
         str_an {"a", "n"}, str_ahn {"a", "h", "n"}, str_ihn {"i", "h", "n"};
 
     GfsmStringCascadeFixture() {
         // members
-        StringTransducer fst = _builder.make_stringtransducer();
-        StringAcceptor   fsa = _builder.make_stringacceptor();
+        StringTransducer fst;
+        StringAcceptor   fsa;
         Alphabet alph_in, alph_out;
         alph_in.cover("njihga");
         alph_out.cover("abcdefghijklmnopqrstuvwxyzäöüß");
@@ -982,7 +976,7 @@ struct GfsmStringCascadeFixture {
         fsa.add_word("an");
         fsa.add_word("ahn");
         // cascade
-        csc = new StringCascade(_builder.make_stringcascade(2));
+        csc = new StringCascade();
         csc->append(fst);
         csc->append(fsa);
         csc->sort();

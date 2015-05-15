@@ -79,7 +79,7 @@ void Lexicon::do_init() {
 void Lexicon::do_clear() {
     if (_fsm != nullptr)
         delete _fsm;
-    _fsm  = new Gfsm::StringAcceptor(gfsm_builder.make_stringacceptor());
+    _fsm  = new Gfsm::StringAcceptor();
     _fsm->set_alphabet(init_alphabet());
     _fsm->ensure_root();
 }

@@ -17,7 +17,6 @@
  */
 #ifndef GFSM_STRING_CASCADE_H_
 #define GFSM_STRING_CASCADE_H_
-#include<mutex>
 #include<set>
 #include<vector>
 #include"gfsmlibs.h"
@@ -35,12 +34,13 @@ class Lexicon;
 }  // namespace Norma
 
 namespace Gfsm {
-class AutomatonBuilder;
 
 /// A Cascade with an Alphabet.
 class StringCascade : public Cascade {
-    friend class AutomatonBuilder;
  public:
+    StringCascade(unsigned int depth = 2,
+                  SemiringType sr = SemiringType::TROPICAL)
+        : Cascade(depth, sr) {}
     StringCascade(const StringCascade& a)
         : Cascade(a), _alph_in(a._alph_in), _alph_out(a._alph_out) {}
     StringCascade(StringCascade&& a)
@@ -76,10 +76,6 @@ class StringCascade : public Cascade {
                                       double max_weight);
 
  protected:
-    StringCascade(std::mutex* m, unsigned int depth = 2,
-                  SemiringType sr = SemiringType::TROPICAL)
-        : Cascade(m, depth, sr) {}
-
     Alphabet _alph_in;
     Alphabet _alph_out;
 
