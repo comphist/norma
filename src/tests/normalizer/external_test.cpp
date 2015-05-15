@@ -36,6 +36,7 @@ struct ExternalFixture {
 
     ExternalFixture() {
         e = new External();
+        e->set_name("External");
         params["External.path"] = TEST_PATH;
         params["External.script"] = "normalize";
         e->set_from_params(params);

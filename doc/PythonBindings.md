@@ -4,7 +4,7 @@
 Norma provides bindings for Python 2.x to facilitate the use of its
 normalization algorithms within larger projects.  Building the
 bindings requires the Boost::Python library and the cmake flag
-`-DUSE_PYTHON`.
+`-DWITH_PYTHON`.
 
 ### Unicode Support
 
