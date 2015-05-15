@@ -36,7 +36,7 @@ class Automaton {
     friend class Cascade;
  public:
     Automaton() : Automaton(SemiringType::TROPICAL) {}
-    Automaton(SemiringType sr);
+    explicit Automaton(SemiringType sr);
     Automaton(const Automaton& a);
     Automaton(Automaton&& a);
     Automaton& operator=(Automaton a);

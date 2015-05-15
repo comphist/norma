@@ -38,18 +38,18 @@
 class unicode_string_impl : public UnicodeString {
  public:
      unicode_string_impl() = default;
-     unicode_string_impl(const char* that)
+     unicode_string_impl(const char* that)  // NOLINT[runtime/explicit]
          : UnicodeString(UnicodeString::fromUTF8(that)) {}
-     unicode_string_impl(char that) {
+     unicode_string_impl(char that) {  // NOLINT[runtime/explicit]
          char tmp[2];
          tmp[0] = that; tmp[1] = '\0';
          UnicodeString(UnicodeString::fromUTF8(tmp));
      }
-     unicode_string_impl(const std::string& that)
+     unicode_string_impl(const std::string& that)  // NOLINT[runtime/explicit]
          : UnicodeString(UnicodeString::fromUTF8(that)) {}
-     unicode_string_impl(const UChar32& that)
+     unicode_string_impl(const UChar32& that)  // NOLINT[runtime/explicit]
         : UnicodeString(that) {}
-     unicode_string_impl(const UnicodeString& that)
+     unicode_string_impl(const UnicodeString& that)  // NOLINT[runtime/explicit]
         : UnicodeString(that) {}
 };
 

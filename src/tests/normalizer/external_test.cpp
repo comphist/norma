@@ -17,6 +17,7 @@
  */
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE Normalizer_External
+#include<Python.h>
 #include<map>
 #include<string>
 #include"tests/tests.h"

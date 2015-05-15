@@ -68,13 +68,13 @@ void Result_from_python_tuple::construct(PyObject* obj_ptr,
     string_impl result_word = bp::extract<string_impl>(ptr_word);
     // .score
     double result_score;
-    if(PyFloat_Check(ptr_score))
+    if (PyFloat_Check(ptr_score))
         result_score = PyFloat_AsDouble(ptr_score);
     else
         result_score = PyInt_AsLong(ptr_score);
     // .origin
     Result* result = new (storage) Result(result_word, result_score);
-    if(PyTuple_Size(obj_ptr) > 2) {
+    if (PyTuple_Size(obj_ptr) > 2) {
         PyObject* ptr_origin = PyTuple_GetItem(obj_ptr, 2);
         std::string result_origin = bp::extract<std::string>(ptr_origin);
         result->origin = result_origin;
@@ -98,7 +98,9 @@ PyObject* LogMessageQueue_to_python_list::convert(LogMessageQueue const& lmq) {
     while (!queue.empty()) {
         const LogMessage& msg = queue.front();
         std::string log_level = level_string(std::get<0>(msg));
-        auto tuple = bp::make_tuple(log_level, std::get<1>(msg), std::get<2>(msg));
+        auto tuple = bp::make_tuple(log_level,
+                                    std::get<1>(msg),
+                                    std::get<2>(msg));
         l.append(tuple);
         queue.pop();
     }
@@ -131,35 +133,28 @@ void result_wrapper::wrap() {
         .add_property("word",
                       bp::make_getter(
                           &Result::word,
-                          bp::return_value_policy<bp::return_by_value>()
-                      ),
-                      "The normalized word."
-                     )
+                          bp::return_value_policy<bp::return_by_value>()),
+                      "The normalized word.")
         .add_property("score",
                       bp::make_getter(&Result::score),
-                      "The normalizer's score for this result."
-                     )
+                      "The normalizer's score for this result.")
         .add_property("origin",
                       bp::make_getter(
                           &Result::origin,
-                          bp::return_value_policy<bp::return_by_value>()
-                      ),
+                          bp::return_value_policy<bp::return_by_value>()),
                       bp::make_setter(&Result::origin),
-                      "Name of the normalizer that produced this result."
-                     )
+                      "Name of the normalizer that produced this result.")
         .add_property("messages",
                       bp::make_getter(
                           &Result::messages,
-                          bp::return_value_policy<bp::return_by_value>()
-                      ),
-                      "A list of log messages concerning this result."
-                     )
+                          bp::return_value_policy<bp::return_by_value>()),
+                      "A list of log messages concerning this result.")
         .def("__eq__", &Result::operator==)
         .def("__neq__", &Result::operator!=)
-        .def("__lt__", &Result::operator<)
-        .def("__gt__", &Result::operator>)
+        .def("__lt__", &Result::operator<)  // NOLINT[whitespace/operators]
+        .def("__gt__", &Result::operator>)  // NOLINT[whitespace/operators]
         .def("__repr__", &result_wrapper::repr)
-        ;
+        ;  // NOLINT[whitespace/semicolon]
 }
 }  // namespace Python
 }  // namespace Norma

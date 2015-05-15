@@ -70,7 +70,7 @@ void Cycle::start() {
         if (_train && training_pair(line))
             continue;
         Normalizer::Result result;
-        if (_norm)  // XXX multiple applicators here
+        if (_norm) {  // XXX multiple applicators here
             if (_thread) {
                 // threaded normalization
                 std::packaged_task<Normalizer::Result()> norm([=]() {
@@ -81,14 +81,17 @@ void Cycle::start() {
             } else {
                 result = _applicators.front()->normalize(line);
             }
-        else  // NOLINT[whitespace/newline]
+        } else {
             result = Normalizer::Result(line, 0.0);
-        if (!_thread)
+        }
+        if (!_thread) {
             _out->put_line(&result, _prob, _max_log_level);
-        if (_train)
+        }
+        if (_train) {
             each_applicator([&](Applicator* app) {
                 app->train(_data);
             });
+        }
     }
     if (_thread) {
         for (auto& fr : *future_results) {

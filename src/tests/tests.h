@@ -27,20 +27,20 @@
 namespace boost {
 namespace test_tools {
 #ifdef USE_ICU_STRING
-    template<>
-    struct print_log_value<string_impl> {
-        void operator()(std::ostream& os, string_impl const& si) {  // NOLINT[runtime/references]
-            ::operator<<(os, si);
-        }
-    };
+template<>
+struct print_log_value<string_impl> {
+    void operator()(std::ostream& os, string_impl const& si) {  // NOLINT[runtime/references]
+        ::operator<<(os, si);
+    }
+};
 #endif  // USE_ICU_STRING
 
-    template<>
-    struct print_log_value<Norma::Normalizer::Rulebased::Rule> {
-        void operator()(std::ostream& os, Norma::Normalizer::Rulebased::Rule const& r) {  // NOLINT[runtime/references]
-            ::operator<<(os, r);
-        }
-    };
+template<>
+struct print_log_value<Norma::Normalizer::Rulebased::Rule> {
+    void operator()(std::ostream& os, Norma::Normalizer::Rulebased::Rule const& r) {  // NOLINT[runtime/references]
+        ::operator<<(os, r);
+    }
+};
 }  // namespace test_tools
 }  // namespace boost
 

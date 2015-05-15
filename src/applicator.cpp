@@ -70,7 +70,7 @@ void Applicator::init_chain() {
     std::set<std::string> aliases;
     std::istringstream chain_stream(chain_def);
     string element;
-    while(std::getline(chain_stream, element, ',')) {
+    while (std::getline(chain_stream, element, ',')) {
         std::istringstream element_stream(element);
         string lib_name, alias;
         std::getline(element_stream, lib_name, ':');
@@ -215,13 +215,14 @@ Normalizer::Base* Applicator::create_plugin(const std::string& lib_name,
         throw std::runtime_error("Normalizer plugin not found: "
                                  + plugin_name);
     dlerror();
-    create_t* create_plugin = (create_t*) dlsym(plugin, "create_normalizer");
+    create_t* create_plugin =
+        reinterpret_cast<create_t*>(dlsym(plugin, "create_normalizer"));
     const char* dlsym_error = dlerror();
     if (dlsym_error)
         throw std::runtime_error("Error loading symbol 'create_normalizer': "
                                  + std::string(dlsym_error));
-    destroy_t* destroy_plugin
-        = (destroy_t*) dlsym(plugin, "destroy_normalizer");
+    destroy_t* destroy_plugin =
+        reinterpret_cast<destroy_t*>(dlsym(plugin, "destroy_normalizer"));
     dlsym_error = dlerror();
     if (dlsym_error)
         throw std::runtime_error("Error loading symbol 'destroy_normalizer': "

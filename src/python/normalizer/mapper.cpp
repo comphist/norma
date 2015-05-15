@@ -56,8 +56,8 @@ struct mapper : normalizer_wrapper {
                  "  source -- Input wordform\n"
                  "  target -- Normalized (target) wordform\n"
                  "       n -- Number of times this word pair has been seen\n\n"
-                 "Calling train(source, target, n) is functionally identical to "
-                 "calling train(n * [(source, target)])."
+                 "Calling train(source, target, n) is functionally identical "
+                 "to calling train(n * [(source, target)])."
                  )
             .add_property("mapfile",
                           bp::make_function(&Mapper::get_mapfile,

@@ -68,7 +68,7 @@ struct rulebased : normalizer_wrapper {
                           bp::make_function(&Rulebased::set_rulesfile,
                                             bp::return_self<>()),
                           "Name of a parameter file containing the rules.")
-            ;
+            ;  // NOLINT[whitespace/semicolon]
     }
 };
 

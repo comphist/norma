@@ -22,7 +22,7 @@ if(CPPLINT STREQUAL "CPPLINT-NOTFOUND")
     endif()
 endif()
 if(NOT CPPLINT STREQUAL "CPPLINT-NOTFOUND" AND NOT PYTHON STREQUAL "PYTHON-NOTFOUND")
-    set(LINT_FILTER "--filter=-readability/streams,-build/header_guard")
+    set(LINT_FILTER "--filter=-readability/streams,-build/header_guard,-build/c++11,-build/include")
     file(GLOB_RECURSE ALLFILES ${CMAKE_SOURCE_DIR} *.cpp *.h)
     add_custom_target(lint
         COMMENT "Checking C++ style conformity..."

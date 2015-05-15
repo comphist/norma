@@ -151,7 +151,7 @@ base_wrapper<T>::make_class(char const* name) {
                       bp::make_function(&base_wrapper<T>::set_name),
                       "Name of the normalizer and namespace of the "
                       "parameter hash.")
-        ;
+        ;  // NOLINT[whitespace/semicolon]
 }
 
 /// a wrapper for the specific normalizers

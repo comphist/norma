@@ -50,6 +50,7 @@ class Path {
      const LabelVector& get_output() const { return output; }
      const LabelVector& get_input() const { return input; }
      const double& get_weight() const { return weight; }
+
  protected:
      LabelVector input;  /**< Input label sequence.  */
      LabelVector output; /**< Output label sequence. */
