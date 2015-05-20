@@ -21,6 +21,7 @@
 #include<map>
 #include<queue>
 #include<functional>
+#include<string>
 #include"string_impl.h"
 #include"symbols.h"
 #include"normalizer/result.h"
@@ -63,14 +64,13 @@ struct RAState {
     }
 };
 
-class Rulebased;
-
 class CandidateFinder {
  public:
     CandidateFinder() = delete;
     CandidateFinder(const string_impl& word,
                     const RuleCollection& rules,
-                    const LexiconInterface& lex);
+                    const LexiconInterface& lex,
+                    const std::string& name);
     Result operator()();
 
  private:
@@ -85,6 +85,7 @@ class CandidateFinder {
     double cost_to_probability(const double cost);
     const RuleCollection* _rules;
     const LexiconInterface* _lex;
+    std::string _name;
     string_impl word_bound;
     Result unchanged_result;
     int _total_steps;

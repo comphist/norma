@@ -135,7 +135,7 @@ void External::init() {
     _initialized = true;
 }
 
-Result External::operator()(const string_impl& word) const {
+Result External::do_normalize(const string_impl& word) const {
     std::lock_guard<std::mutex> guard(*python_mutex);
     PyEval_AcquireLock();
     temp_state = PyThreadState_Swap(my_threadstate);
@@ -160,7 +160,7 @@ Result External::operator()(const string_impl& word) const {
     return make_result(cword, score);
 }
 
-ResultSet External::operator()(const string_impl& word, unsigned int n) const {
+ResultSet External::do_normalize(const string_impl& word, unsigned int n) const {
     std::lock_guard<std::mutex> guard(*python_mutex);
     PyEval_AcquireLock();
     temp_state = PyThreadState_Swap(my_threadstate);
@@ -195,7 +195,7 @@ ResultSet External::operator()(const string_impl& word, unsigned int n) const {
     return resultset;
 }
 
-bool External::train(TrainingData* data) {
+bool External::do_train(TrainingData* data) {
     std::lock_guard<std::mutex> guard(*python_mutex);
     PyEval_AcquireLock();
     temp_state = PyThreadState_Swap(my_threadstate);
@@ -207,7 +207,7 @@ bool External::train(TrainingData* data) {
     return true;
 }
 
-void External::save_params() {
+void External::do_save_params() {
     std::lock_guard<std::mutex> guard(*python_mutex);
     PyEval_AcquireLock();
     temp_state = PyThreadState_Swap(my_threadstate);

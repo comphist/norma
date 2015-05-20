@@ -24,6 +24,7 @@
 #include<vector>
 #include<cmath>
 #include<stdexcept>
+#include"normalizer/cacheable.h"
 #include"normalizer/result.h"
 #include"gfsm_wrapper.h"
 #include"string_impl.h"
@@ -46,8 +47,6 @@ void strip_boundary_symbol(std::vector<string_impl>* vec) {
         vec->pop_back();
 }
 }  // namespace
-
-WLD::WLD() : cache_mutex(new std::mutex()) {}
 
 void WLD::set_from_params(const std::map<std::string, std::string>& params) {
     if (params.count(_name + ".paramfile") != 0) {
@@ -124,9 +123,12 @@ void WLD::set_lexicon(LexiconInterface* lexicon) {
     _gfsm_lex = gfsm_lex;
 }
 
-Result WLD::operator()(const string_impl& word) const {
-    if (_caching && _cache.count(word) > 0)
-        return _cache.at(word);
+Result WLD::do_normalize(const string_impl& word) const {
+    if (is_caching()) {
+        Result res = query_cache(word);
+        if (res != Result())
+            return res;
+    }
 
     ResultSet resultset = this->operator()(word, 1);
     Result result;
@@ -135,15 +137,13 @@ Result WLD::operator()(const string_impl& word) const {
     else
         result = resultset.front();
 
-    if (_caching) {
-        std::lock_guard<std::mutex> guard(*cache_mutex);
-        _cache[word] = result;
-    }
+    if (is_caching())
+        cache(word, result);
 
     return result;
 }
 
-ResultSet WLD::operator()(const string_impl& word, unsigned int n) const {
+ResultSet WLD::do_normalize(const string_impl& word, unsigned int n) const {
     if (_cascade == nullptr || _gfsm_lex == nullptr)
         return ResultSet();
 
@@ -168,7 +168,7 @@ ResultSet WLD::operator()(const string_impl& word, unsigned int n) const {
     return resultset;
 }
 
-bool WLD::train(TrainingData* data) {
+bool WLD::do_train(TrainingData* data) {
     for (auto pp = data->rbegin(); pp != data->rend(); ++pp) {
         if (pp->is_used())
             break;
@@ -182,21 +182,9 @@ bool WLD::train(TrainingData* data) {
     return true;
 }
 
-void WLD::save_params() {
+void WLD::do_save_params() {
     perform_training();  // TODO(bollmann): this is a hack
     _weights.save_paramfile(_paramfile);
-}
-
-void WLD::set_caching(bool value) const {
-    std::lock_guard<std::mutex> guard(*cache_mutex);
-    _caching = value;
-    if (!value)
-        _cache.clear();
-}
-
-void WLD::clear_cache() const {
-    std::lock_guard<std::mutex> guard(*cache_mutex);
-    _cache.clear();
 }
 
 void WLD::compile_transducer() {

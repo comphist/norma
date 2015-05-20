@@ -26,7 +26,8 @@ struct mapper : normalizer_wrapper {
     static void wrap_mapper() {
         using Norma::Normalizer::Mapper::Mapper;
         void (Mapper::*mapper_train)(const string_impl&,
-                                     const string_impl&, int) = &Mapper::train;
+                                     const string_impl&,
+                                     int) = &Mapper::do_train;
         bp::docstring_options local_docstring_options(true, true, false);
 
         base_wrapper<Mapper>::make_class("MapperNormalizer")

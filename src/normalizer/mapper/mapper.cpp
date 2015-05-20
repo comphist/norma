@@ -52,7 +52,7 @@ void Mapper::clear() {
     _map.clear();
 }
 
-Result Mapper::operator()(const string_impl& word) const {
+Result Mapper::do_normalize(const string_impl& word) const {
     // this will probably perform worse than the implementation it had before
     // since an entire list is sorted instead of just returning the best result,
     // but it's a cleaner implementation. if the performance hit is significant,
@@ -66,7 +66,7 @@ Result Mapper::operator()(const string_impl& word) const {
     return resultset.front();
 }
 
-ResultSet Mapper::operator()(const string_impl& word, unsigned int n) const {
+ResultSet Mapper::do_normalize(const string_impl& word, unsigned int n) const {
     ResultSet resultset = make_all_results(word);
     if (resultset.size() > n)
         resultset.resize(n);
@@ -95,16 +95,16 @@ ResultSet Mapper::make_all_results(const string_impl& word) const {
     return resultset;
 }
 
-bool Mapper::train(TrainingData* data) {
+bool Mapper::do_train(TrainingData* data) {
     for (auto pp = data->rbegin(); pp != data->rend(); ++pp) {
         if (pp->is_used())
             break;
-        this->train(pp->source(), pp->target(), 1);
+        this->do_train(pp->source(), pp->target(), 1);
     }
     return true;
 }
 
-void Mapper::train(const string_impl& word,
+void Mapper::do_train(const string_impl& word,
                    const string_impl& modern,
                    int count) {
     if (_map.count(word) == 0 || _map[word].count(modern) == 0)
@@ -113,7 +113,7 @@ void Mapper::train(const string_impl& word,
         _map[word][modern] += count;
 }
 
-void Mapper::save_params() {
+void Mapper::do_save_params() {
     write_mapfile(_mapfile);
 }
 
@@ -133,7 +133,7 @@ bool Mapper::read_mapfile(const std::string& fname) {
         int count;
         iss >> word >> modern >> count;
         if (iss)
-            train(word, modern, count);
+            do_train(word, modern, count);
         else
             ++invalid_line_count;
     }

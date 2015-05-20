@@ -20,10 +20,10 @@
 #include<map>
 #include<string>
 #include<mutex>
-#include<memory>
 #include"gfsm_wrapper.h"
 #include"string_impl.h"
 #include"normalizer/base.h"
+#include"normalizer/cacheable.h"
 #include"normalizer/result.h"
 #include"typedefs.h"
 #include"weight_set.h"
@@ -33,18 +33,13 @@ namespace Normalizer {
 class Lexicon;
 
 namespace WLD {
-class WLD : public Base {
+class WLD : public Base, public Cacheable {
  public:
-     WLD();
      ~WLD();
      void set_from_params(const std::map<std::string, std::string>& params);
      void init();
      using Base::init;
      void clear();
-     Result operator()(const string_impl& word) const;
-     ResultSet operator()(const string_impl& word, unsigned int n) const;
-     bool train(TrainingData* data);
-     void save_params();
 
      void set_lexicon(LexiconInterface* lexicon);
 
@@ -84,14 +79,19 @@ class WLD : public Base {
          return *this;
      }
 
-     void set_caching(bool value) const;
-     void clear_cache() const;
-     bool is_caching() const { return _caching; }
+     using Cacheable::set_caching;
+     using Cacheable::clear_cache;
+     using Cacheable::is_caching;
 
      /// trains on learned pairs
      bool perform_training();
 
  protected:
+     bool do_train(TrainingData* data);
+     Result do_normalize(const string_impl& word) const;
+     ResultSet do_normalize(const string_impl& word, unsigned int n) const;
+     void do_save_params();
+
      Gfsm::StringCascade* _cascade = nullptr;
      Gfsm::StringTransducer* _wfst = nullptr;
 
@@ -106,10 +106,6 @@ class WLD : public Base {
      unsigned int _max_ops = 0;
      double _max_weight = 0.0;
      Lexicon* _gfsm_lex = nullptr;
-
-     mutable bool _caching = true;
-     mutable std::map<string_impl, Result> _cache;
-     mutable std::unique_ptr<std::mutex> cache_mutex;
 
      /// compiles FSTs for lookup
      void build_gfsm_objects();

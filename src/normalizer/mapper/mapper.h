@@ -34,13 +34,6 @@ class Mapper : public Base {
      using Base::init;
      void set_from_params(const std::map<std::string, std::string>& params);
      void clear();
-     Result operator()(const string_impl& word) const;
-     ResultSet operator()(const string_impl& word, unsigned int n) const;
-     bool train(TrainingData* data);
-     void train(const string_impl& word, const string_impl& modern,
-                int count);
-     void save_params();
-
      /// Get filename of the current mappings file
      const std::string& get_mapfile() const { return _mapfile; }
      /// Set filename for the mappings file
@@ -48,6 +41,15 @@ class Mapper : public Base {
          _mapfile = mapfile;
          return *this;
      }
+     // this needs to be public because it is exposed to python bindings
+     void do_train(const string_impl& word, const string_impl& modern,
+                   int count);
+
+ protected:
+     bool do_train(TrainingData* data);
+     Result do_normalize(const string_impl& word) const;
+     ResultSet do_normalize(const string_impl& word, unsigned int n) const;
+     void do_save_params();
 
  private:
      ResultSet make_all_results(const string_impl& word) const;

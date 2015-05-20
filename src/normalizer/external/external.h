@@ -61,10 +61,12 @@ class External : public Base {
      void init();
      using Base::init;
      void set_from_params(const std::map<std::string, std::string>& params);
-     Result operator()(const string_impl& word) const;
-     ResultSet operator()(const string_impl& word, unsigned int n) const;
-     bool train(TrainingData* data);
-     void save_params();
+
+ protected:
+     bool do_train(TrainingData* data);
+     Result do_normalize(const string_impl& word) const;
+     ResultSet do_normalize(const string_impl& word, unsigned int n) const;
+     void do_save_params();
 
  private:
      /// clean up stuff that was set in initialization.

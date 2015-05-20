@@ -18,6 +18,7 @@
 #include"candidate_finder.h"
 #include<algorithm>
 #include<sstream>
+#include<string>
 #include<vector>
 #include"symbols.h"
 #include"lexicon/lexicon.h"
@@ -31,12 +32,13 @@ namespace Rulebased {
 
 CandidateFinder::CandidateFinder(const string_impl& word,
                                  const RuleCollection& rules,
-                                 const LexiconInterface& lex)
-    : _rules(&rules), _lex(&lex) {
+                                 const LexiconInterface& lex,
+                                 const std::string& name)
+    : _rules(&rules), _lex(&lex), _name(name) {
     word_bound = word + Symbols::BOUNDARY;
-    unchanged_result = Result(word, 0.0);
+    unchanged_result = Result(word, 0.0, _name);
     unchanged_result.messages.push(make_message(LogLevel::TRACE,
-                                                "RuleBased",
+                                                _name,
                                                 "no candidate found"));
     _total_steps = (2 * word.length()) + 1;
     // this is experimental -- not clear what the best setting is:
@@ -53,12 +55,13 @@ Result CandidateFinder::operator()() {
                 continue;
             } else {  // success!
                 Result result = Result(current.norm,
-                                       cost_to_probability(current.cost));
+                                       cost_to_probability(current.cost),
+                                       _name);
                 for (const Rule& rule : current.history) {
                     std::ostringstream message;
                     message << "applied rule: " << rule;
                     result.messages.push(make_message(LogLevel::TRACE,
-                                                      "RuleBased",
+                                                      _name,
                                                       message.str()));
                 }
                 return result;

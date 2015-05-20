@@ -21,6 +21,7 @@
 #include<map>
 #include<string>
 #include<mutex>
+#include<shared_mutex>
 #include<boost/filesystem.hpp>  // NOLINT[build/include_order]
 #include"string_impl.h"
 #include"result.h"
@@ -73,20 +74,40 @@ class Base {
      virtual void set_lexicon(LexiconInterface* lexicon) { _lex = lexicon; }
      /// Start training the normalizer given the Input/Output history
      /// return true when training is done
-     virtual bool train(TrainingData* data) = 0;
+     bool train(TrainingData* data) {
+         std::unique_lock<std::shared_timed_mutex> write_lock(_mutex);
+         return do_train(data);
+     }
      /// Normalize function
-     virtual Result operator()(const string_impl& word) const = 0;
+     Result operator()(const string_impl& word) const {
+         std::shared_lock<std::shared_timed_mutex> read_lock(_mutex);
+         return do_normalize(word);
+     }
      /// Normalize to N best results
-     virtual ResultSet operator()(const string_impl& word,
-                                  unsigned int n) const = 0;
+     ResultSet operator()(const string_impl& word, unsigned int n) const {
+         std::shared_lock<std::shared_timed_mutex> read_lock(_mutex);
+         return do_normalize(word, n);
+     }
      /// Save parameters to file(s)
-     virtual void save_params() = 0;
+     void save_params() {
+         std::unique_lock<std::shared_timed_mutex> write_lock(_mutex);
+         do_save_params();
+     }
      /// This must return a name which is used as a namespace for params
-     virtual const std::string& name() const { return _name; }
-     virtual void set_name(const std::string& n) { _name = n; }
-     std::mutex mutex;
+     const std::string& name() const { return _name; }
+     void set_name(const std::string& n) { _name = n; }
 
  protected:
+     mutable std::shared_timed_mutex _mutex;
+     // the following pure virtual methods need to be implemented by
+     // normalizers
+     virtual bool do_train(TrainingData* data) = 0;
+     virtual Result do_normalize(const string_impl& word) const = 0;
+     virtual ResultSet do_normalize(const string_impl& word,
+                                     unsigned int n) const = 0;
+     virtual void do_save_params() = 0;
+
+     // the following are convenience methods
      void log_message(Result* result,
                       LogLevel level, std::string message) const {
          result->messages.push(make_message(level, name(), message));

@@ -75,16 +75,13 @@ include_directories( "${CMAKE_BINARY_DIR}/src" )
 ########## compiler setting and flags {{{
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -pedantic")
-    if(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "4.7.99")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    if(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "4.8.99")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
     else()
-        message(FATAL_ERROR "You need at least g++ >= 4.8! Your version is ${CMAKE_CXX_COMPILER_VERSION}")
+        message(FATAL_ERROR "You need at least g++ >= 4.9! Your version is ${CMAKE_CXX_COMPILER_VERSION}")
     endif()
     set(CMAKE_CXX_FLAGS_DEBUG
         "${CMAKE_CXX_FLAGS_DEBUG} -O0 -ggdb -fno-inline")
-endif()
-if (MSVC)
-    message(FATAL_ERROR "Sorry, compilation won't work with MSVC due to incomplete C++11 support")
 endif()
 # }}}
 ########## main source directories {{{

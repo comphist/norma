@@ -1,8 +1,8 @@
 # common headers
-install_headers(result.h exceptions.h base.h)
+install_headers(result.h exceptions.h base.h cacheable.h)
 # convenience headers
 install_headers(exceptions.h rulebased.h wld.h mapper.h)
-add_sources(result.cpp)
+add_sources(result.cpp cacheable.cpp)
 
 add_subdirectory(mapper)
 add_subdirectory(wld)

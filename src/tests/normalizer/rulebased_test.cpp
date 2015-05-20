@@ -393,7 +393,7 @@ BOOST_AUTO_TEST_CASE(candidate_finder_vnd) {
         expected_messages.push(msg.str());
     }
     // check
-    CandidateFinder finder("vnd", rules, lex);
+    CandidateFinder finder("vnd", rules, lex, "FinderTest");
     Result result = finder();
     BOOST_CHECK_EQUAL(result.word, "und");
     BOOST_CHECK_CLOSE(result.score, 0.277777778, 0.001);
@@ -408,7 +408,7 @@ BOOST_AUTO_TEST_CASE(candidate_finder_vnd) {
 }
 
 BOOST_AUTO_TEST_CASE(candidate_finder_vnt) {
-    CandidateFinder finder("vnt", rules, lex);
+    CandidateFinder finder("vnt", rules, lex, "FinderTest");
     Result result = finder();
     BOOST_REQUIRE(result.messages.size() > 0);
     std::string message = std::get<2>(result.messages.front());
