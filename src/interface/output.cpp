@@ -64,18 +64,16 @@ void InteractiveOutput::put_line(Normalizer::Result* result,
     log_messages(result, max_level);
     *_output << std::endl
              << validate_prompt;
-    validate(result->word);
+    _opposite->store_last();
+    _training->add_target(validate(result->word));
+    _request_train = true;
 }
 
 std::string InteractiveOutput::validate(const string_impl& line) {
     std::string validate_input;
     getline(std::cin, validate_input);
-    if (validate_input.length() != 0) {
-        _training->add_target(validate_input.c_str());
+    if (validate_input.length() != 0)
         return validate_input;
-    }
-    _training->add_target(line);
-    _opposite->store_last();
     return to_cstr(line);
 }
 }  // namespace Norma

@@ -60,6 +60,7 @@ FileInput::~FileInput() {
 
 string_impl FileInput::get_line() {
     string_impl line = Input::get_line();
+    _request_train = (string_find(line, " ") != string_npos);
     return line;
 }
 
@@ -68,6 +69,7 @@ string_impl FileInput::get_line() {
 ShellInput::ShellInput() {
     _input = &std::cin;
     _output = &std::cout;
+    parse_command = CommandHandler(this, _cycle, _output);
 }
 
 string_impl ShellInput::get_line() {
@@ -78,10 +80,12 @@ string_impl ShellInput::get_line() {
         parse_command(sline);
         return "";
     }
+    _line = line;
+    _request_train = (string_find(line, " ") != string_npos);
     return line;
 }
 
-void ShellInput::parse_command(const string& command) {
+void CommandHandler::operator()(const string& command) {
     std::vector<string> tokens;
     size_t pos = 0,
            left = 1;  // 1 to ignore leading !
@@ -104,11 +108,11 @@ void ShellInput::parse_command(const string& command) {
     }
 }
 
-void ShellInput::command_exit(const std::string& arg) {
-    do_quit = true;
+void CommandHandler::command_exit(const std::string& arg) {
+    _si->do_quit = true;
 }
 
-void ShellInput::command_help(const std::string& arg) {
+void CommandHandler::command_help(const std::string& arg) {
     if (arg.length() == 0) {
         *_output  << "Documented commands (type help <topic>):"
                   << std::endl
@@ -131,10 +135,10 @@ void ShellInput::command_help(const std::string& arg) {
             *_output  << "*** No help for " << arg << std::endl;
     }
 }
-void ShellInput::command_save(const std::string& arg) {
+void CommandHandler::command_save(const std::string& arg) {
     _cycle->save_params();
 }
-void ShellInput::switch_feature(const string& desc, const string& arg,
+void CommandHandler::switch_feature(const string& desc, const string& arg,
                                 function<void(Cycle*, bool)> set,
                                 function<bool(Cycle*)> check) {  // NOLINT[readability/casting]
     if (arg == "on")
@@ -145,15 +149,15 @@ void ShellInput::switch_feature(const string& desc, const string& arg,
               << (check(_cycle) ? "ON" : "OFF")
               << "." << std::endl;
 }
-void ShellInput::command_prob(const string& arg) {
+void CommandHandler::command_prob(const string& arg) {
     switch_feature("Printing of probabilities", arg,
                    &Cycle::do_print_prob, &Cycle::print_prob);
 }
-void ShellInput::command_train(const string& arg) {
+void CommandHandler::command_train(const string& arg) {
     switch_feature("Training", arg,
                    &Cycle::do_train, &Cycle::train);
 }
-void ShellInput::command_normalize(const string& arg) {
+void CommandHandler::command_normalize(const string& arg) {
     switch_feature("Normalizing", arg,
                    &Cycle::do_norm, &Cycle::norm);
 }
