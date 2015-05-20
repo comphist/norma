@@ -62,22 +62,23 @@ void Cycle::each_applicator(std::function<void(Applicator*)> fun) {
 
 void Cycle::start() {
     _in->begin();
-    auto* future_results = new std::vector<std::future<Normalizer::Result>>();
+    auto future_results = std::vector<std::future<Normalizer::Result>>();
     while (!_in->request_quit()) {
         string_impl line = _in->get_line();
         if (line.length() == 0)
             continue;
-        if (_train && training_pair(line))
+        if (_train && _in->request_train()) {
+            training_pair(line);
             continue;
+        }
         Normalizer::Result result;
         if (_norm) {  // XXX multiple applicators here
             if (_thread) {
                 // threaded normalization
-                std::packaged_task<Normalizer::Result()> norm([=]() {
+                future_results.push_back(std::async(std::launch::async,
+                            [this, line]() {
                     return _applicators.front()->normalize(line);
-                });
-                future_results->push_back(norm.get_future());
-                std::thread(std::move(norm)).detach();
+                }));
             } else {
                 result = _applicators.front()->normalize(line);
             }
@@ -87,20 +88,18 @@ void Cycle::start() {
         if (!_thread) {
             _out->put_line(&result, _prob, _max_log_level);
         }
-        if (_train) {
+        if (_train && _out->request_train()) {
             each_applicator([&](Applicator* app) {
                 app->train(_data);
             });
+            continue;
         }
     }
     if (_thread) {
-        for (auto& fr : *future_results) {
+        for (auto& fr : future_results) {
             Normalizer::Result result = fr.get();
             _out->put_line(&result, _prob, _max_log_level);
         }
-        delete future_results;
-    } else {
-        delete future_results;
     }
     _in->end();
 }
