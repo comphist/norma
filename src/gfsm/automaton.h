@@ -82,13 +82,6 @@ class Automaton {
     /// Return ID of the root state; creates a root state if none exists.
     gfsmStateId root();
 
-    /// Find all paths that are accepted by this automaton.
-    /** This is identical to accepted_paths() but doesn't lock the
-        mutex, so it can be called from functions which are already
-        under mutex-lock.
-        @see accepted_paths()
-     */
-    std::set<Path> find_accepted_paths() const;
 };
 
 }  // namespace Gfsm

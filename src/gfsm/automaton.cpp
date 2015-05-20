@@ -115,10 +115,6 @@ void Automaton::minimize(bool remove_eps) {
 }
 
 std::set<Path> Automaton::accepted_paths() const {
-    return find_accepted_paths();
-}
-
-std::set<Path> Automaton::find_accepted_paths() const {
     std::set<Path> acc;
     if (gfsm_automaton_is_cyclic(_fsm))  // sanity check
         return acc;
