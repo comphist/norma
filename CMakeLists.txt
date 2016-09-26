@@ -74,14 +74,18 @@ include_directories( "${CMAKE_BINARY_DIR}/src" )
 # }}}
 ########## compiler setting and flags {{{
 if(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -pedantic")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
     if(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "4.8.99")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
     else()
         message(FATAL_ERROR "You need at least g++ >= 4.9! Your version is ${CMAKE_CXX_COMPILER_VERSION}")
     endif()
     set(CMAKE_CXX_FLAGS_DEBUG
-        "${CMAKE_CXX_FLAGS_DEBUG} -O0 -ggdb -fno-inline")
+        "${CMAKE_CXX_FLAGS_DEBUG} -Og -ggdb")
+endif()
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++14")
 endif()
 # }}}
 ########## main source directories {{{
