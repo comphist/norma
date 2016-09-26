@@ -17,13 +17,8 @@
  */
 #ifndef GFSM_LIBRARIES_H_
 #define GFSM_LIBRARIES_H_
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat"
-#pragma GCC diagnostic ignored "-pedantic"
-#pragma GCC diagnostic ignored "-Wpointer-arith"
 extern "C" {
 #include<gfsm.h>
 #include<gfsmxl.h>
 }
-#pragma GCC diagnostic pop
 #endif
