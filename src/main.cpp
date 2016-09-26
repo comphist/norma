@@ -146,15 +146,15 @@ int main(int argc, char* argv[]) {
             output = new Norma::Output();
         else
             output = new Norma::InteractiveOutput();
-        Norma::Cycle c(input, output,
-                       m["normalizers"].as<std::string>(),
-                       m["plugin-base"].as<std::string>(),
-                       file_opts);
+        Norma::Cycle c;
+        c.init(input, output, file_opts);
+        c.init_chain(m["normalizers"].as<std::string>(),
+                     m["plugin-base"].as<std::string>());
         if (m["sync"].as<bool>())
             c.set_thread(false);
         // v-- this doesn't work for some reason
         if (m["train"].as<bool>())
-            c.do_norm(false);
+            c.set("normalize", false);
         c.start();
         if (m["saveonexit"].as<bool>())
             c.save_params();

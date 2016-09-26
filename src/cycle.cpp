@@ -34,73 +34,77 @@ using std::map;
 using std::string;
 
 namespace Norma {
-Cycle::Cycle(Input *in, Output *out,
-             const string& chain_definition,
-             const string& plugin_base,
-             const map<string, string>& params)
-    : _in(in), _out(out) {
-    _applicators.push_back(new Applicator(chain_definition,
-                                          plugin_base, params));
+Cycle::~Cycle() {
+    if (_data != nullptr)
+        delete _data;
+    if (_applicator != nullptr)
+        delete _applicator;
+}
+
+void Cycle::init(Input *input, Output* output,
+                 const std::map<std::string, std::string>& params) {
+    _in = input;
+    _out = output;
+    _params = params;
     _data = new TrainingData();
-    for (auto app : _applicators)
-        app->init_chain();
     _in->initialize(this, _out, _data);
     _out->initialize(this, _in, _data);
-    _thread = _in->thread_suitable() && _out->thread_suitable();
+    set_thread(_in->thread_suitable() && _out->thread_suitable());
 }
 
-Cycle::~Cycle() {
-    delete _data;
-    for (auto app_ptr : _applicators)
-        delete app_ptr;
+void Cycle::init_chain(const std::string& chain_definition,
+                       const std::string& plugin_base) {
+    if (_in == nullptr || _out == nullptr)
+        throw std::runtime_error("Cycle was not intialized!");
+    _applicator = new Applicator(chain_definition, plugin_base, _params);
 }
 
-void Cycle::each_applicator(std::function<void(Applicator*)> fun) {
-    for (auto app : _applicators)
-        fun(app);
+bool Cycle::output_thread() {
+    do {
+        std::unique_lock<std::mutex> output_lock(output_mutex);
+        output_condition.wait(output_lock,
+                              [this]{ return output_ready; });
+        while (!results.empty()) {
+            Normalizer::Result r = results.front().get();
+            _out->put_line(&r, settings["prob"], _max_log_level);
+            results.pop();
+        }
+        output_ready = false;
+    } while (!workers_done);
+    return true;
+}
+
+Normalizer::Result Cycle::worker_thread(const string_impl& line) {
+    return _applicator->normalize(line);
 }
 
 void Cycle::start() {
     _in->begin();
-    auto future_results = std::vector<std::future<Normalizer::Result>>();
+    output_done = std::async(policy, &Cycle::output_thread, this);
+    workers_done = false;
+    output_ready = false;
     while (!_in->request_quit()) {
         string_impl line = _in->get_line();
         if (line.length() == 0)
             continue;
-        if (_train && _in->request_train()) {
+        if (settings["train"] && _in->request_train()) {
             training_pair(line);
             continue;
         }
-        Normalizer::Result result;
-        if (_norm) {  // XXX multiple applicators here
-            if (_thread) {
-                // threaded normalization
-                future_results.push_back(std::async(std::launch::async,
-                            [this, line]() {
-                    return _applicators.front()->normalize(line);
-                }));
-            } else {
-                result = _applicators.front()->normalize(line);
+        if (settings["normalize"]) {
+            results.push(std::async(policy,
+                                    &Cycle::worker_thread,
+                                    this, line));
+            if (!output_ready) {
+                output_ready = true;
+                output_condition.notify_all();
             }
-        } else {
-            result = Normalizer::Result(line, 0.0);
         }
-        if (!_thread) {
-            _out->put_line(&result, _prob, _max_log_level);
-        }
-        if (_train && _out->request_train()) {
-            each_applicator([&](Applicator* app) {
-                app->train(_data);
-            });
-            continue;
-        }
+        if (settings["train"] && _out->request_train())
+            _applicator->train(_data);
     }
-    if (_thread) {
-        for (auto& fr : future_results) {
-            Normalizer::Result result = fr.get();
-            _out->put_line(&result, _prob, _max_log_level);
-        }
-    }
+    workers_done = true;
+    output_done.get();
     _in->end();
 }
 
@@ -118,17 +122,14 @@ bool Cycle::training_pair(const string_impl& line) {
         extract(line, divpos + 1, line.length(), &modern);
         _data->add_source(word);
         _data->add_target(modern);
-        each_applicator([&](Applicator* app) {
-            app->train(_data);
-        });
+        _applicator->train(_data);
         return true;
     }
     return false;
 }
 
 void Cycle::save_params() {
-    for (auto app : _applicators)
-        app->save_params();
+    _applicator->save_params();
 }
 }  // namespace Norma
 

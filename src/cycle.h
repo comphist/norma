@@ -18,11 +18,10 @@
 #ifndef CYCLE_H_
 #define CYCLE_H_
 #include<map>
-#include<vector>
+#include<queue>
 #include<string>
-#include<fstream>
-#include<stdexcept>
-#include<functional>
+#include<future>
+#include<condition_variable>
 #include"string_impl.h"
 #include"training_data.h"
 #include"normalizer/result.h"
@@ -43,62 +42,55 @@ class Applicator;
  *  but it's conceivable to have multiple ones, e.g. when
  *  normalizing several files parallel.
  **/
+
 class Cycle {
  public:
-     Cycle(Input* in, Output* out,
-           const std::string& chain_definition,
-           const std::string& plugin_base,
-           const std::map<std::string, std::string>& params);
-     Cycle() = delete;
-     Cycle(const Cycle& c) = delete;
-     Cycle& operator=(const Cycle& c) = delete;
+     Cycle() = default;
      ~Cycle();
-     /// start processing data
-     void start();
+     //Cycle(const Cycle& c);
+     //Cycle& operator=(const Cycle& c);
+     void init(Input* input, Output* output,
+               const std::map<std::string, std::string>& params);
+     void init_chain(const std::string& chain_definition,
+                     const std::string& plugin_base);
 
-     /// save all normalizer parameter files
+     void start();
      void save_params();
-     /// turn printing probabilities on/off
-     inline void do_print_prob(bool status) {
-         _prob = status;
+     void set(const std::string setting, bool val) {
+         settings[setting] = val;
      }
-     inline bool print_prob() {
-         return _prob;
+     bool get(const std::string setting) const {
+         return settings.at(setting);
      }
-     /// set training on/off
-     inline void do_train(bool status) {
-         _train = status;
-     }
-     inline bool train() {
-         return _train;
-     }
-     /// set normalizing on/off
-     inline void do_norm(bool status) {
-         _norm = status;
-     }
-     inline bool norm() {
-         return _norm;
-     }
-     void set_thread(bool status) {
-         _thread = status;
+     void set_thread(bool val) {
+         policy = val ? std::launch::async : std::launch::deferred;
      }
 
  private:
-     /// check input for training pair and add them to
-     /// in/out history if appropriate
      bool training_pair(const string_impl& line);
-     void each_applicator(std::function<void(Applicator*)> fun);
-     bool _train = true,
-          _norm  = true,
-          _prob  = true,
-          _thread = false;
+
+     std::map<std::string, std::string> _params;
      Normalizer::LogLevel _max_log_level = Normalizer::LogLevel::WARN;
-     TrainingData* _data;
-     Input*  _in;
-     Output* _out;
-     std::vector<Applicator*> _applicators;
+     std::map<std::string, bool> settings = {
+         { "train", true },
+         { "normalize", true },
+         { "prob", true } };
+     TrainingData* _data = nullptr;
+     Applicator* _applicator = nullptr;
+     Input* _in = nullptr;
+     Output* _out = nullptr;
+
+     bool output_thread();
+     Normalizer::Result worker_thread(const string_impl& line);
+
+     std::launch policy = std::launch::async|std::launch::deferred;
+     std::queue<std::future<Normalizer::Result>> results;
+     std::future<bool> output_done;
+     std::mutex output_mutex;
+     std::condition_variable output_condition;
+     bool output_ready = false,
+          workers_done = false;
 };
 }  // namespace Norma
-
 #endif  // CYCLE_H_
 

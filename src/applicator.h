@@ -66,24 +66,24 @@ class Applicator : private std::list<Normalizer::Base*> {
      /// ready
      Normalizer::Result normalize(const string_impl& word) const;
      /// start all training in parallel, then wait until
-     /// all of them are finished. Also lock a Normalizers
-     /// mutex before the training start, because its internal
-     /// state will be messed up if we train twice on different
-     /// history.
+     /// all of them are finished.
      void train(TrainingData *data);
-     /// choose between two results
-     std::function<const Normalizer::Result&(const Normalizer::Result&,
-                                             const Normalizer::Result&)>
-                   chooser = Applicator::best_priority;
      /// choose the result with the best score
-     static const Normalizer::Result& best_score(const Normalizer::Result& one,
-                                                 const Normalizer::Result& two);
+     static const Normalizer::Result&
+                best_score(Normalizer::Result* one,
+                           Normalizer::Result* two);
      /// choose the result with the lowest priority and score > 0
      static const Normalizer::Result&
-         best_priority(const Normalizer::Result& one,
-                       const Normalizer::Result& two);
+                best_priority(Normalizer::Result* one,
+                              Normalizer::Result* two);
      void save_params();
      void init_chain();
+
+     typedef std::function<const Normalizer::Result(Normalizer::Result*,
+                                                    Normalizer::Result*)>
+             Chooser;
+     /// choose between two results
+     Chooser chooser = Applicator::best_priority;
 
  private:
      Normalizer::Base* create_plugin(const std::string& lib_name,

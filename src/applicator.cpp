@@ -52,6 +52,12 @@ Applicator::Applicator(const string& chain_definition,
         std::cerr << "*** WARNING: while initializing Lexicon: "
                   << e.what() << std::endl;
     }
+    try {
+        init_chain();
+    } catch(Normalizer::init_error e) {
+        std::cerr << "*** WARNING: while initializing a normalizer: "
+                  << e.what() << std::endl;
+    }
 }
 
 Applicator::~Applicator() {
@@ -111,16 +117,29 @@ void Applicator::init_chain() {
 }
 
 Normalizer::Result Applicator::normalize(const string_impl& word) const {
+    // starting all normalizers async seems to make everything slower
+    // presumably this is because the cascade_lookup blocks
+    unsigned int priority = 1;
+    Normalizer::Result result, bestresult(word, 0);
+    for (auto normalizer : *this) {
+        result = (*normalizer)(word);
+        result.priority = priority;
+        bestresult = chooser(&bestresult, &result);
+        if (bestresult.is_final)
+            break;
+        ++priority;
+    }
+    return bestresult;
+#if 0
     std::list<std::future<Normalizer::Result>> results;
     unsigned int priority = 1;
     for (auto normalizer : *this) {
-        std::packaged_task<Normalizer::Result()> task([=]() {
+        results.push_back(std::async(std::launch::async,
+            [word, normalizer, priority]() {
                 Normalizer::Result result = (*normalizer)(word);
                 result.priority = priority;
                 return result;
-        });
-        results.push_back(task.get_future());
-        std::thread(std::move(task)).detach();
+        }));
         ++priority;
     }
 
@@ -130,6 +149,7 @@ Normalizer::Result Applicator::normalize(const string_impl& word) const {
         bestresult = chooser(bestresult, my_result);
     }
     return bestresult;
+#endif
 }
 
 void Applicator::train(TrainingData *data) {
@@ -143,7 +163,6 @@ void Applicator::train(TrainingData *data) {
     // start the training threads and detach
     for (auto normalizer : *this) {
         std::packaged_task<bool()> train_task([=]() {
-            std::lock_guard<std::mutex> train_guard(normalizer->mutex);
             bool result = normalizer->train(data);
             return result;
         });
@@ -173,18 +192,19 @@ void Applicator::train(TrainingData *data) {
 }
 
 const Normalizer::Result&
-    Applicator::best_score(const Normalizer::Result& one,
-                           const Normalizer::Result& two) {
-    return (one.score > two.score) ? one : two;
+    Applicator::best_score(Normalizer::Result* one,
+                           Normalizer::Result* two) {
+    return (one->score > two->score) ? *one : *two;
 }
 
 const Normalizer::Result&
-    Applicator::best_priority(const Normalizer::Result& one,
-                              const Normalizer::Result& two) {
-    if ((one.priority < two.priority) && one.score > 0.0)
-        return one;
-    else
-        return two;
+    Applicator::best_priority(Normalizer::Result* one,
+                              Normalizer::Result* two) {
+    if ((two->priority < one->priority) && two->score > 0.0) {
+        two->is_final = true;
+        return *two;
+    }
+    return *one;
 }
 
 void Applicator::save_params() {
