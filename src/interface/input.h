@@ -110,8 +110,7 @@ class CommandHandler {
     /// the Cycle may offer.
     void switch_feature(const std::string& desc,
                         const std::string& arg,
-                        std::function<void(Cycle*, bool)> set,
-                        std::function<bool(Cycle*)> check);
+                        const std::string& feature);
     std::map<std::string, std::string> _helptxt
          = { { "exit", "Exits the program, saving data if necessary." },
              { "prob", "Turn the printing of probabilities on or off, "

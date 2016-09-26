@@ -139,27 +139,21 @@ void CommandHandler::command_save(const std::string& arg) {
     _cycle->save_params();
 }
 void CommandHandler::switch_feature(const string& desc, const string& arg,
-                                function<void(Cycle*, bool)> set,
-                                function<bool(Cycle*)> check) {  // NOLINT[readability/casting]
-    if (arg == "on")
-        set(_cycle, true);
-    else if (arg == "off")
-        set(_cycle, false);
+                                    const string& feature) {
+    if (arg.length() > 0)
+        _cycle->set(feature, (arg == "on" ? true : false));
     *_output  << "*** " << desc << " is "
-              << (check(_cycle) ? "ON" : "OFF")
+              << (_cycle->get(feature) ? "ON" : "OFF")
               << "." << std::endl;
 }
 void CommandHandler::command_prob(const string& arg) {
-    switch_feature("Printing of probabilities", arg,
-                   &Cycle::do_print_prob, &Cycle::print_prob);
+    switch_feature("Printing of probabilities", arg, "prob");
 }
 void CommandHandler::command_train(const string& arg) {
-    switch_feature("Training", arg,
-                   &Cycle::do_train, &Cycle::train);
+    switch_feature("Training", arg, "train");
 }
 void CommandHandler::command_normalize(const string& arg) {
-    switch_feature("Normalizing", arg,
-                   &Cycle::do_norm, &Cycle::norm);
+    switch_feature("Normalizing", arg, "normalize");
 }
 }  // namespace Norma
 
