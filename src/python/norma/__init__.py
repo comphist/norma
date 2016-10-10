@@ -19,3 +19,4 @@
 ################################################################################
 
 from norma import NormaInitError, Result
+from NormaCfgParser import NormaCfgParser
