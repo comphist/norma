@@ -31,6 +31,7 @@ macro(add_normalizer_bindings _NORM_LIB_NAME)
     set_target_properties("${_NORM_NAME}-python"
                           PROPERTIES PREFIX ""
                                      OUTPUT_NAME ${_NORM_NAME}
+                                     INSTALL_RPATH ${NORMA_DEFAULT_PLUGIN_BASE}
                                      LIBRARY_OUTPUT_DIRECTORY "norma/")
     target_link_libraries("${_NORM_NAME}-python" LINK_PUBLIC ${_NORM_LIB_NAME} ${NORMA_PYTHON_LIBRARIES})
     install(TARGETS "${_NORM_NAME}-python" DESTINATION ${NORMA_PYTHON_INSTALL_DIR})
