@@ -91,6 +91,7 @@ class Rule {
          return !(*this == that);
      }
      bool operator<(const Rule& that) const;
+     friend std::ostream& operator<<(std::ostream& strm, const Rule& r);
 
  protected:
      Rule() = default;
@@ -139,6 +140,8 @@ class RuleSet {
                    const string_impl& source, size_t spos,
                    const string_impl& target, size_t tpos);
 
+     friend std::ostream& operator<<(std::ostream& strm, const RuleSet& rs);
+
  protected:
      /// just push a rule on the vector
      /// protected since it might confuse the rest of the
@@ -177,16 +180,16 @@ struct RuleHasher {
     std::size_t operator()(const Rule& r) const;
 };
 
+/// ostream operator to ensure Rules can be outputted to cout or file
+std::ostream& operator<<(std::ostream& strm,
+                         const Rule& r);
+
+/// ostream operator to ensure RuleSet can be outputted to cout or file
+std::ostream& operator<<(std::ostream& strm,
+                         const RuleSet& rs);
 }  // namespace Rulebased
 }  // namespace Normalizer
 }  // namespace Norma
 
-/// ostream operator to ensure Rules can be outputted to cout or file
-std::ostream& operator<<(std::ostream& strm,
-                         const Norma::Normalizer::Rulebased::Rule& r);
-
-/// ostream operator to ensure RuleSet can be outputted to cout or file
-std::ostream& operator<<(std::ostream& strm,
-                         const Norma::Normalizer::Rulebased::RuleSet& rs);
 #endif  // NORMALIZER_RULEBASED_RULE_H_
 

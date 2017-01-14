@@ -249,10 +249,6 @@ std::size_t RuleHasher::operator()(const Rule& r) const {
     return std::hash<std::string>()(s);
 }
 
-}  // namespace Rulebased
-}  // namespace Normalizer
-}  // namespace Norma
-
 std::ostream& operator<<(std::ostream& strm,
                          const Norma::Normalizer::Rulebased::Rule& r) {
     strm << "{" << r.from() << "->" << r.to()
@@ -266,3 +262,6 @@ std::ostream& operator<<(std::ostream& strm,
         strm << *rule << std::endl;
     return strm;
 }
+}  // namespace Rulebased
+}  // namespace Normalizer
+}  // namespace Norma
