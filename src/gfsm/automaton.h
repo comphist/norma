@@ -81,7 +81,6 @@ class Automaton {
 
     /// Return ID of the root state; creates a root state if none exists.
     gfsmStateId root();
-
 };
 
 }  // namespace Gfsm

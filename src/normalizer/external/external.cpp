@@ -160,7 +160,8 @@ Result External::do_normalize(const string_impl& word) const {
     return make_result(cword, score);
 }
 
-ResultSet External::do_normalize(const string_impl& word, unsigned int n) const {
+ResultSet External::do_normalize(const string_impl& word, unsigned int n)
+                    const {
     std::lock_guard<std::mutex> guard(*python_mutex);
     PyEval_AcquireLock();
     temp_state = PyThreadState_Swap(my_threadstate);
