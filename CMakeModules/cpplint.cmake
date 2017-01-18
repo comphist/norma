@@ -13,7 +13,7 @@ if(CPPLINT STREQUAL "CPPLINT-NOTFOUND")
     find_package(CURL)
     if(CURL_FOUND)
         exec_program(curl
-            ARGS "http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py -O")
+            ARGS "https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py -O")
         exec_program(chmod
             ARGS "+x ${CMAKE_CURRENT_BINARY_DIR}/cpplint.py")
         set(CPPLINT "${CMAKE_CURRENT_BINARY_DIR}/cpplint.py")
