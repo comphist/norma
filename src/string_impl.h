@@ -57,10 +57,6 @@ typedef unicode_string_impl string_impl;
 typedef UChar32 char_impl;
 typedef int string_size;
 
-inline void lower_case(string_impl* str)
-    { str->toLower(); }
-inline void upper_case(string_impl* str)
-    { str->toUpper(); }
 static const string_size string_npos = -1;
 inline void extract(const string_impl& str, int from, int to, string_impl* out)
     { str.extractBetween(from, to, *out); }
@@ -92,12 +88,6 @@ std::ostream& operator<<(std::ostream& strm, const string_impl& ustr);
 typedef std::string string_impl;
 typedef char char_impl;
 typedef size_t string_size;
-
-inline void lower_case(string_impl* str)
-    { std::transform(str->begin(), str->end(), str->begin(), ::tolower); }
-
-inline void upper_case(string_impl* str)
-    { std::transform(str->begin(), str->end(), str->begin(), ::toupper); }
 
 static const size_t string_npos = std::string::npos;
 
@@ -132,13 +122,6 @@ inline bool is_empty(const string_impl& str) {
 void extract_tail(const string_impl& str, string_size len, string_impl* out);
 
 bool has_alpha(const string_impl& str);
-
-inline void upper_case(char_impl* c) {
-    string_impl s = "";
-    s += *c;
-    upper_case(&s);
-    *c = s[0];
-}
 
 #endif  // STRING_IMPL_H_
 

@@ -34,9 +34,7 @@ namespace Norma {
 string_impl Input::get_line() {
     std::string l;
     getline(*_input, l);
-    _line = l.c_str();
-    lower_case(&_line);
-    return _line;
+    return l;
 }
 
 //////////////////////////// FileInput ///////////////////////////////////

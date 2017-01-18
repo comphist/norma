@@ -53,32 +53,28 @@ void construct_initial_matrix(std::vector<std::vector<RuleSet>> *matrix,
 
 RuleSet learn_rules(const string_impl& source, const string_impl& target,
                     bool do_merge = true, bool insert_epsilon = true) {
-    string_impl _source = source,
-                _target = target;
-    lower_case(&_source);
-    lower_case(&_target);
-    int n = _source.length(),
-        m = _target.length();
+    int n = source.length(),
+        m = target.length();
 
     std::vector<std::vector<RuleSet>> _matrix;
-    construct_initial_matrix(&_matrix, _source, _target);
+    construct_initial_matrix(&_matrix, source, target);
 
     RuleSet edits;
     for (int i = 1; i <= n; ++i)
         for (int j = 1; j <= m; ++j) {
-            int sc = (_source[i - 1] == _target[j - 1]) ? 0 : 1,
+            int sc = (source[i - 1] == target[j - 1]) ? 0 : 1,
                 add_cost = _matrix[i][j-1].cost() + 1,
                 del_cost = _matrix[i-1][j].cost() + 1,
                 sub_cost = _matrix[i-1][j-1].cost() + sc;
             if (sub_cost <= add_cost && sub_cost <= del_cost) {
                 edits = RuleSet(_matrix[i-1][j-1]);
-                edits.add_rule(EditOp::SUB, _source, i, _target, j);
+                edits.add_rule(EditOp::SUB, source, i, target, j);
             } else if (del_cost <= sub_cost && del_cost <= add_cost) {
                 edits = RuleSet(_matrix[i-1][j]);
-                edits.add_rule(EditOp::DEL, _source, i, _target, j);
+                edits.add_rule(EditOp::DEL, source, i, target, j);
             } else if (add_cost <= sub_cost && add_cost <= del_cost) {
                 edits = RuleSet(_matrix[i][j-1]);
-                edits.add_rule(EditOp::ADD, _source, i, _target, j);
+                edits.add_rule(EditOp::ADD, source, i, target, j);
             }
             _matrix[i][j] = edits;
         }
@@ -89,7 +85,7 @@ RuleSet learn_rules(const string_impl& source, const string_impl& target,
         edits.merge_rules();
 
     if (insert_epsilon)
-        edits.insert_epsilon_identity(_source, _target);
+        edits.insert_epsilon_identity(source, target);
 
     return edits;
 }
