@@ -58,7 +58,7 @@ FileInput::~FileInput() {
 
 string_impl FileInput::get_line() {
     string_impl line = Input::get_line();
-    _request_train = (string_find(line, " ") != string_npos);
+    _request_train = (string_find(line, "\t") != string_npos);
     return line;
 }
 
@@ -79,7 +79,7 @@ string_impl ShellInput::get_line() {
         return "";
     }
     _line = line;
-    _request_train = (string_find(line, " ") != string_npos);
+    _request_train = (string_find(line, "\t") != string_npos);
     return line;
 }
 

@@ -103,6 +103,11 @@ void Cycle::start() {
         if (settings["train"] && _out->request_train())
             _applicator->train(_data);
     }
+    // if output isn't ready by now, we haven't normalized at all
+    if (!output_ready) {
+        output_ready = true;
+        output_condition.notify_all();
+    }
     workers_done = true;
     output_done.get();
     _in->end();
