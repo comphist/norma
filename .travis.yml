@@ -1,0 +1,44 @@
+dist: trusty
+sudo: required
+
+language: cpp
+
+compiler:
+    - gcc
+    - clang
+
+addons:
+    apt:
+        packages:
+            - libboost-all-dev
+            - glib2.0-dev
+            - gcc-4.8
+            - g++-4.8
+
+
+install:
+    - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+    - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
+    - GFSM_SRC="http://kaskade.dwds.de/~moocow/mirror/projects/gfsm"
+    - |
+        for pkg in gfsm-0.0.15-1 gfsmxl-0.0.15; do
+            curl -O ${GFSM_SRC}/${pkg}.tar.gz
+            tar xzf ${pkg}.tar.gz
+            pushd ${pkg}
+            ./configure && make && sudo make install
+            popd
+        done
+    - cd ..
+
+env:
+    - STRINGS=ICU PY_EMBED=TRUE
+    - STRINGS=ICU PY_EMBED=FALSE
+    - STRINGS=STD PY_EMBED=TRUE
+    - STRINGS=STD PY_EMBED=FALSE
+
+script:
+    - mkdir build
+    - cd build
+    - cmake .. -DSTRING_IMPL=${STRINGS} -DWITH_PYTHON=${PY_EMBED} -DCMAKE_BUILD_TYPE=Release
+    - make && make check && sudo make install
+
