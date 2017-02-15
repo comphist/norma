@@ -18,13 +18,11 @@
 #ifndef CYCLE_H_
 #define CYCLE_H_
 #include<map>
-#include<queue>
 #include<string>
-#include<future>
-#include<condition_variable>
 #include"string_impl.h"
 #include"training_data.h"
 #include"normalizer/result.h"
+#include"results_queue.h"
 
 namespace Norma {
 class Input;
@@ -47,8 +45,6 @@ class Cycle {
  public:
      Cycle() = default;
      ~Cycle();
-     //Cycle(const Cycle& c);
-     //Cycle& operator=(const Cycle& c);
      void init(Input* input, Output* output,
                const std::map<std::string, std::string>& params);
      void init_chain(const std::string& chain_definition,
@@ -80,16 +76,7 @@ class Cycle {
      Input* _in = nullptr;
      Output* _out = nullptr;
 
-     bool output_thread();
-     Normalizer::Result worker_thread(const string_impl& line);
-
      std::launch policy = std::launch::async|std::launch::deferred;
-     std::queue<std::future<Normalizer::Result>> results;
-     std::future<bool> output_done;
-     std::mutex output_mutex;
-     std::condition_variable output_condition;
-     bool output_ready = false,
-          workers_done = false;
 };
 }  // namespace Norma
 #endif  // CYCLE_H_

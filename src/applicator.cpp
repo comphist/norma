@@ -130,26 +130,6 @@ Normalizer::Result Applicator::normalize(const string_impl& word) const {
         ++priority;
     }
     return bestresult;
-#if 0
-    std::list<std::future<Normalizer::Result>> results;
-    unsigned int priority = 1;
-    for (auto normalizer : *this) {
-        results.push_back(std::async(std::launch::async,
-            [word, normalizer, priority]() {
-                Normalizer::Result result = (*normalizer)(word);
-                result.priority = priority;
-                return result;
-        }));
-        ++priority;
-    }
-
-    Normalizer::Result bestresult(word, 0);
-    for (std::future<Normalizer::Result>& fr : results) {
-        Normalizer::Result my_result = fr.get();
-        bestresult = chooser(bestresult, my_result);
-    }
-    return bestresult;
-#endif
 }
 
 void Applicator::train(TrainingData *data) {

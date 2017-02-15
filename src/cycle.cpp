@@ -20,15 +20,14 @@
 #include<vector>
 #include<string>
 #include<fstream>
-#include<functional>
 #include<stdexcept>
-#include<thread>
 #include<future>
 #include<cctype>
 #include"normalizer/result.h"
 #include"interface.h"
 #include"applicator.h"
 #include"training_data.h"
+#include"results_queue.h"
 
 using std::map;
 using std::string;
@@ -59,30 +58,20 @@ void Cycle::init_chain(const std::string& chain_definition,
     _applicator = new Applicator(chain_definition, plugin_base, _params);
 }
 
-bool Cycle::output_thread() {
-    do {
-        std::unique_lock<std::mutex> output_lock(output_mutex);
-        output_condition.wait(output_lock,
-                              [this]{ return output_ready; });
-        while (!results.empty()) {
-            Normalizer::Result r = results.front().get();
-            _out->put_line(&r, settings["prob"], _max_log_level);
-            results.pop();
-        }
-        output_ready = false;
-    } while (!workers_done);
-    return true;
-}
-
-Normalizer::Result Cycle::worker_thread(const string_impl& line) {
-    return _applicator->normalize(line);
-}
-
 void Cycle::start() {
+    ResultsQueue<Normalizer::Result> res(128, policy);
+    bool print_prob = settings["prob"];
+    Normalizer::LogLevel ll = _max_log_level;
+    Output* o = _out;
+    auto outputter = [print_prob, ll, o](Normalizer::Result r) {
+        o->put_line(&r, print_prob, ll);
+    };
+    auto producer = [this](string_impl line) {
+        auto my_result = _applicator->normalize(line);
+        return my_result;
+    };
+    res.set_consumer(outputter);
     _in->begin();
-    output_done = std::async(policy, &Cycle::output_thread, this);
-    workers_done = false;
-    output_ready = false;
     while (!_in->request_quit()) {
         string_impl line = _in->get_line();
         if (line.length() == 0)
@@ -91,25 +80,12 @@ void Cycle::start() {
             training_pair(line);
             continue;
         }
-        if (settings["normalize"]) {
-            results.push(std::async(policy,
-                                    &Cycle::worker_thread,
-                                    this, line));
-            if (!output_ready) {
-                output_ready = true;
-                output_condition.notify_all();
-            }
-        }
+        if (settings["normalize"])
+            res.add_producer(producer, line);
         if (settings["train"] && _out->request_train())
             _applicator->train(_data);
     }
-    // if output isn't ready by now, we haven't normalized at all
-    if (!output_ready) {
-        output_ready = true;
-        output_condition.notify_all();
-    }
-    workers_done = true;
-    output_done.get();
+    res.finish();
     _in->end();
 }
 
