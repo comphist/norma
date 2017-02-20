@@ -119,7 +119,7 @@ class CommandHandler {
                        "normalizers." },
              { "train", "Turn the 'training' option on or off, or show "
                         "the current setting." },
-             { "normalize", "Turn the 'normalizing' option on or off, or"
+             { "normalize", "Turn the 'normalizing' option on or off, or "
                             "show the current setting." } };
     std::map<std::string,
          std::function<void(CommandHandler*, const std::string&)>> _commands

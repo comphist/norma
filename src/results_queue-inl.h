@@ -57,5 +57,5 @@ template<typename R> bool ResultsQueue<R>::consume() {
     } while (!workers_done);
     return true;
 }
-};  // namespace Norma
+}  // namespace Norma
 #endif  // RESULTS_QUEUE_INL_H_

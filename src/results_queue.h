@@ -35,6 +35,7 @@ template<typename RESULT_TY> class ResultsQueue {
  public:
      ResultsQueue() { init(); }
      explicit ResultsQueue(unsigned max_threads) { init(max_threads); }
+     explicit ResultsQueue(std::launch policy) { init(0, policy); }
      ResultsQueue(unsigned max_threads, std::launch policy) {
          init(max_threads, policy);
      }
@@ -52,20 +53,18 @@ template<typename RESULT_TY> class ResultsQueue {
  private:
      std::launch _policy = std::launch::async|std::launch::deferred;
      unsigned _max_threads;
-     std::atomic<unsigned> num_threads;
+     std::atomic<unsigned> num_threads{0};
      std::mutex _mutex;
      std::function<void(RESULT_TY)> _consumer;
      std::queue<std::future<RESULT_TY>> results;
      std::future<bool> output_done;
-     std::atomic<bool> output_ready, workers_done;
+     std::atomic<bool> output_ready{false}, workers_done{false};
      std::condition_variable consumer_condition;
+
      void init(unsigned max_threads = 0,
                std::launch policy = std::launch::async|std::launch::deferred) {
-         num_threads = 0;
-         output_ready = false;
-         workers_done = false;
          if (max_threads == 0)
-             _max_threads = std::thread::hardware_concurrency();
+             _max_threads = std::thread::hardware_concurrency() * 2;
          _policy = policy;
      }
      bool consume();

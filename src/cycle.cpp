@@ -59,7 +59,7 @@ void Cycle::init_chain(const std::string& chain_definition,
 }
 
 void Cycle::start() {
-    ResultsQueue<Normalizer::Result> res(128, policy);
+    ResultsQueue<Normalizer::Result> res(policy);
     bool print_prob = settings["prob"];
     Normalizer::LogLevel ll = _max_log_level;
     Output* o = _out;
