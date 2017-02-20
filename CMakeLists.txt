@@ -106,9 +106,10 @@ target_link_libraries(norma
     ${STRING_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_REGEX_LIBRARY}
+    ${CMAKE_DL_LIBS}
     LINK_PRIVATE
     ${PYTHON_LIBRARIES}
-    ${Boost_REGEX_LIBRARY}
     ${LIBGFSM_LIBRARIES}
 )
 add_executable(normalize src/main.cpp)
