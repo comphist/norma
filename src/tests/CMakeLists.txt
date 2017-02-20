@@ -18,6 +18,7 @@ endmacro()
 
 add_complete_test(gfsm_wrapper gfsm_wrapper.cpp Gfsm ${LIBGFSM_LIBRARIES})
 add_complete_test(training_data training_data.cpp TrainingData)
+add_complete_test(interface interface_test.cpp Interface)
 add_subdirectory(normalizer)
 
 if(WITH_PYTHON)
