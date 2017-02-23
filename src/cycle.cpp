@@ -25,7 +25,7 @@
 #include<cctype>
 #include"normalizer/result.h"
 #include"interface.h"
-#include"applicator.h"
+#include"pluginsocket.h"
 #include"training_data.h"
 #include"results_queue.h"
 
@@ -36,8 +36,8 @@ namespace Norma {
 Cycle::~Cycle() {
     if (_data != nullptr)
         delete _data;
-    if (_applicator != nullptr)
-        delete _applicator;
+    if (_plugins != nullptr)
+        delete _plugins;
 }
 
 void Cycle::init(Input *input, Output* output,
@@ -55,7 +55,7 @@ void Cycle::init_chain(const std::string& chain_definition,
                        const std::string& plugin_base) {
     if (_in == nullptr || _out == nullptr)
         throw std::runtime_error("Cycle was not intialized!");
-    _applicator = new Applicator(chain_definition, plugin_base, _params);
+    _plugins = new PluginSocket(chain_definition, plugin_base, _params);
 }
 
 void Cycle::start() {
@@ -67,7 +67,7 @@ void Cycle::start() {
         o->put_line(&r, print_prob, ll);
     };
     auto producer = [this](string_impl line) {
-        auto my_result = _applicator->normalize(line);
+        auto my_result = _plugins->normalize(line);
         return my_result;
     };
     res.set_consumer(outputter);
@@ -83,7 +83,7 @@ void Cycle::start() {
         if (settings["normalize"])
             res.add_producer(producer, line);
         if (settings["train"] && _out->request_train())
-            _applicator->train(_data);
+            _plugins->train(_data);
     }
     res.finish();
     _in->end();
@@ -103,14 +103,14 @@ bool Cycle::training_pair(const string_impl& line) {
         extract(line, divpos + 1, line.length(), &modern);
         _data->add_source(word);
         _data->add_target(modern);
-        _applicator->train(_data);
+        _plugins->train(_data);
         return true;
     }
     return false;
 }
 
 void Cycle::save_params() {
-    _applicator->save_params();
+    _plugins->save_params();
 }
 }  // namespace Norma
 

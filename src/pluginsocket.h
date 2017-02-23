@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public License along
  * with Norma.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef APPLICATOR_H_
-#define APPLICATOR_H_
+#ifndef PLUGINSOCKET_H_
+#define PLUGINSOCKET_H_
 #include<list>
 #include<string>
 #include<map>
@@ -49,15 +49,15 @@ class Base;
  *  concurrency related issues as possible from the authors of
  *  the Normalizer.
  **/
-class Applicator : private std::list<Normalizer::Base*> {
+class PluginSocket : private std::list<Normalizer::Base*> {
  public:
-     explicit Applicator(const std::string& chain_definition,
+     explicit PluginSocket(const std::string& chain_definition,
                          const std::string& plugin_base_param,
                          const std::map<std::string, std::string>& params);
-     Applicator() = delete;
-     Applicator(const Applicator& a) = delete;
-     const Applicator& operator=(const Applicator& a) = delete;
-     ~Applicator();
+     PluginSocket() = delete;
+     PluginSocket(const PluginSocket& a) = delete;
+     const PluginSocket& operator=(const PluginSocket& a) = delete;
+     ~PluginSocket();
 
      /// add a normalizer to the back of the chain
      inline void push_chain(Normalizer::Base* n);
@@ -83,7 +83,7 @@ class Applicator : private std::list<Normalizer::Base*> {
                                                     Normalizer::Result*)>
              Chooser;
      /// choose between two results
-     Chooser chooser = Applicator::best_priority;
+     Chooser chooser = PluginSocket::best_priority;
 
  private:
      Normalizer::Base* create_plugin(const std::string& lib_name,
@@ -96,5 +96,5 @@ class Applicator : private std::list<Normalizer::Base*> {
 };
 }  // namespace Norma
 
-#endif  // APPLICATOR_H_
+#endif  // PLUGINSOCKET_H_
 

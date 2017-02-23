@@ -1,4 +1,4 @@
-/* Copyright 2013-2015 Marcel Bollmann, Florian Petran
+/* Copyright 2013-2017 Marcel Bollmann, Florian Petran
  *
  * This file is part of Norma.
  *
@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License along
  * with Norma.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include"applicator.h"
+#include"pluginsocket.h"
 #include<dlfcn.h>  // linux specific XXX
 #include<string>
 #include<stdexcept>
@@ -40,7 +40,7 @@ using std::string;
 
 namespace Norma {
 
-Applicator::Applicator(const string& chain_definition,
+PluginSocket::PluginSocket(const string& chain_definition,
                        const string& plugin_base_param,
                        const map<string, string>& params)
     : config_vars(params), chain_def(chain_definition),
@@ -60,7 +60,7 @@ Applicator::Applicator(const string& chain_definition,
     }
 }
 
-Applicator::~Applicator() {
+PluginSocket::~PluginSocket() {
     delete _lex;
     for (auto normalizer : created_normalizers)
         normalizer.first(normalizer.second);
@@ -68,11 +68,11 @@ Applicator::~Applicator() {
         dlclose(plugin);
 }
 
-void Applicator::push_chain(Normalizer::Base* n) {
+void PluginSocket::push_chain(Normalizer::Base* n) {
     push_back(n);
 }
 
-void Applicator::init_chain() {
+void PluginSocket::init_chain() {
     std::set<std::string> aliases;
     std::istringstream chain_stream(chain_def);
     string element;
@@ -116,7 +116,7 @@ void Applicator::init_chain() {
     }
 }
 
-Normalizer::Result Applicator::normalize(const string_impl& word) const {
+Normalizer::Result PluginSocket::normalize(const string_impl& word) const {
     // starting all normalizers async seems to make everything slower
     // presumably this is because the cascade_lookup blocks
     unsigned int priority = 1;
@@ -132,7 +132,7 @@ Normalizer::Result Applicator::normalize(const string_impl& word) const {
     return bestresult;
 }
 
-void Applicator::train(TrainingData *data) {
+void PluginSocket::train(TrainingData *data) {
     if (data->empty())
         return;
 
@@ -172,13 +172,13 @@ void Applicator::train(TrainingData *data) {
 }
 
 const Normalizer::Result&
-    Applicator::best_score(Normalizer::Result* one,
+    PluginSocket::best_score(Normalizer::Result* one,
                            Normalizer::Result* two) {
     return (one->score > two->score) ? *one : *two;
 }
 
 const Normalizer::Result&
-    Applicator::best_priority(Normalizer::Result* one,
+    PluginSocket::best_priority(Normalizer::Result* one,
                               Normalizer::Result* two) {
     if ((two->priority < one->priority) && two->score > 0.0) {
         two->is_final = true;
@@ -187,7 +187,7 @@ const Normalizer::Result&
     return *one;
 }
 
-void Applicator::save_params() {
+void PluginSocket::save_params() {
     for (auto n : *this) {
         try {
             n->save_params();
@@ -205,7 +205,7 @@ void Applicator::save_params() {
     }
 }
 
-Normalizer::Base* Applicator::create_plugin(const std::string& lib_name,
+Normalizer::Base* PluginSocket::create_plugin(const std::string& lib_name,
                                             const std::string& alias) {
     // this is linux specific now
     std::string plugin_name = plugin_base + "/lib" + lib_name + ".so";
@@ -234,3 +234,4 @@ Normalizer::Base* Applicator::create_plugin(const std::string& lib_name,
 }
 
 }  // namespace Norma
+

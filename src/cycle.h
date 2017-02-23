@@ -27,14 +27,11 @@
 namespace Norma {
 class Input;
 class Output;
-class Applicator;
+class PluginSocket;
 
 /// the main application cycle
 /** This class contains the main loop for input and output.
- *  It connects Input, Output, and Applicator classes.
- *  At some point it should support multiple Applicator instances
- *  and supply a way of choosing between their input, but right
- *  now, it's just the one.
+ *  It connects Input, Output, and PluginSocket classes.
  *
  *  Usually, an application should need just one Cycle object,
  *  but it's conceivable to have multiple ones, e.g. when
@@ -72,7 +69,7 @@ class Cycle {
          { "normalize", true },
          { "prob", true } };
      TrainingData* _data = nullptr;
-     Applicator* _applicator = nullptr;
+     PluginSocket* _plugins = nullptr;
      Input* _in = nullptr;
      Output* _out = nullptr;
 
