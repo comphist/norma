@@ -5,25 +5,25 @@ language: cpp
 
 matrix:
     include:
-#       - compiler: gcc
-#         addons:
-#             apt:
-#                 sources:
-#                     - ubuntu-toolchain-r-test
-#                 packages:
-#                     - g++-4.9
-#                     - gcc-4.9
-#         env: TRAVIS_CXX=g++-4.9 TRAVIS_CC=gcc-4.9 STRINGS=STD
-#       - compiler: gcc
-#         addons:
-#             apt:
-#                 sources:
-#                     - ubuntu-toolchain-r-test
-#                 packages:
-#                     - g++-4.9
-#                     - gcc-4.9
-#         env: TRAVIS_CXX=g++-4.9 TRAVIS_CC=gcc-4.9 STRINGS=ICU
-        - compiler: gcc
+       - compiler: gcc
+         addons:
+             apt:
+                 sources:
+                     - ubuntu-toolchain-r-test
+                 packages:
+                     - g++-4.9
+                     - gcc-4.9
+         env: TRAVIS_CXX=g++-4.9 TRAVIS_CC=gcc-4.9 STRINGS=STD
+       - compiler: gcc
+         addons:
+             apt:
+                 sources:
+                     - ubuntu-toolchain-r-test
+                 packages:
+                     - g++-4.9
+                     - gcc-4.9
+         env: TRAVIS_CXX=g++-4.9 TRAVIS_CC=gcc-4.9 STRINGS=ICU
+       - compiler: gcc
           addons:
               apt:
                   sources:
@@ -51,7 +51,7 @@ install:
     - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
     - GFSM_SRC="http://kaskade.dwds.de/~moocow/mirror/projects/gfsm"
     - |
-        for pkg in gfsm-0.0.15-1 gfsmxl-0.0.15; do
+        for pkg in gfsm-0.0.16-1 gfsmxl-0.0.15; do
             curl -O ${GFSM_SRC}/${pkg}.tar.gz
             tar xzf ${pkg}.tar.gz
             pushd ${pkg}
