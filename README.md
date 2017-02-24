@@ -1,5 +1,7 @@
 # Norma
 
+[![Build Status](https://travis-ci.org/comphist/norma.svg?branch=develop)](https://travis-ci.org/comphist/norma)
+
 Norma is a tool for **automatic spelling normalization** of non-standard language data.  It
 uses a combination of different normalization techniques that typically require
 *training data* (= a list of manually normalized wordforms) and a *target
