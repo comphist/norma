@@ -22,6 +22,7 @@
 #include<iosfwd>
 #include<map>
 #include<functional>
+#include<memory>
 #include"string_impl.h"
 #include"iobase.h"
 
@@ -158,8 +159,9 @@ class ShellInput : public Input {
      bool do_quit = false;
 
  private:
+     void parse_command(const std::string& command);
      std::ostream *_output;
-     CommandHandler parse_command;
+     std::unique_ptr<CommandHandler> _handler = nullptr;
      const char *prompt = "> ",
                 *intro  = "\nEnter any wordform to normalize it."
                           "\nPrefix a word with '!' to issue commands. "

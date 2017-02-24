@@ -23,6 +23,7 @@
 #include<algorithm>
 #include<cctype>
 #include<functional>
+#include<memory>
 #include"string_impl.h"
 #include"cycle.h"
 
@@ -67,7 +68,6 @@ string_impl FileInput::get_line() {
 ShellInput::ShellInput() {
     _input = &std::cin;
     _output = &std::cout;
-    parse_command = CommandHandler(this, _cycle, _output);
 }
 
 string_impl ShellInput::get_line() {
@@ -81,6 +81,15 @@ string_impl ShellInput::get_line() {
     _line = line;
     _request_train = (string_find(line, "\t") != string_npos);
     return line;
+}
+
+void ShellInput::parse_command(const std::string& command) {
+    if (_handler == nullptr)
+        _handler =
+            std::unique_ptr<CommandHandler>(new CommandHandler(this,
+                                                               _cycle,
+                                                               _output));
+    (*_handler)(command);
 }
 
 void CommandHandler::operator()(const string& command) {
