@@ -10,7 +10,7 @@ dictionary* (= a list of valid wordforms in the target language).
 If you have any questions, suggestions, or comments, please contact one of the authors:
 
 * Marcel Bollmann (<bollmann@linguistics.rub.de>)
-* Florian Petran (<petran@linguistics.rub.de>)
+* Florian Petran (<florian.petran@gmail.com>)
 
 #### License
 
@@ -20,7 +20,7 @@ Norma is licensed under the
 #### Dependencies
 
 * Needed for compilation:
-    * GCC >= 4.8
+    * GCC >= 4.9
     * CMake >= 2.8.10
     * Boost >= 1.50
         * in particular these libraries: Filesystem, Program Options, Regex, System, Test
