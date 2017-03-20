@@ -17,7 +17,6 @@
  */
 #include"string_transducer.h"
 #include<algorithm>
-#include<mutex>
 #include<set>
 #include<vector>
 #include"gfsmlibs.h"
@@ -77,9 +76,7 @@ StringTransducer::transduce_vector_to_string(const LabelVector& vec) const {
     auto results = Transducer::transduce(vec);
     for (const Path& p : results) {
         try {
-            auto i = _alph_in.map_labels_to_vector(p.input);
-            auto o = _alph_out.map_labels_to_vector(p.output);
-            x.insert(StringPath(i, o, p.weight));
+            x.insert(StringPath::from(p, _alph_in, _alph_out));
         }
         catch (const std::out_of_range& err) {}
     }
@@ -97,9 +94,9 @@ void StringTransducer::add_path(const string_impl& str_in,
 
 void StringTransducer::add_path(const StringPath& path,
                                 bool cyclic, bool final) {
-    Transducer::add_path(Path(_alph_in.map_symbols(path.input),
-                              _alph_out.map_symbols(path.output),
-                              path.weight),
+    Transducer::add_path(Path(_alph_in.map_symbols(path.get_input()),
+                              _alph_out.map_symbols(path.get_output()),
+                              path.get_weight()),
                          cyclic, final);
 }
 

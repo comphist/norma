@@ -17,7 +17,6 @@
  */
 #include"transducer.h"
 #include<algorithm>
-#include<mutex>
 #include<tuple>
 #include<set>
 #include"gfsmlibs.h"
@@ -33,16 +32,13 @@ Transducer& Transducer::operator=(Transducer a) {
 }
 
 std::set<Path> Transducer::transduce(const LabelVector& input) const {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     std::set<Path> tr;
     gfsmAutomaton* result = gfsm_automaton_new();
     gfsm_automaton_lookup(_fsm, input._vec, result);
-    std::mutex dummy;  // we are creating new Gfsm objects, but we are
-                       // already under lock_guard
     if (gfsm_automaton_n_final_states(result) > 0) {
-        Transducer a(&dummy);
+        Transducer a;
         a.set_gfsm_automaton(result);
-        tr = a.find_accepted_paths(true);
+        tr = a.accepted_paths();
     } else {
         gfsm_automaton_free(result);
     }
@@ -50,16 +46,15 @@ std::set<Path> Transducer::transduce(const LabelVector& input) const {
 }
 
 void Transducer::add_path(const Path& p, bool cyclic, bool final) {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsmStateId from = root();
     gfsmStateId to   = gfsm_automaton_n_states(_fsm);
-    gfsmWeight  w    = p.weight;
-    unsigned int input_size  = p.input.size(),
-                 output_size = p.output.size(),
-                 max_size    = std::max(input_size, output_size);
-    for (unsigned int i = 0; i < max_size; ++i) {
-        gfsmLabelVal from_val = (i < input_size) ? p.input.get(i) : 0;
-        gfsmLabelVal to_val   = (i < output_size) ? p.output.get(i) : 0;
+    gfsmWeight  w    = p.get_weight();
+    size_t input_size  = p.get_input().size(),
+           output_size = p.get_output().size(),
+           max_size    = std::max(input_size, output_size);
+    for (size_t i = 0; i < max_size; ++i) {
+        gfsmLabelVal from_val = (i < input_size) ? p.get_input().get(i) : 0;
+        gfsmLabelVal to_val   = (i < output_size) ? p.get_output().get(i) : 0;
         if (cyclic && (i == max_size - 1)) {
             to = root();  // cyclic: back to the root
         }

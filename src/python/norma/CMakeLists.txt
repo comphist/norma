@@ -1,5 +1,6 @@
 set(PY_NATIVE_FILES
-    __init__.py LexiconWrapper.py ChainNormalizer.py NormalizerWrapper.py)
+    __init__.py LexiconWrapper.py ChainNormalizer.py NormalizerWrapper.py
+    NormaCfgParser.py)
 
 foreach(PY_NATIVE_FILE ${PY_NATIVE_FILES})
   configure_file(${PY_NATIVE_FILE} ${PY_NATIVE_FILE} COPYONLY)

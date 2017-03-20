@@ -20,20 +20,38 @@
 #include<limits>
 #include<string>
 #include<vector>
+#include<tuple>
+#include<queue>
 #include"string_impl.h"
 
 namespace Norma {
 namespace Normalizer {
+enum class LogLevel {
+    TRACE = 0,
+    WARN,
+    ERROR,
+    SILENT
+};
+typedef std::tuple<LogLevel, std::string, std::string> LogMessage;
+LogMessage make_message(LogLevel loglevel,
+                        std::string origin, std::string message);
+std::string level_string(LogLevel loglevel);
+
 struct Result {
     string_impl word = "";
     double score = 0.0;
     std::string origin = "<none>";
     unsigned int priority = std::numeric_limits<unsigned int>::max();
+    std::queue<LogMessage> messages;
+    /// this should only be set by the chooser, and is used to prevent
+    /// subsequent normalizers from running in a best priority scenario
+    bool is_final = false;
 
-    Result() {}
+    Result() = default;
     Result(const string_impl& w, double s) : word(w), score(s) {}
-    Result(const string_impl& w, double s, const char* c)
+    Result(const string_impl& w, double s, const std::string& c)
     : word(w), score(s), origin(c) {}
+
     bool operator<(const Result& that) const {
         return this->score < that.score;
     }

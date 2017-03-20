@@ -1,11 +1,8 @@
-add_sources(alphabet.cpp)
-add_sources(labelvector.cpp)
-add_sources(implode_explode.cpp)
-add_sources(automaton.cpp)
-add_sources(acceptor.cpp)
-add_sources(string_acceptor.cpp)
-add_sources(transducer.cpp)
-add_sources(string_transducer.cpp)
-add_sources(cascade.cpp)
-add_sources(string_cascade.cpp)
-add_sources(builder.cpp)
+add_sources(alphabet.cpp labelvector.cpp implode_explode.cpp automaton.cpp
+            acceptor.cpp string_acceptor.cpp transducer.cpp
+            string_transducer.cpp cascade.cpp string_cascade.cpp)
+install_headers(acceptor.h alphabet.h automaton.h cascade.h
+                implode_explode.h labelvector.h path.h semiring.h
+                string_acceptor.h string_cascade.h string_transducer.h
+                transducer.h)
+

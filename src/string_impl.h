@@ -30,14 +30,33 @@
 #include<unicode/unistr.h> // NOLINT[build/include_order]
 #include<unicode/uchar.h>  // NOLINT[build/include_order]
 
-typedef UnicodeString string_impl;
+/// Wrapper class for UnicodeString.
+/// this class is necessary because we assume that non-ICU
+/// strings are always UTF encoded already, which is not an
+/// assumption ICU shares, so we have to explicitly call
+/// UnicodeString::fromUTF8 a few times.
+class unicode_string_impl : public UnicodeString {
+ public:
+     unicode_string_impl() = default;
+     unicode_string_impl(const char* that)  // NOLINT[runtime/explicit]
+         : UnicodeString(UnicodeString::fromUTF8(that)) {}
+     unicode_string_impl(char that) {  // NOLINT[runtime/explicit]
+         char tmp[2];
+         tmp[0] = that; tmp[1] = '\0';
+         UnicodeString(UnicodeString::fromUTF8(tmp));
+     }
+     unicode_string_impl(const std::string& that)  // NOLINT[runtime/explicit]
+         : UnicodeString(UnicodeString::fromUTF8(that)) {}
+     unicode_string_impl(const UChar32& that)  // NOLINT[runtime/explicit]
+        : UnicodeString(that) {}
+     unicode_string_impl(const UnicodeString& that)  // NOLINT[runtime/explicit]
+        : UnicodeString(that) {}
+};
+
+typedef unicode_string_impl string_impl;
 typedef UChar32 char_impl;
 typedef int string_size;
 
-inline void lower_case(string_impl* str)
-    { str->toLower(); }
-inline void upper_case(string_impl* str)
-    { str->toUpper(); }
 static const string_size string_npos = -1;
 inline void extract(const string_impl& str, int from, int to, string_impl* out)
     { str.extractBetween(from, to, *out); }
@@ -69,12 +88,6 @@ std::ostream& operator<<(std::ostream& strm, const string_impl& ustr);
 typedef std::string string_impl;
 typedef char char_impl;
 typedef size_t string_size;
-
-inline void lower_case(string_impl* str)
-    { std::transform(str->begin(), str->end(), str->begin(), ::tolower); }
-
-inline void upper_case(string_impl* str)
-    { std::transform(str->begin(), str->end(), str->begin(), ::toupper); }
 
 static const size_t string_npos = std::string::npos;
 
@@ -109,13 +122,6 @@ inline bool is_empty(const string_impl& str) {
 void extract_tail(const string_impl& str, string_size len, string_impl* out);
 
 bool has_alpha(const string_impl& str);
-
-inline void upper_case(char_impl* c) {
-    string_impl s = "";
-    s += *c;
-    upper_case(&s);
-    *c = s[0];
-}
 
 #endif  // STRING_IMPL_H_
 

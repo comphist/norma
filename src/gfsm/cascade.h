@@ -19,13 +19,13 @@
 #define GFSM_CASCADE_H_
 #include<mutex>
 #include<set>
+#include<memory>
 #include"gfsmlibs.h"
 #include"semiring.h"
 #include"labelvector.h"
 #include"path.h"
 
 namespace Gfsm {
-class AutomatonBuilder;
 class Automaton;
 
 /// A cascade of finite-state automata.
@@ -33,8 +33,10 @@ class Automaton;
     Gfsmxl extension to the Gfsm library.
  */
 class Cascade {
-    friend class AutomatonBuilder;
  public:
+    Cascade() : Cascade(2, SemiringType::TROPICAL) {}
+    Cascade(unsigned int depth,
+            SemiringType sr = SemiringType::TROPICAL);
     Cascade(const Cascade& a);
     Cascade(Cascade&& a);
     Cascade& operator=(Cascade a);
@@ -85,10 +87,7 @@ class Cascade {
                                 double max_weight);
 
  protected:
-    Cascade() = delete;
-    Cascade(std::mutex* m, unsigned int depth = 2,
-            SemiringType sr = SemiringType::TROPICAL);
-    std::mutex* gfsm_mutex;
+    std::unique_ptr<std::mutex> cascade_mutex;
     gfsmxlCascade* _csc;
     gfsmxlCascadeLookup* _cl;
     unsigned int _size = 0;

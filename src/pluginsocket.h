@@ -15,14 +15,15 @@
  * You should have received a copy of the GNU Lesser General Public License along
  * with Norma.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef APPLICATOR_H_
-#define APPLICATOR_H_
+#ifndef PLUGINSOCKET_H_
+#define PLUGINSOCKET_H_
 #include<list>
 #include<string>
 #include<map>
 #include<functional>
 #include"string_impl.h"
 #include"normalizer/result.h"
+#include"normalizer/base.h"
 
 namespace Norma {
 class TrainingData;
@@ -48,53 +49,52 @@ class Base;
  *  concurrency related issues as possible from the authors of
  *  the Normalizer.
  **/
-class Applicator : private std::list<Normalizer::Base*> {
+class PluginSocket : private std::list<Normalizer::Base*> {
  public:
-     explicit Applicator(const std::string& chain_definition,
+     explicit PluginSocket(const std::string& chain_definition,
+                         const std::string& plugin_base_param,
                          const std::map<std::string, std::string>& params);
-     Applicator() = delete;
-     Applicator(const Applicator& a) = delete;
-     const Applicator& operator=(const Applicator& a) = delete;
-     ~Applicator();
-
-     /// register a normalizer with the applicator
-     void register_method(Normalizer::Base* n);
+     PluginSocket() = delete;
+     PluginSocket(const PluginSocket& a) = delete;
+     const PluginSocket& operator=(const PluginSocket& a) = delete;
+     ~PluginSocket();
 
      /// add a normalizer to the back of the chain
-     inline void push_chain(Normalizer::Base* n) {
-         push_back(n);
-     }
+     inline void push_chain(Normalizer::Base* n);
      /// start all normalizers for a word in parallel
      /// then select the best result as soon as all are
      /// ready
      Normalizer::Result normalize(const string_impl& word) const;
      /// start all training in parallel, then wait until
-     /// all of them are finished. Also lock a Normalizers
-     /// mutex before the training start, because its internal
-     /// state will be messed up if we train twice on different
-     /// history.
+     /// all of them are finished.
      void train(TrainingData *data);
-     /// choose between two results
-     std::function<const Normalizer::Result&(const Normalizer::Result&,
-                                             const Normalizer::Result&)>
-                   chooser = Applicator::best_priority;
      /// choose the result with the best score
-     static const Normalizer::Result& best_score(const Normalizer::Result& one,
-                                                 const Normalizer::Result& two);
+     static const Normalizer::Result&
+                best_score(Normalizer::Result* one,
+                           Normalizer::Result* two);
      /// choose the result with the lowest priority and score > 0
      static const Normalizer::Result&
-         best_priority(const Normalizer::Result& one,
-                       const Normalizer::Result& two);
+                best_priority(Normalizer::Result* one,
+                              Normalizer::Result* two);
      void save_params();
      void init_chain();
 
+     typedef std::function<const Normalizer::Result(Normalizer::Result*,
+                                                    Normalizer::Result*)>
+             Chooser;
+     /// choose between two results
+     Chooser chooser = PluginSocket::best_priority;
+
  private:
-     std::map<std::string, Normalizer::Base*> normalizers;
+     Normalizer::Base* create_plugin(const std::string& lib_name,
+                                     const std::string& alias = "");
+     std::list<std::pair<destroy_t*, Normalizer::Base*>> created_normalizers;
+     std::list<void*> loaded_plugins;
      const std::map<std::string, std::string>& config_vars;
-     std::string chain_def;
+     std::string chain_def, plugin_base;
      Normalizer::LexiconInterface* _lex;
 };
 }  // namespace Norma
 
-#endif  // APPLICATOR_H_
+#endif  // PLUGINSOCKET_H_
 

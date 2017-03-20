@@ -19,32 +19,25 @@
 #define NORMALIZER_RULEBASED_RULEBASED_H_
 #include<map>
 #include<string>
-#include<mutex>
-#include<memory>
 #include"string_impl.h"
-#include"base.h"
-#include"result.h"
+#include"normalizer/base.h"
+#include"normalizer/cacheable.h"
+#include"normalizer/result.h"
+#include"lexicon/lexicon.h"
 #include"rule_collection.h"
 #include"rule_learn.h"
-#include"lexicon.h"
 #include"candidate_finder.h"
 
 namespace Norma {
 namespace Normalizer {
 namespace Rulebased {
 
-class Rulebased : public Base {
+class Rulebased : public Base, public Cacheable {
  public:
-     Rulebased();
      void init();
      using Base::init;
      void set_from_params(const std::map<std::string, std::string>& params);
      void clear();
-     Result operator()(const string_impl& word) const;
-     ResultSet operator()(const string_impl& word, unsigned int n) const;
-     bool train(TrainingData* data);
-     void save_params();
-     const char* name() const { return "RuleBased"; }
 
      /// Get filename of the current rules file
      const std::string& get_rulesfile() const { return _rulesfile; }
@@ -54,21 +47,30 @@ class Rulebased : public Base {
          return *this;
      }
 
-     void set_caching(bool value) const;
-     void clear_cache() const;
-     bool is_caching() const { return _caching; }
+     using Cacheable::set_caching;
+     using Cacheable::clear_cache;
+     using Cacheable::is_caching;
+
+ protected:
+     bool do_train(TrainingData* data);
+     Result do_normalize(const string_impl& word) const;
+     ResultSet do_normalize(const string_impl& word, unsigned int n) const;
+     void do_save_params();
 
  private:
      std::string _rulesfile;
      RuleCollection _rules;
-
-     mutable bool _caching = true;
-     mutable std::map<string_impl, Result> _cache;
-     mutable std::unique_ptr<std::mutex> cache_mutex;
 };
 }  // namespace Rulebased
 }  // namespace Normalizer
 }  // namespace Norma
+
+extern "C" Norma::Normalizer::Base* create_normalizer() {
+    return new Norma::Normalizer::Rulebased::Rulebased;
+}
+extern "C" void destroy_normalizer(Norma::Normalizer::Base* n) {
+    delete n;
+}
 
 #endif  // NORMALIZER_RULEBASED_RULEBASED_H_
 

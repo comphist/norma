@@ -20,6 +20,7 @@
 #include<set>
 #include<vector>
 #include<string>
+#include<boost/cerrno.hpp>
 #include<boost/bimap.hpp>  // NOLINT[build/include_order]
 #include"gfsmlibs.h"
 #include"string_impl.h"

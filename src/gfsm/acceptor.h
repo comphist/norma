@@ -18,21 +18,21 @@
 #ifndef GFSM_ACCEPTOR_H_
 #define GFSM_ACCEPTOR_H_
 #include<utility>
-#include<mutex>
 #include<set>
 #include"automaton.h"
 
 namespace Gfsm {
 class LabelVector;
-class AutomatonBuilder;
 
 /// A finite-state acceptor.
 /** Implements functions specific to a finite-state acceptor, i.e., an
     Automaton where input labels always equal output labels.
  */
 class Acceptor : public Automaton {
-    friend class AutomatonBuilder;
  public:
+    Acceptor() : Automaton() {
+        _fsm->flags.is_transducer = FALSE;
+    }
     Acceptor(const Acceptor& a) : Automaton(a) {}
     Acceptor(Acceptor&& a) : Automaton(std::move(a)) {}
     Acceptor& operator=(Acceptor a);
@@ -56,11 +56,6 @@ class Acceptor : public Automaton {
                    the automaton will also accept {1} and {1, 3}).
      */
     void add_path(const LabelVector& vec, bool set_all_final = false);
-
- protected:
-    Acceptor() = delete;
-    explicit Acceptor(std::mutex* m) : Automaton(m)
-        { _fsm->flags.is_transducer = FALSE; }
 };
 
 }  // namespace Gfsm

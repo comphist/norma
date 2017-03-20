@@ -23,7 +23,7 @@
 #include<boost/filesystem.hpp>  // NOLINT[build/include_order]
 #include"gfsm_wrapper.h"
 #include"string_impl.h"
-#include"normalizer/lexicon_interface.h"
+#include"lexicon/lexicon_interface.h"
 
 namespace Norma {
 namespace Normalizer {
@@ -59,8 +59,6 @@ friend class Gfsm::StringCascade;
      Gfsm::StringAcceptor* get_acceptor() const { return _fsm; }
 
  private:
-     Gfsm::AutomatonBuilder& gfsm_builder
-         = Gfsm::AutomatonBuilder::instance();
      boost::filesystem::path _lexfile;
      boost::filesystem::path _symfile;
      Gfsm::StringAcceptor* _fsm = nullptr;

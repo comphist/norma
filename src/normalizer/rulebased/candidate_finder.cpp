@@ -17,9 +17,12 @@
  */
 #include"candidate_finder.h"
 #include<algorithm>
+#include<sstream>
+#include<string>
 #include<vector>
 #include"symbols.h"
-#include"lexicon.h"
+#include"lexicon/lexicon.h"
+#include"normalizer/result.h"
 #include"rule.h"
 #include"rule_collection.h"
 
@@ -29,10 +32,14 @@ namespace Rulebased {
 
 CandidateFinder::CandidateFinder(const string_impl& word,
                                  const RuleCollection& rules,
-                                 const LexiconInterface& lex)
-    : _rules(&rules), _lex(&lex) {
+                                 const LexiconInterface& lex,
+                                 const std::string& name)
+    : _rules(&rules), _lex(&lex), _name(name) {
     word_bound = word + Symbols::BOUNDARY;
-    unchanged_result = Result(word, 0.0);
+    unchanged_result = Result(word, 0.0, _name);
+    unchanged_result.messages.push(make_message(LogLevel::TRACE,
+                                                _name,
+                                                "no candidate found"));
     _total_steps = (2 * word.length()) + 1;
     // this is experimental -- not clear what the best setting is:
     _minimum_combined_frequency = 2 * _rules->get_average_freq();
@@ -44,10 +51,21 @@ Result CandidateFinder::operator()() {
         const RAState current = _q.top();
         _q.pop();
         if (current.end_of_word()) {
-            if (!_lex->contains(current.norm))
+            if (!_lex->contains(current.norm)) {
                 continue;
-            else  // success!
-                return Result(current.norm, cost_to_probability(current.cost));
+            } else {  // success!
+                Result result = Result(current.norm,
+                                       cost_to_probability(current.cost),
+                                       _name);
+                for (const Rule& rule : current.history) {
+                    std::ostringstream message;
+                    message << "applied rule: " << rule;
+                    result.messages.push(make_message(LogLevel::TRACE,
+                                                      _name,
+                                                      message.str()));
+                }
+                return result;
+            }
         }
 
         string_impl current_back;

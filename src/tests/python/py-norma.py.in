@@ -3,7 +3,7 @@
 import sys
 from numbers import Number
 sys.path.insert(0, "../../python")
-from norma import NormaInitError
+from norma import NormaInitError, Result
 from norma.LexiconWrapper import Lexicon
 import norma.NormalizerWrapper as Normalizer
 import unittest
@@ -15,6 +15,10 @@ test_vars = {}
 class AssertFloat:
     precision = 0.001
     def assertClose(self, tuple1, tuple2):
+        if isinstance(tuple1, Result):
+            tuple1 = (tuple1.word, tuple1.score, tuple1.origin)
+        if isinstance(tuple2, Result):
+            tuple2 = (tuple2.word, tuple2.score, tuple2.origin)
         for (x, y) in zip(tuple1, tuple2):
             if isinstance(x, Number) and isinstance(y, Number):
                 try:
@@ -28,6 +32,7 @@ class AssertFloat:
 
 execfile("test_lexicon.py")
 execfile("test_base.py")
+execfile("test_result.py")
 execfile("test_mapper.py")
 execfile("test_rulebased.py")
 execfile("test_wld.py")

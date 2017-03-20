@@ -12,3 +12,8 @@ macro (add_sources)
     endif()
 endmacro()
 
+macro (install_headers)
+    file(RELATIVE_PATH _relPath "${CMAKE_SOURCE_DIR}/src" "${CMAKE_CURRENT_SOURCE_DIR}")
+    install(FILES ${ARGN} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/${CMAKE_PROJECT_NAME}/${_relPath}")
+endmacro()
+

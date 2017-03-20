@@ -19,8 +19,6 @@
 # with Norma.  If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
 
-import norma.NormalizerWrapper as Normalizer
-
 class ChainTest(unittest.TestCase, AssertFloat):
     rulesfile = TEST_BASE_DIR + "/test-rulesfile.txt"
     mapfile = TEST_BASE_DIR + "/test-mapfile.txt"
@@ -34,8 +32,11 @@ class ChainTest(unittest.TestCase, AssertFloat):
 
     def testNormalize(self):
         norm1 = Normalizer.Rulebased(self.rulesfile, self.lex)
+        norm1.name = "RuleBased"
         norm2 = Normalizer.Mapper(self.mapfile, self.lex)
+        norm2.name = "Mapper"
         norm3 = Normalizer.WLD(self.wldfile, self.lex)
+        norm3.name = "WLD"
         self.norm = Normalizer.Chain(norm1, norm2, norm3)
         self.norm.threshold = 0.001
         self.assertClose(self.norm("vnd"),  ("eins", 0.011, "RuleBased"))
@@ -47,8 +48,11 @@ class ChainTest(unittest.TestCase, AssertFloat):
 
     def testNormalizeNBest(self):
         norm1 = Normalizer.Mapper(self.mapfile, self.lex)
+        norm1.name = "Mapper"
         norm2 = Normalizer.Rulebased(self.rulesfile, self.lex)
+        norm2.name = "RuleBased"
         norm3 = Normalizer.WLD(self.wldfile, self.lex)
+        norm3.name = "WLD"
         self.norm = Normalizer.Chain(norm1, norm2, norm3)
         actual   = self.norm("vnd", 10)
         expected = [("und", 1.0, "Mapper"),
@@ -58,11 +62,14 @@ class ChainTest(unittest.TestCase, AssertFloat):
         self.assertEquals(len(actual), len(expected))
         for (x, y) in zip(actual, expected):
             self.assertClose(x, y)
-        
+
     def testTrain(self):
         norm1 = Normalizer.Mapper()
+        norm1.name = "Mapper"
         norm2 = Normalizer.Rulebased()
+        norm2.name = "RuleBased"
         norm3 = Normalizer.WLD()
+        norm3.name = "WLD"
         self.norm = Normalizer.Chain(norm1, norm2, norm3)
         self.norm.lexicon = self.lex
         self.assertEquals(self.norm("zwey"),     ("zwey",     0, "[None]"))
@@ -79,8 +86,11 @@ class ChainTest(unittest.TestCase, AssertFloat):
 
     def testList(self):
         norm1 = Normalizer.Mapper()
+        norm1.name = "Mapper"
         norm2 = Normalizer.Rulebased()
+        norm2.name = "RuleBased"
         norm3 = Normalizer.WLD()
+        norm3.name = "WLD"
         self.norm = Normalizer.Chain(norm1, norm2, norm3)
         self.assertEquals(len(self.norm), 3)
         names = [x.name for x in self.norm]

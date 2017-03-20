@@ -30,8 +30,9 @@ class Output : public IOBase {
      Output();
      virtual ~Output() = default;
      /// put a line on the output device and record it in the history
-     virtual void put_line(const Normalizer::Result& result,
-                           bool print_prob = true);
+     virtual void put_line(Normalizer::Result* result,
+                           bool print_prob,
+                           Normalizer::LogLevel max_level);
      bool thread_suitable() {
          return true;
      }
@@ -40,23 +41,11 @@ class Output : public IOBase {
      virtual void store_line(const string_impl& line) {
          _training->add_target(line);
      }
+     virtual void log_messages(Normalizer::Result* result,
+                               Normalizer::LogLevel max_level);
      std::ostream *_output;
 };
 
-/// Interactive output class that asks the user for validation of
-/// each normalization.
-class InteractiveOutput : public Output {
- public:
-     void put_line(const Normalizer::Result& result,
-                   bool print_prob = true);
-     std::string validate(const string_impl& line);
-     bool thread_suitable() {
-         return false;
-     }
-
- private:
-     const char *validate_prompt = "? ";
-};
 }  // namespace Norma
 #endif  // INTERFACE_OUTPUT_H_
 

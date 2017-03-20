@@ -35,21 +35,21 @@ TrainingPair_to_python_tuple::convert(Norma::TrainingPair const& pair) {
 
 void* TrainingData_from_python_list::convertible(PyObject* obj_ptr) {
     // can only convert lists
-    if (PyList_Check(obj_ptr)) {
-        Py_ssize_t size = PyList_Size(obj_ptr);
-        for (Py_ssize_t i = 0; i < size; ++i) {
-            // each list member must be a tuple
-            PyObject* member = PyList_GetItem(obj_ptr, i);
-            if (PyTuple_Check(member) && PyTuple_Size(member) == 2) {
-                // each tuple must consist of exactly two strings
-                PyObject* source = PyTuple_GetItem(member, 0);
-                PyObject* target = PyTuple_GetItem(member, 1);
-                if (!(PyString_Check(source) || PyUnicode_Check(source))
-                    || !(PyString_Check(target) || PyUnicode_Check(target)))
-                    return 0;
-            } else {
+    if (!PyList_Check(obj_ptr))
+        return 0;
+    Py_ssize_t size = PyList_Size(obj_ptr);
+    for (Py_ssize_t i = 0; i < size; ++i) {
+        // each list member must be a tuple
+        PyObject* member = PyList_GetItem(obj_ptr, i);
+        if (PyTuple_Check(member) && PyTuple_Size(member) == 2) {
+            // each tuple must consist of exactly two strings
+            PyObject* source = PyTuple_GetItem(member, 0);
+            PyObject* target = PyTuple_GetItem(member, 1);
+            if (!(PyString_Check(source) || PyUnicode_Check(source))
+                || !(PyString_Check(target) || PyUnicode_Check(target)))
                 return 0;
-            }
+        } else {
+            return 0;
         }
     }
     return obj_ptr;

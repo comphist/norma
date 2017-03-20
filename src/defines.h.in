@@ -20,7 +20,6 @@
 
 // compile time defines that need to be available at runtime
 #cmakedefine USE_ICU_STRING
-#cmakedefine EMBED_PYTHON
 
 #endif  // NORMA_DEFINES_H_
 

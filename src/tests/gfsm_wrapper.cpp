@@ -316,10 +316,9 @@ BOOST_AUTO_TEST_SUITE_END()
 
 struct GfsmAutomatonFixture {
     Automaton* fsm;
-    Gfsm::AutomatonBuilder& _builder = Gfsm::AutomatonBuilder::instance();
 
     GfsmAutomatonFixture() {
-        fsm = new Automaton(_builder.make_automaton());
+        fsm = new Automaton();
     }
     ~GfsmAutomatonFixture() {
         delete fsm;
@@ -345,7 +344,6 @@ struct GfsmAcceptorFixture {
     Acceptor* fsm;
     Alphabet  alph;
     StringAcceptor* sa;
-    Gfsm::AutomatonBuilder& _builder = Gfsm::AutomatonBuilder::instance();
     const std::string LEXICON_FILE =
         std::string(TEST_BASE_DIR) + "/test-lexicon.gfsa";
     const std::string LABELS_FILE =
@@ -361,8 +359,8 @@ struct GfsmAcceptorFixture {
     const LabelVector invalid_labels {44, 49, 20};
 
     GfsmAcceptorFixture() {
-        fsm = new Acceptor(_builder.make_acceptor());
-        sa = new StringAcceptor(_builder.make_stringacceptor());
+        fsm = new Acceptor();
+        sa = new StringAcceptor();
 
         fsm->load_binfile(LEXICON_FILE);
         alph.load_labfile(LABELS_FILE);
@@ -426,7 +424,7 @@ BOOST_AUTO_TEST_CASE(add_path_set_all_final) {
 }
 
 BOOST_AUTO_TEST_CASE(add_path_on_empty) {
-    Acceptor fsm1 = _builder.make_acceptor();
+    Acceptor fsm1;
     BOOST_CHECK(!fsm1.accepts(eins));
     BOOST_CHECK(!fsm1.accepts(zwei));
     BOOST_CHECK(!fsm1.accepts(zei));
@@ -436,7 +434,7 @@ BOOST_AUTO_TEST_CASE(add_path_on_empty) {
     BOOST_CHECK(fsm1.accepts(eins));
     BOOST_CHECK(fsm1.accepts(zwei));
     BOOST_CHECK(fsm1.accepts(zei));
-    Acceptor fsm2 = _builder.make_acceptor();
+    Acceptor fsm2;
     BOOST_CHECK(!fsm2.accepts(eins));
     BOOST_CHECK(!fsm2.accepts(zwei));
     BOOST_CHECK(!fsm2.accepts(zei));
@@ -515,7 +513,6 @@ BOOST_AUTO_TEST_SUITE_END()
 
 struct GfsmTransducerFixture {
     Transducer* fsm;
-    Gfsm::AutomatonBuilder& _builder = Gfsm::AutomatonBuilder::instance();
     const LabelVector v {4}, n {5}, d {6}, u {8}, s {9}, m {10};
     const LabelVector vn {4, 5}, un {8, 5}, um {8, 10},
                       mu {10, 8}, nd {5, 6};
@@ -528,7 +525,7 @@ struct GfsmTransducerFixture {
     const LabelVector mund {10, 8, 5, 6};
 
     GfsmTransducerFixture() {
-        fsm = new Transducer(_builder.make_transducer());
+        fsm = new Transducer();
     }
     ~GfsmTransducerFixture() {
         delete fsm;
@@ -547,9 +544,9 @@ BOOST_AUTO_TEST_CASE(transducer_add_path) {
     std::set<Path> results = fsm->transduce(v);
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto it = results.begin();
-    BOOST_CHECK((*it).input  == v);
-    BOOST_CHECK((*it).output == u);
-    BOOST_CHECK_CLOSE((*it).weight, 0.5, 0.0001);
+    BOOST_CHECK((*it).get_input()  == v);
+    BOOST_CHECK((*it).get_output() == u);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.5, 0.0001);
     results = fsm->transduce(vvv);
     BOOST_CHECK_EQUAL(results.size(), 0);
 }
@@ -559,15 +556,15 @@ BOOST_AUTO_TEST_CASE(transducer_add_cyclic_path) {
     std::set<Path> results = fsm->transduce(v);
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto it = results.begin();
-    BOOST_CHECK((*it).input  == v);
-    BOOST_CHECK((*it).output == u);
-    BOOST_CHECK_CLOSE((*it).weight, 0.5, 0.0001);
+    BOOST_CHECK((*it).get_input()  == v);
+    BOOST_CHECK((*it).get_output() == u);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.5, 0.0001);
     results = fsm->transduce(vvv);
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto iu = results.begin();
-    BOOST_CHECK((*iu).input  == vvv);
-    BOOST_CHECK((*iu).output == uuu);
-    BOOST_CHECK_CLOSE((*iu).weight, 1.5, 0.0001);
+    BOOST_CHECK((*iu).get_input()  == vvv);
+    BOOST_CHECK((*iu).get_output() == uuu);
+    BOOST_CHECK_CLOSE((*iu).get_weight(), 1.5, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(transducer_add_cyclic_paths_2) {
@@ -577,9 +574,9 @@ BOOST_AUTO_TEST_CASE(transducer_add_cyclic_paths_2) {
     std::set<Path> results = fsm->transduce(vnd);
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto it = results.begin();
-    BOOST_CHECK((*it).input  == vnd);
-    BOOST_CHECK((*it).output == und);
-    BOOST_CHECK_CLOSE((*it).weight, 0.5, 0.0001);
+    BOOST_CHECK((*it).get_input()  == vnd);
+    BOOST_CHECK((*it).get_output() == und);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.5, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(transducer_add_cyclic_paths_3) {
@@ -588,9 +585,9 @@ BOOST_AUTO_TEST_CASE(transducer_add_cyclic_paths_3) {
     std::set<Path> results = fsm->transduce(vnd);
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto it = results.begin();
-    BOOST_CHECK((*it).input  == vnd);
-    BOOST_CHECK((*it).output == und);
-    BOOST_CHECK_CLOSE((*it).weight, 0.5, 0.0001);
+    BOOST_CHECK((*it).get_input()  == vnd);
+    BOOST_CHECK((*it).get_output() == und);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.5, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(transducer_add_cyclic_paths_4) {
@@ -599,9 +596,9 @@ BOOST_AUTO_TEST_CASE(transducer_add_cyclic_paths_4) {
     std::set<Path> results = fsm->transduce(vnd);
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto it = results.begin();
-    BOOST_CHECK((*it).input  == vnd);
-    BOOST_CHECK((*it).output == um);
-    BOOST_CHECK_CLOSE((*it).weight, 1.9, 0.0001);
+    BOOST_CHECK((*it).get_input()  == vnd);
+    BOOST_CHECK((*it).get_output() == um);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 1.9, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(transducer_add_cyclic_paths_5) {
@@ -611,9 +608,9 @@ BOOST_AUTO_TEST_CASE(transducer_add_cyclic_paths_5) {
     std::set<Path> results = fsm->transduce(vnd);
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto it = results.begin();
-    BOOST_CHECK((*it).input  == vnd);
-    BOOST_CHECK((*it).output == mund);
-    BOOST_CHECK_CLOSE((*it).weight, 0.75, 0.0001);
+    BOOST_CHECK((*it).get_input()  == vnd);
+    BOOST_CHECK((*it).get_output() == mund);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.75, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(transducer_add_cyclic_paths_deletion) {
@@ -623,9 +620,9 @@ BOOST_AUTO_TEST_CASE(transducer_add_cyclic_paths_deletion) {
     std::set<Path> results = fsm->transduce(vnd);
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto it = results.begin();
-    BOOST_CHECK((*it).input  == vnd);
-    BOOST_CHECK((*it).output == un);
-    BOOST_CHECK_CLOSE((*it).weight, 1.08, 0.0001);
+    BOOST_CHECK((*it).get_input()  == vnd);
+    BOOST_CHECK((*it).get_output() == un);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 1.08, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(transducer_add_cyclic_paths_multiple) {
@@ -642,10 +639,10 @@ BOOST_AUTO_TEST_CASE(transducer_add_cyclic_paths_multiple) {
             std::make_pair(uns, 0.6)};
     BOOST_REQUIRE_EQUAL(results.size(), expected.size());
     for (const Path& p : results) {
-        BOOST_CHECK(p.input == vnd);
-        BOOST_REQUIRE(expected.count(p.output) > 0);
-        BOOST_CHECK_CLOSE(expected.at(p.output), p.weight, 0.0001);
-        expected.erase(p.output);
+        BOOST_CHECK(p.get_input() == vnd);
+        BOOST_REQUIRE(expected.count(p.get_output()) > 0);
+        BOOST_CHECK_CLOSE(expected.at(p.get_output()), p.get_weight(), 0.0001);
+        expected.erase(p.get_output());
     }
     BOOST_CHECK_EQUAL(expected.size(), 0);
 }
@@ -664,10 +661,10 @@ BOOST_AUTO_TEST_CASE(transducer_add_nonfinal) {
             std::make_pair(mu, 0.33)};
     BOOST_CHECK_EQUAL(results.size(), expected.size());
     for (const Path& p : results) {
-        BOOST_CHECK(p.input == v);
-        BOOST_REQUIRE(expected.count(p.output) > 0);
-        BOOST_CHECK_CLOSE(expected.at(p.output), p.weight, 0.0001);
-        expected.erase(p.output);
+        BOOST_CHECK(p.get_input() == v);
+        BOOST_REQUIRE(expected.count(p.get_output()) > 0);
+        BOOST_CHECK_CLOSE(expected.at(p.get_output()), p.get_weight(), 0.0001);
+        expected.erase(p.get_output());
     }
     BOOST_CHECK_EQUAL(expected.size(), 0);
 }
@@ -679,25 +676,25 @@ BOOST_AUTO_TEST_CASE(transducer_add_nonfinal_2) {
     std::set<Path> results = fsm->transduce(v);
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto it = results.begin();
-    BOOST_CHECK((*it).input  == v);
-    BOOST_CHECK((*it).output == und);
-    BOOST_CHECK_CLOSE((*it).weight, 0.7, 0.0001);
+    BOOST_CHECK((*it).get_input()  == v);
+    BOOST_CHECK((*it).get_output() == und);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.7, 0.0001);
     results = fsm->transduce(eps);
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto iu = results.begin();
-    BOOST_CHECK((*iu).input  == eps);
-    BOOST_CHECK((*iu).output == d);
-    BOOST_CHECK_CLOSE((*iu).weight, 0.2, 0.0001);
+    BOOST_CHECK((*iu).get_input()  == eps);
+    BOOST_CHECK((*iu).get_output() == d);
+    BOOST_CHECK_CLOSE((*iu).get_weight(), 0.2, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(transducer_accepted_paths) {
     fsm->add_path(Path(v, mu, 0.5));
-    std::set<Path> accepted = fsm->accepted_paths(true);
+    std::set<Path> accepted = fsm->accepted_paths();
     BOOST_REQUIRE_EQUAL(accepted.size(), 1);
     auto it = accepted.begin();
-    BOOST_CHECK((*it).input  == v);
-    BOOST_CHECK((*it).output == mu);
-    BOOST_CHECK_CLOSE((*it).weight, 0.5, 0.0001);
+    BOOST_CHECK((*it).get_input()  == v);
+    BOOST_CHECK((*it).get_output() == mu);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.5, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(transducer_accepted_paths_cyclic) {
@@ -715,13 +712,12 @@ BOOST_AUTO_TEST_SUITE_END()
 struct GfsmStringTransducerFixture {
     StringTransducer* fsm;
     Alphabet in, out;
-    Gfsm::AutomatonBuilder& _builder = Gfsm::AutomatonBuilder::instance();
     const std::vector<string_impl> vnd {"v", "n", "d"},
         und {"u", "n", "d"}, um {"u", "m"}, mund {"m", "u", "n", "d"},
         vns {"v", "n", "s"}, uns {"u", "n", "s"};
 
     GfsmStringTransducerFixture() {
-        fsm = new StringTransducer(_builder.make_stringtransducer());
+        fsm = new StringTransducer();
         in.cover("abcdefghijklmnopqrstuvwxyzäöü");
         out.cover("dmnsuv");
         fsm->set_input_alphabet(in);
@@ -741,9 +737,9 @@ BOOST_AUTO_TEST_CASE(string_transducer_add_paths) {
     std::set<StringPath> results = fsm->transduce("vnd");
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto it = results.begin();
-    BOOST_CHECK((*it).input  == vnd);
-    BOOST_CHECK((*it).output == und);
-    BOOST_CHECK_CLOSE((*it).weight, 0.5, 0.0001);
+    BOOST_CHECK((*it).get_input()  == vnd);
+    BOOST_CHECK((*it).get_output() == und);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.5, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(string_transducer_add_paths_2) {
@@ -754,9 +750,9 @@ BOOST_AUTO_TEST_CASE(string_transducer_add_paths_2) {
     std::set<StringPath> results = fsm->transduce(vnd);
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto it = results.begin();
-    BOOST_CHECK((*it).input  == vnd);
-    BOOST_CHECK((*it).output == und);
-    BOOST_CHECK_CLOSE((*it).weight, 0.5, 0.0001);
+    BOOST_CHECK((*it).get_input()  == vnd);
+    BOOST_CHECK((*it).get_output() == und);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.5, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(string_transducer_add_paths_3) {
@@ -765,9 +761,9 @@ BOOST_AUTO_TEST_CASE(string_transducer_add_paths_3) {
     std::set<StringPath> results = fsm->transduce(vnd);
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto it = results.begin();
-    BOOST_CHECK((*it).input  == vnd);
-    BOOST_CHECK((*it).output == und);
-    BOOST_CHECK_CLOSE((*it).weight, 0.5, 0.0001);
+    BOOST_CHECK((*it).get_input()  == vnd);
+    BOOST_CHECK((*it).get_output() == und);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.5, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(string_transducer_add_paths_4) {
@@ -776,9 +772,9 @@ BOOST_AUTO_TEST_CASE(string_transducer_add_paths_4) {
     std::set<StringPath> results = fsm->transduce("vnd");
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto it = results.begin();
-    BOOST_CHECK((*it).input  == vnd);
-    BOOST_CHECK((*it).output == um);
-    BOOST_CHECK_CLOSE((*it).weight, 1.9, 0.0001);
+    BOOST_CHECK((*it).get_input()  == vnd);
+    BOOST_CHECK((*it).get_output() == um);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 1.9, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(string_transducer_add_paths_5) {
@@ -790,9 +786,9 @@ BOOST_AUTO_TEST_CASE(string_transducer_add_paths_5) {
     std::set<StringPath> results = fsm->transduce(vnd);
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto it = results.begin();
-    BOOST_CHECK((*it).input  == vnd);
-    BOOST_CHECK((*it).output == mund);
-    BOOST_CHECK_CLOSE((*it).weight, 0.75, 0.0001);
+    BOOST_CHECK((*it).get_input()  == vnd);
+    BOOST_CHECK((*it).get_output() == mund);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.75, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(string_transducer_add_paths_deletion) {
@@ -802,9 +798,9 @@ BOOST_AUTO_TEST_CASE(string_transducer_add_paths_deletion) {
     std::set<StringPath> results = fsm->transduce("vnd");
     BOOST_REQUIRE_EQUAL(results.size(), 1);
     auto it = results.begin();
-    BOOST_CHECK((*it).input  == vnd);
-    BOOST_CHECK((*it).output == um);
-    BOOST_CHECK_CLOSE((*it).weight, 1.9, 0.0001);
+    BOOST_CHECK((*it).get_input()  == vnd);
+    BOOST_CHECK((*it).get_output() == um);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 1.9, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(string_transducer_add_paths_multiple) {
@@ -817,9 +813,9 @@ BOOST_AUTO_TEST_CASE(string_transducer_add_paths_multiple) {
     std::set<Path> results_vec = fsm->transduce(in.map_symbols(vnd));
     std::set<Path> results_str;
     for (const StringPath& p : results) {
-        results_str.insert(Path(in.map_symbols(p.input),
-                                out.map_symbols(p.output),
-                                p.weight));
+        results_str.insert(Path(in.map_symbols(p.get_input()),
+                                out.map_symbols(p.get_output()),
+                                p.get_weight()));
     }
     BOOST_REQUIRE(results_vec == results_str);
     std::map<std::vector<string_impl>, double> expected
@@ -829,10 +825,10 @@ BOOST_AUTO_TEST_CASE(string_transducer_add_paths_multiple) {
             std::make_pair(uns, 0.6)};
     BOOST_REQUIRE_EQUAL(results.size(), expected.size());
     for (const StringPath& p : results) {
-        BOOST_CHECK(p.input == vnd);
-        BOOST_REQUIRE(expected.count(p.output) > 0);
-        BOOST_CHECK_CLOSE(expected.at(p.output), p.weight, 0.0001);
-        expected.erase(p.output);
+        BOOST_CHECK(p.get_input() == vnd);
+        BOOST_REQUIRE(expected.count(p.get_output()) > 0);
+        BOOST_CHECK_CLOSE(expected.at(p.get_output()), p.get_weight(), 0.0001);
+        expected.erase(p.get_output());
     }
     BOOST_CHECK_EQUAL(expected.size(), 0);
 }
@@ -843,15 +839,14 @@ BOOST_AUTO_TEST_SUITE_END()
 
 struct GfsmCascadeFixture {
     Cascade* csc;
-    Gfsm::AutomatonBuilder& _builder = Gfsm::AutomatonBuilder::instance();
     const LabelVector vec_in {1, 2}, vec_best {3, 2}, vec_alt {5, 2};
     const LabelVector triple_in {1, 1, 1}, triple_best {4, 4, 4},
         triple_alt {3, 3, 3};
 
     GfsmCascadeFixture() {
         // members
-        Transducer fst = _builder.make_transducer();
-        Acceptor   fsa = _builder.make_acceptor();
+        Transducer fst;
+        Acceptor   fsa;
         fst.add_cyclic_path(Path(LabelVector {1}, LabelVector {4}, 0.05));
         fst.add_cyclic_path(Path(LabelVector {1}, LabelVector {5}, 0.7));
         fst.add_cyclic_path(Path(LabelVector {2}, LabelVector {2}, 0.0));
@@ -864,7 +859,7 @@ struct GfsmCascadeFixture {
         fsa.add_path(LabelVector {3, 3, 3});
         fsa.add_path(LabelVector {4, 4, 4});
         // cascade
-        csc = new Cascade(_builder.make_cascade(2));
+        csc = new Cascade();
         csc->append(&fst);
         csc->append(&fsa);
         csc->sort();
@@ -888,9 +883,9 @@ BOOST_AUTO_TEST_CASE(cascade_lookup_best_path) {
     std::set<Path> best = csc->lookup_nbest(vec_in);
     BOOST_REQUIRE_EQUAL(best.size(), 1);
     auto it = best.begin();
-    BOOST_CHECK((*it).input  == vec_in);
-    BOOST_CHECK((*it).output == vec_best);
-    BOOST_CHECK_CLOSE((*it).weight, 0.3, 0.0001);
+    BOOST_CHECK((*it).get_input()  == vec_in);
+    BOOST_CHECK((*it).get_output() == vec_best);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.3, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(cascade_lookup_best_path_2) {
@@ -899,9 +894,9 @@ BOOST_AUTO_TEST_CASE(cascade_lookup_best_path_2) {
     std::set<Path> best = csc->lookup_nbest(triple_in);
     BOOST_REQUIRE_EQUAL(best.size(), 1);
     auto it = best.begin();
-    BOOST_CHECK((*it).input  == triple_in);
-    BOOST_CHECK((*it).output == triple_best);
-    BOOST_CHECK_CLOSE((*it).weight, 0.15, 0.0001);
+    BOOST_CHECK((*it).get_input()  == triple_in);
+    BOOST_CHECK((*it).get_output() == triple_best);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.15, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(cascade_lookup_best_paths) {
@@ -913,10 +908,10 @@ BOOST_AUTO_TEST_CASE(cascade_lookup_best_paths) {
             std::make_pair(vec_alt,  0.7)};
     BOOST_REQUIRE_EQUAL(results.size(), expected.size());
     for (const Path& p : results) {
-        BOOST_CHECK(p.input == vec_in);
-        BOOST_REQUIRE(expected.count(p.output) > 0);
-        BOOST_CHECK_CLOSE(expected.at(p.output), p.weight, 0.0001);
-        expected.erase(p.output);
+        BOOST_CHECK(p.get_input() == vec_in);
+        BOOST_REQUIRE(expected.count(p.get_output()) > 0);
+        BOOST_CHECK_CLOSE(expected.at(p.get_output()), p.get_weight(), 0.0001);
+        expected.erase(p.get_output());
     }
     BOOST_CHECK_EQUAL(expected.size(), 0);
 }
@@ -930,10 +925,10 @@ BOOST_AUTO_TEST_CASE(cascade_lookup_best_paths_2) {
             std::make_pair(triple_alt,  0.9)};
     BOOST_REQUIRE_EQUAL(results.size(), expected.size());
     for (const Path& p : results) {
-        BOOST_CHECK(p.input == triple_in);
-        BOOST_REQUIRE(expected.count(p.output) > 0);
-        BOOST_CHECK_CLOSE(expected.at(p.output), p.weight, 0.0001);
-        expected.erase(p.output);
+        BOOST_CHECK(p.get_input() == triple_in);
+        BOOST_REQUIRE(expected.count(p.get_output()) > 0);
+        BOOST_CHECK_CLOSE(expected.at(p.get_output()), p.get_weight(), 0.0001);
+        expected.erase(p.get_output());
     }
     BOOST_CHECK_EQUAL(expected.size(), 0);
 }
@@ -944,9 +939,9 @@ BOOST_AUTO_TEST_CASE(cascade_lookup_best_paths_weight_cutoff) {
     std::set<Path> best = csc->lookup_nbest(vec_in);
     BOOST_REQUIRE_EQUAL(best.size(), 1);
     auto it = best.begin();
-    BOOST_CHECK((*it).input  == vec_in);
-    BOOST_CHECK((*it).output == vec_best);
-    BOOST_CHECK_CLOSE((*it).weight, 0.3, 0.0001);
+    BOOST_CHECK((*it).get_input()  == vec_in);
+    BOOST_CHECK((*it).get_output() == vec_best);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.3, 0.0001);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -955,14 +950,13 @@ BOOST_AUTO_TEST_SUITE_END()
 
 struct GfsmStringCascadeFixture {
     StringCascade* csc;
-    Gfsm::AutomatonBuilder& _builder = Gfsm::AutomatonBuilder::instance();
     const std::vector<string_impl> str_jn {"j", "n"}, str_in {"i", "n"},
         str_an {"a", "n"}, str_ahn {"a", "h", "n"}, str_ihn {"i", "h", "n"};
 
     GfsmStringCascadeFixture() {
         // members
-        StringTransducer fst = _builder.make_stringtransducer();
-        StringAcceptor   fsa = _builder.make_stringacceptor();
+        StringTransducer fst;
+        StringAcceptor   fsa;
         Alphabet alph_in, alph_out;
         alph_in.cover("njihga");
         alph_out.cover("abcdefghijklmnopqrstuvwxyzäöüß");
@@ -982,7 +976,7 @@ struct GfsmStringCascadeFixture {
         fsa.add_word("an");
         fsa.add_word("ahn");
         // cascade
-        csc = new StringCascade(_builder.make_stringcascade(2));
+        csc = new StringCascade();
         csc->append(fst);
         csc->append(fsa);
         csc->sort();
@@ -1006,9 +1000,9 @@ BOOST_AUTO_TEST_CASE(stringcascade_lookup_best_path) {
     std::set<StringPath> best = csc->lookup_nbest(str_in);
     BOOST_REQUIRE_EQUAL(best.size(), 1);
     auto it = best.begin();
-    BOOST_CHECK((*it).input  == str_in);
-    BOOST_CHECK((*it).output == str_in);
-    BOOST_CHECK_CLOSE((*it).weight, 0.0, 0.0001);
+    BOOST_CHECK((*it).get_input()  == str_in);
+    BOOST_CHECK((*it).get_output() == str_in);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.0, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(stringcascade_lookup_best_path_2) {
@@ -1017,9 +1011,9 @@ BOOST_AUTO_TEST_CASE(stringcascade_lookup_best_path_2) {
     std::set<StringPath> best = csc->lookup_nbest(str_jn);
     BOOST_REQUIRE_EQUAL(best.size(), 1);
     auto it = best.begin();
-    BOOST_CHECK((*it).input  == str_jn);
-    BOOST_CHECK((*it).output == str_in);
-    BOOST_CHECK_CLOSE((*it).weight, 0.05, 0.0001);
+    BOOST_CHECK((*it).get_input()  == str_jn);
+    BOOST_CHECK((*it).get_output() == str_in);
+    BOOST_CHECK_CLOSE((*it).get_weight(), 0.05, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(cascade_lookup_best_paths) {
@@ -1033,10 +1027,10 @@ BOOST_AUTO_TEST_CASE(cascade_lookup_best_paths) {
             std::make_pair(str_ahn, 1.5)};
     BOOST_REQUIRE_EQUAL(results.size(), expected.size());
     for (const StringPath& p : results) {
-        BOOST_CHECK(p.input == str_jn);
-        BOOST_REQUIRE(expected.count(p.output) > 0);
-        BOOST_CHECK_CLOSE(expected.at(p.output), p.weight, 0.0001);
-        expected.erase(p.output);
+        BOOST_CHECK(p.get_input() == str_jn);
+        BOOST_REQUIRE(expected.count(p.get_output()) > 0);
+        BOOST_CHECK_CLOSE(expected.at(p.get_output()), p.get_weight(), 0.0001);
+        expected.erase(p.get_output());
     }
     BOOST_CHECK_EQUAL(expected.size(), 0);
 }

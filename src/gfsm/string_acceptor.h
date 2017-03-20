@@ -26,12 +26,13 @@
 
 namespace Gfsm {
 class Alphabet;
-class AutomatonBuilder;
 
 /// An Acceptor with an Alphabet.
 class StringAcceptor : public Acceptor {
-    friend class AutomatonBuilder;
  public:
+    explicit StringAcceptor(const Alphabet& alph)
+        : Acceptor(), _alph(alph) {}
+    StringAcceptor() : Acceptor() {}
     StringAcceptor(const StringAcceptor& a);
     StringAcceptor(StringAcceptor&& a)
         : Acceptor(std::move(a)), _alph(std::move(a._alph)) {}
@@ -84,11 +85,6 @@ class StringAcceptor : public Acceptor {
     void add_word(const std::vector<string_impl>& str, bool partials = false);
 
  protected:
-    StringAcceptor(std::mutex* m, const Alphabet& alph)
-        : Acceptor(m), _alph(alph) {}
-    explicit StringAcceptor(std::mutex* m)
-        : Acceptor(m) {}
-
     Alphabet _alph;
 };
 

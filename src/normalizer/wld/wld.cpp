@@ -24,12 +24,13 @@
 #include<vector>
 #include<cmath>
 #include<stdexcept>
-#include"result.h"
+#include"normalizer/cacheable.h"
+#include"normalizer/result.h"
 #include"gfsm_wrapper.h"
 #include"string_impl.h"
-#include"iobase.h"
+#include"interface/iobase.h"
 #include"levenshtein_aligner.h"
-#include"lexicon.h"
+#include"lexicon/lexicon.h"
 #include"symbols.h"
 #include"weight_set.h"
 
@@ -47,40 +48,38 @@ void strip_boundary_symbol(std::vector<string_impl>* vec) {
 }
 }  // namespace
 
-WLD::WLD() : cache_mutex(new std::mutex()) {}
-
 void WLD::set_from_params(const std::map<std::string, std::string>& params) {
-    if (params.count("WLD.paramfile") != 0) {
-        set_paramfile(to_absolute(params.at("WLD.paramfile"), params));
+    if (params.count(_name + ".paramfile") != 0) {
+        set_paramfile(to_absolute(params.at(_name + ".paramfile"), params));
     } else if (params.count("perfilemode.input") != 0) {
         set_paramfile(with_extension(params.at("perfilemode.input"),
-                                     "WLD.paramfile"));
+                                     _name + ".paramfile"));
     }
-    if (params.count("WLD.train_ngrams") != 0) {
+    if (params.count(_name + ".train_ngrams") != 0) {
         std::stringstream ss;
         unsigned int n;
-        ss << params.at("WLD.train_ngrams");
+        ss << params.at(_name + ".train_ngrams");
         if (ss >> n)
             set_train_ngrams(n);
     }
-    if (params.count("WLD.train_divisor") != 0) {
+    if (params.count(_name + ".train_divisor") != 0) {
         std::stringstream ss;
         unsigned int div;
-        ss << params.at("WLD.train_divisor");
+        ss << params.at(_name + ".train_divisor");
         if (ss >> div)
             set_train_divisor(div);
     }
-    if (params.count("WLD.max_weight") != 0) {
+    if (params.count(_name + ".max_weight") != 0) {
         std::stringstream ss;
         double w;
-        ss << params.at("WLD.max_weight");
+        ss << params.at(_name + ".max_weight");
         if (ss >> w)
             set_maximum_weight(w);
     }
-    if (params.count("WLD.max_ops") != 0) {
+    if (params.count(_name + ".max_ops") != 0) {
         std::stringstream ss;
         unsigned int ops;
-        ss << params.at("WLD.max_ops");
+        ss << params.at(_name + ".max_ops");
         if (ss >> ops)
             set_maximum_ops(ops);
     }
@@ -124,9 +123,12 @@ void WLD::set_lexicon(LexiconInterface* lexicon) {
     _gfsm_lex = gfsm_lex;
 }
 
-Result WLD::operator()(const string_impl& word) const {
-    if (_caching && _cache.count(word) > 0)
-        return _cache.at(word);
+Result WLD::do_normalize(const string_impl& word) const {
+    if (is_caching()) {
+        Result res = query_cache(word);
+        if (res != Result())
+            return res;
+    }
 
     ResultSet resultset = this->operator()(word, 1);
     Result result;
@@ -135,15 +137,13 @@ Result WLD::operator()(const string_impl& word) const {
     else
         result = resultset.front();
 
-    if (_caching) {
-        std::lock_guard<std::mutex> guard(*cache_mutex);
-        _cache[word] = result;
-    }
+    if (is_caching())
+        cache(word, result);
 
     return result;
 }
 
-ResultSet WLD::operator()(const string_impl& word, unsigned int n) const {
+ResultSet WLD::do_normalize(const string_impl& word, unsigned int n) const {
     if (_cascade == nullptr || _gfsm_lex == nullptr)
         return ResultSet();
 
@@ -158,17 +158,17 @@ ResultSet WLD::operator()(const string_impl& word, unsigned int n) const {
     // convert cascade output to Result
     ResultSet resultset;
     for (auto stringpath : results) {
-        std::vector<string_impl> output = stringpath.output;
+        std::vector<string_impl> output = stringpath.get_output();
         strip_boundary_symbol(&output);
-        resultset
-            .push_back(make_result(Gfsm::implode(output),
-                                   calculate_probability(stringpath.weight)));
+        resultset.push_back(
+                   make_result(Gfsm::implode(output),
+                               calculate_probability(stringpath.get_weight())));
         resultset.back().origin = std::string(name());
     }
     return resultset;
 }
 
-bool WLD::train(TrainingData* data) {
+bool WLD::do_train(TrainingData* data) {
     for (auto pp = data->rbegin(); pp != data->rend(); ++pp) {
         if (pp->is_used())
             break;
@@ -182,27 +182,14 @@ bool WLD::train(TrainingData* data) {
     return true;
 }
 
-void WLD::save_params() {
+void WLD::do_save_params() {
     perform_training();  // TODO(bollmann): this is a hack
     _weights.save_paramfile(_paramfile);
 }
 
-void WLD::set_caching(bool value) const {
-    std::lock_guard<std::mutex> guard(*cache_mutex);
-    _caching = value;
-    if (!value)
-        _cache.clear();
-}
-
-void WLD::clear_cache() const {
-    std::lock_guard<std::mutex> guard(*cache_mutex);
-    _cache.clear();
-}
-
 void WLD::compile_transducer() {
     // initialize objects
-    _wfst = new Gfsm::StringTransducer(gfsm_builder.make_stringtransducer(
-                                                Gfsm::SemiringType::TROPICAL));
+    _wfst = new Gfsm::StringTransducer();
     Gfsm::Alphabet alph_in(_gfsm_lex->get_alphabet()),
                    alph_out(_gfsm_lex->get_alphabet());
     alph_in.cover(_weights.input_symbols());
@@ -237,8 +224,7 @@ void WLD::compile_transducer() {
 }
 
 void WLD::compile_cascade() {
-    _cascade = new Gfsm::StringCascade(gfsm_builder.make_stringcascade(2,
-                                                Gfsm::SemiringType::TROPICAL));
+    _cascade = new Gfsm::StringCascade();
     _cascade->append(*_wfst);
     _cascade->append(_gfsm_lex);
     _cascade->sort();

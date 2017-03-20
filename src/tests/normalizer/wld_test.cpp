@@ -26,7 +26,7 @@
 #include"tests/tests.h"
 #include"config.h"
 #include"normalizer/exceptions.h"
-#include"normalizer/lexicon.h"
+#include"lexicon/lexicon.h"
 #include"normalizer/result.h"
 #include"normalizer/wld.h"
 #include"normalizer/wld/levenshtein_algorithm.h"
@@ -74,9 +74,9 @@ BOOST_AUTO_TEST_CASE(ws_add_weight) {
     ws.add_weight("v", "u", 0.5);
     BOOST_REQUIRE_EQUAL(ws.size(), 1);
     StringPath path = ws.weights().at(0);
-    BOOST_CHECK(path.input  == std::vector<string_impl>{"v"});
-    BOOST_CHECK(path.output == std::vector<string_impl>{"u"});
-    BOOST_CHECK_CLOSE(path.weight, 0.5, 0.00001);
+    BOOST_CHECK(path.get_input()  == std::vector<string_impl>{"v"});
+    BOOST_CHECK(path.get_output() == std::vector<string_impl>{"u"});
+    BOOST_CHECK_CLOSE(path.get_weight(), 0.5, 0.00001);
     ws.add_weight("v", "u", 0.2);
     BOOST_REQUIRE_EQUAL(ws.size(), 1);
 }
@@ -111,9 +111,9 @@ BOOST_AUTO_TEST_CASE(ws_add_weight_with_empty_string) {
     BOOST_REQUIRE_EQUAL(ws.size(), 1);
     const StringPath& path = ws.weights().at(0);
     const std::vector<string_impl> jn {"j", "n"};
-    BOOST_CHECK(path.input  == jn);
-    BOOST_CHECK(path.output == std::vector<string_impl>());
-    BOOST_CHECK_CLOSE(path.weight, 0.4, 0.00001);
+    BOOST_CHECK(path.get_input()  == jn);
+    BOOST_CHECK(path.get_output() == std::vector<string_impl>());
+    BOOST_CHECK_CLOSE(path.get_weight(), 0.4, 0.00001);
 }
 
 BOOST_AUTO_TEST_CASE(ws_add_weight_with_epsilon) {
@@ -121,9 +121,9 @@ BOOST_AUTO_TEST_CASE(ws_add_weight_with_epsilon) {
     BOOST_REQUIRE_EQUAL(ws.size(), 1);
     const StringPath& path = ws.weights().at(0);
     const std::vector<string_impl> jn {"j", "n"};
-    BOOST_CHECK(path.input  == jn);
-    BOOST_CHECK(path.output == std::vector<string_impl>());
-    BOOST_CHECK_CLOSE(path.weight, 0.4, 0.00001);
+    BOOST_CHECK(path.get_input()  == jn);
+    BOOST_CHECK(path.get_output() == std::vector<string_impl>());
+    BOOST_CHECK_CLOSE(path.get_weight(), 0.4, 0.00001);
 }
 
 BOOST_AUTO_TEST_CASE(ws_input_symbols) {
@@ -285,6 +285,7 @@ struct WLDFixture {
         lex->add("ihm");
         lex->add("und");
         w = new WLD();
+        w->set_name("WLD");
         w->init(params, lex);
     }
     ~WLDFixture() {

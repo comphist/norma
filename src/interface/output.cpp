@@ -29,38 +29,27 @@ Output::Output() {
     _output = &std::cout;
 }
 
-void Output::put_line(const Normalizer::Result& result,
-                      bool print_prob) {
-    *_output << result.word;
+void Output::put_line(Normalizer::Result* result,
+                      bool print_prob, Normalizer::LogLevel max_level) {
+    *_output << result->word;
     if (print_prob)
-        *_output << "\t" << result.score;
+        *_output << "\t" << result->score;
     *_output << std::endl;
+    log_messages(result, max_level);
 }
 
-//////////////////////////// InteractiveOutput ///////////////////////////
-
-void InteractiveOutput::put_line(const Normalizer::Result& result,
-                                 bool print_prob) {
-    // can't use Output::put_line here, since what's added
-    // to the history is conditional on the validation
-    *_output << result.word;
-    if (print_prob)
-        *_output << "\t" << result.score;
-    *_output << std::endl
-             << validate_prompt;
-    validate(result.word);
-}
-
-std::string InteractiveOutput::validate(const string_impl& line) {
-    std::string validate_input;
-    getline(std::cin, validate_input);
-    if (validate_input.length() != 0) {
-        _training->add_target(validate_input.c_str());
-        return validate_input;
+void Output::log_messages(Normalizer::Result* result,
+                          Normalizer::LogLevel max_level) {
+    while (!result->messages.empty()) {
+        Normalizer::LogLevel level;
+        std::string origin, message;
+        std::tie(level, origin, message) = result->messages.front();
+        if (level >= max_level)
+            *_output << "[" << Normalizer::level_string(level) << "]:"
+                     << message << " Origin: " << origin << std::endl;
+        result->messages.pop();
     }
-    _training->add_target(line);
-    _opposite->store_last();
-    return to_cstr(line);
 }
+
 }  // namespace Norma
 

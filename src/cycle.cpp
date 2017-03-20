@@ -20,83 +20,72 @@
 #include<vector>
 #include<string>
 #include<fstream>
-#include<functional>
 #include<stdexcept>
-#include<thread>
 #include<future>
 #include<cctype>
 #include"normalizer/result.h"
 #include"interface.h"
-#include"applicator.h"
+#include"pluginsocket.h"
 #include"training_data.h"
+#include"results_queue.h"
 
 using std::map;
 using std::string;
 
 namespace Norma {
-Cycle::Cycle(Input *in, Output *out,
-             const string& chain_definition,
-             const map<string, string>& params)
-    : _in(in), _out(out) {
-    _applicators.push_back(new Applicator(chain_definition, params));
+Cycle::~Cycle() {
+    if (_data != nullptr)
+        delete _data;
+    if (_plugins != nullptr)
+        delete _plugins;
+}
+
+void Cycle::init(Input *input, Output* output,
+                 const std::map<std::string, std::string>& params) {
+    _in = input;
+    _out = output;
+    _params = params;
     _data = new TrainingData();
-    for (auto app : _applicators)
-        app->init_chain();
     _in->initialize(this, _out, _data);
     _out->initialize(this, _in, _data);
-    _thread = _in->thread_suitable() && _out->thread_suitable();
+    set_thread(_in->thread_suitable() && _out->thread_suitable());
 }
 
-Cycle::~Cycle() {
-    delete _data;
-    for (auto app_ptr : _applicators)
-        delete app_ptr;
-}
-
-void Cycle::each_applicator(std::function<void(Applicator*)> fun) {
-    for (auto app : _applicators)
-        fun(app);
+void Cycle::init_chain(const std::string& chain_definition,
+                       const std::string& plugin_base) {
+    if (_in == nullptr || _out == nullptr)
+        throw std::runtime_error("Cycle was not intialized!");
+    _plugins = new PluginSocket(chain_definition, plugin_base, _params);
 }
 
 void Cycle::start() {
+    ResultsQueue<Normalizer::Result> res(policy);
+    bool print_prob = settings["prob"];
+    Normalizer::LogLevel ll = _max_log_level;
+    Output* o = _out;
+    auto outputter = [print_prob, ll, o](Normalizer::Result r) {
+        o->put_line(&r, print_prob, ll);
+    };
+    auto producer = [this](string_impl line) {
+        auto my_result = _plugins->normalize(line);
+        return my_result;
+    };
+    res.set_consumer(outputter);
     _in->begin();
-    auto* future_results = new std::vector<std::future<Normalizer::Result>>();
     while (!_in->request_quit()) {
         string_impl line = _in->get_line();
         if (line.length() == 0)
             continue;
-        if (_train && training_pair(line))
+        if (settings["train"] && _in->request_train()) {
+            training_pair(line);
             continue;
-        Normalizer::Result result;
-        if (_norm)  // XXX multiple applicators here
-            if (_thread) {
-                // threaded normalization
-                std::packaged_task<Normalizer::Result()> norm([=]() {
-                    return _applicators.front()->normalize(line);
-                });
-                future_results->push_back(norm.get_future());
-                std::thread(std::move(norm)).detach();
-            } else {
-                result = _applicators.front()->normalize(line);
-            }
-        else  // NOLINT[whitespace/newline]
-            result = Normalizer::Result(line, 0.0);
-        if (!_thread)
-            _out->put_line(result, _prob);
-        if (_train)
-            each_applicator([&](Applicator* app) {
-                app->train(_data);
-            });
-    }
-    if (_thread) {
-        for (auto& fr : *future_results) {
-            Normalizer::Result res = fr.get();
-            _out->put_line(res);
         }
-        delete future_results;
-    } else {
-        delete future_results;
+        if (settings["normalize"])
+            res.add_producer(producer, line);
+        if (settings["train"] && _out->request_train())
+            _plugins->train(_data);
     }
+    res.finish();
     _in->end();
 }
 
@@ -114,17 +103,14 @@ bool Cycle::training_pair(const string_impl& line) {
         extract(line, divpos + 1, line.length(), &modern);
         _data->add_source(word);
         _data->add_target(modern);
-        each_applicator([&](Applicator* app) {
-            app->train(_data);
-        });
+        _plugins->train(_data);
         return true;
     }
     return false;
 }
 
 void Cycle::save_params() {
-    for (auto app : _applicators)
-        app->save_params();
+    _plugins->save_params();
 }
 }  // namespace Norma
 

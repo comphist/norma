@@ -17,7 +17,14 @@
  */
 #ifndef GFSM_WRAPPER_H_
 #define GFSM_WRAPPER_H_
-#include"gfsm/builder.h"
+#include"gfsm/automaton.h"
+#include"gfsm/acceptor.h"
+#include"gfsm/string_acceptor.h"
+#include"gfsm/transducer.h"
+#include"gfsm/string_transducer.h"
+#include"gfsm/cascade.h"
+#include"gfsm/string_cascade.h"
+#include"gfsm/semiring.h"
 #include"gfsm/alphabet.h"
 #include"gfsm/labelvector.h"
 #include"gfsm/path.h"

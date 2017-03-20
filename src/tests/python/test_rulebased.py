@@ -24,6 +24,7 @@ class RulebasedTest(unittest.TestCase, AssertFloat):
 
     def setUp(self):
         self.norm = Normalizer.Rulebased()
+        self.norm.name = "RuleBased"
 
     def testName(self):
         self.assertEquals(self.norm.name, "RuleBased")
@@ -42,7 +43,22 @@ class RulebasedTest(unittest.TestCase, AssertFloat):
         self.norm.rulesfile = self.rulesfile
         self.norm.lexicon = make_test_lexicon()
         self.norm.init()
-        self.assertClose(self.norm.normalize("vnd"), ("eins", 0.0105, "RuleBased"))
+        result = self.norm.normalize("vnd")
+        self.assertClose(result, ("eins", 0.0105, "RuleBased"))
+
+    def testLogMessages1(self):
+        self.norm.rulesfile = self.rulesfile
+        self.norm.lexicon = make_test_lexicon()
+        self.norm.init()
+        result = self.norm.normalize("vnd")
+        self.assertEquals(len(result.messages), 7)
+        self.assertEquals(result.messages[0][2], "applied rule: {E->E/#_v}")
+        self.assertEquals(result.messages[1][2], "applied rule: {v->ei/#_n}")
+        self.assertEquals(result.messages[2][2], "applied rule: {E->E/i_n}")
+        self.assertEquals(result.messages[3][2], "applied rule: {n->n/i_d}")
+        self.assertEquals(result.messages[4][2], "applied rule: {E->E/n_d}")
+        self.assertEquals(result.messages[5][2], "applied rule: {d->s/n_#}")
+        self.assertEquals(result.messages[6][2], "applied rule: {E->E/s_#}")
 
     def testNormalize2(self):
         self.norm.rulesfile = self.rulesfile
@@ -60,6 +76,8 @@ class RulebasedTest(unittest.TestCase, AssertFloat):
         self.norm.init(self.rulesfile, make_test_lexicon())
         fvo = self.norm.normalize("fvo")
         self.assertEquals(fvo, ("fvo", 0.0, "RuleBased"))
+        self.assertEquals(len(fvo.messages), 1)
+        self.assertEquals(fvo.messages[0][2], "no candidate found")
 
     def testTrain(self):
         self.norm.lexicon = make_test_lexicon()

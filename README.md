@@ -10,7 +10,7 @@ dictionary* (= a list of valid wordforms in the target language).
 If you have any questions, suggestions, or comments, please contact one of the authors:
 
 * Marcel Bollmann (<bollmann@linguistics.rub.de>)
-* Florian Petran (<petran@linguistics.rub.de>)
+* Florian Petran (<florian.petran@gmail.com>)
 
 #### License
 
@@ -20,7 +20,7 @@ Norma is licensed under the
 #### Dependencies
 
 * Needed for compilation:
-    * GCC >= 4.8
+    * GCC >= 4.9
     * CMake >= 2.8.10
     * Boost >= 1.50
         * in particular these libraries: Filesystem, Program Options, Regex, System, Test
@@ -58,8 +58,5 @@ messages), as well as API documentation that is generated via `make doc` (requir
 
 #### Other platforms
 
-* Norma was developed on Linux but should theoretically work on other platforms
+* Norma was developed on Linux and will not work on non-Unix platforms
 * Compilation with clang will probably work but is untested.
-* Compilation on OSX will probably work but is untested
-* Compilation on Windows might work if Microsoft ever releases a compiler that fully supports C++11 or if you use gcc.
-* The main problem on either of those platforms will probably be to get the dependencies to build and get cmake to find them in the proper location.

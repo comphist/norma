@@ -21,7 +21,7 @@
 #include<sstream>
 #include<string>
 #include<vector>
-#include"exceptions.h"
+#include"normalizer/exceptions.h"
 #include"regex_impl.h"
 #include"string_impl.h"
 #include"symbols.h"

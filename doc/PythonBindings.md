@@ -4,7 +4,7 @@
 Norma provides bindings for Python 2.x to facilitate the use of its
 normalization algorithms within larger projects.  Building the
 bindings requires the Boost::Python library and the cmake flag
-`-DUSE_PYTHON`.
+`-DWITH_PYTHON`.
 
 ### Unicode Support
 
@@ -64,15 +64,26 @@ is an example how to use the rule-based normalizer:
 
     >>> import norma.NormalizerWrapper as Normalizer
     >>> norm = Normalizer.Rulebased()
+    >>> norm.name = "Rulebased"  # unfortunately currently needed
     >>> norm.lexicon = lex
     >>> norm.train([('drey', 'drei'), ('frevde', 'freude')])
     True
     >>> norm('drey')
-    ('drei', 0.5294117647058824, 'RuleBased')
+    Result('drei', 0.5294117647058824, 'RuleBased')
     >>> norm('frevde')
-    ('freude', 0.52, 'RuleBased')
+    Result('freude', 0.52, 'RuleBased')
     >>> norm('frey')
-    ('frei', 0.5294117647058824, 'RuleBased')
+    Result('frei', 0.5294117647058824, 'RuleBased')
+
+The individual components of a `Result` object can be accessed via properties:
+
+    >>> r = norm('frey')
+    >>> r.word
+    'frei'
+    >>> r.score
+    0.5294117647058824
+    >>> r.origin
+    'RuleBased'
 
 Saving and loading works in a similar fashion as above:
 
@@ -99,6 +110,22 @@ more than one result:
 
     >>> chain('jn', 2)
     [('in', 0.75, 'Mapper'), ('ihn', 0.5, 'RuleBased')]
+
+### Instantiating normalizers from config file
+
+You can also instantiate normalizers from the same configuration file that the
+command-line tool uses, like this:
+
+    >>> from norma import NormaCfgParser
+    >>> normalizers = NormaCfgParser('example_chain.cfg').instantiate_all()
+    >>> for norm in normalizers:
+    ...     norm('drey')
+    ...
+    Result('drei', 1, 'Mapper')
+    Result('drei', 0.332345, 'RuleBased')
+    Result('drei', 0.75952, 'WLD')
+
+A more detailed example script is provided in `example/normalize.py`.
 
 ### Handling exceptions
 

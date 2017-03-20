@@ -50,12 +50,15 @@ class IOBase {
      virtual bool thread_suitable() {
          return false;
      }
+     virtual bool request_train() { return _request_train; }
+
  protected:
      virtual void store_line(const string_impl& line) = 0;
      TrainingData* _training;
      Cycle* _cycle;
      IOBase* _opposite;
      string_impl _line;
+     bool _request_train = false;
 };
 }  // namespace Norma
 #endif  // INTERFACE_IOBASE_H_

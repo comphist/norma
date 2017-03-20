@@ -19,8 +19,9 @@
 #include<map>
 #include<mutex>
 #include<string>
-#include"result.h"
-#include"iobase.h"
+#include"normalizer/result.h"
+#include"normalizer/cacheable.h"
+#include"interface/iobase.h"
 #include"rule.h"
 #include"candidate_finder.h"
 
@@ -28,15 +29,13 @@ namespace Norma {
 namespace Normalizer {
 namespace Rulebased {
 
-Rulebased::Rulebased() : cache_mutex(new std::mutex()) {}
-
 void Rulebased::set_from_params(const std::map<std::string, std::string>&
                                                                        params) {
-    if (params.count("RuleBased.rulesfile") != 0)
-        set_rulesfile(to_absolute(params.at("RuleBased.rulesfile"), params));
+    if (params.count(_name + ".rulesfile") != 0)
+        set_rulesfile(to_absolute(params.at(_name + ".rulesfile"), params));
     else if (params.count("perfilemode.input") != 0)
         set_rulesfile(with_extension(params.at("perfilemode.input"),
-                                     "RuleBased.rulesfile"));
+                                     _name + ".rulesfile"));
 }
 
 void Rulebased::init() {
@@ -50,37 +49,41 @@ void Rulebased::clear() {
     clear_cache();
 }
 
-Result Rulebased::operator()(const string_impl& word) const {
-    if (_caching && _cache.count(word) > 0)
-        return _cache.at(word);
-    ResultSet resultset = this->operator()(word, 1);
-    Result result;
-    if (resultset.size() == 0)
-        result = make_result(word, 0.0);
-    else
-        result = resultset.front();
-    if (_caching) {
-        std::lock_guard<std::mutex> guard(*cache_mutex);
-        _cache[word] = result;
+Result Rulebased::do_normalize(const string_impl& word) const {
+    if (is_caching()) {
+        Result res = query_cache(word);
+        if (res != Result())
+            return res;
     }
+
+    ResultSet resultset = do_normalize(word, 1);
+    Result result;
+    if (resultset.empty()) {
+        result = Result(word, 0.0, name());
+        log_message(&result, LogLevel::TRACE, "no candidate found");
+    } else {
+        result = resultset.front();
+    }
+    if (is_caching())
+        cache(word, result);
     return result;
 }
 
-ResultSet Rulebased::operator()(const string_impl& word, unsigned int n) const {
+ResultSet Rulebased::do_normalize(const string_impl& word,
+                                  unsigned int n) const {
     ResultSet resultset;
     Result unchanged_result = make_result(word, 0.0);
-    CandidateFinder finder(word, _rules, *_lex);
+    CandidateFinder finder(word, _rules, *_lex, _name);
     for (unsigned int i = 0; i < n; ++i) {
         Result result = finder();
         if (result == unchanged_result)
             break;
         resultset.push_back(result);
-        resultset.back().origin = std::string(name());
     }
     return resultset;
 }
 
-bool Rulebased::train(TrainingData* data) {
+bool Rulebased::do_train(TrainingData* data) {
     for (auto pp = data->rbegin(); pp != data->rend(); ++pp) {
         if (pp->is_used())
             break;
@@ -92,22 +95,9 @@ bool Rulebased::train(TrainingData* data) {
     return true;
 }
 
-void Rulebased::save_params() {
+void Rulebased::do_save_params() {
     _rules.save_rulesfile(_rulesfile);
 }
-
-void Rulebased::set_caching(bool value) const {
-    std::lock_guard<std::mutex> guard(*cache_mutex);
-    _caching = value;
-    if (!value)
-        _cache.clear();
-}
-
-void Rulebased::clear_cache() const {
-    std::lock_guard<std::mutex> guard(*cache_mutex);
-    _cache.clear();
-}
-
 
 }  // namespace Rulebased
 }  // namespace Normalizer

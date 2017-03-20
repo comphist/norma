@@ -20,8 +20,6 @@
 #include<string>
 #include<fstream>
 #include<iosfwd>
-#include<map>
-#include<functional>
 #include"string_impl.h"
 #include"iobase.h"
 
@@ -79,75 +77,6 @@ class FileInput : public Input {
      std::ostream *_output, *_error;
 };
 
-/// Input from a shell
-/** Adding a command to the shell:
- *  1. Implement it as class method. The method receives
- *     one argument for a command as parameter. The argument
- *     is downcased.
- *  2. add an entry to commands with the name of the command
- *     and the pointer to the unbound method
- *  3. (Optional): Add a help text to _helptxt
- **/
-class ShellInput : public Input {
- public:
-     ShellInput();
-     inline void begin() {
-         *_output << intro << std::endl;
-     }
-     inline void end() {
-         *_output << std::endl;
-     }
-     string_impl get_line();
-     bool request_quit() {
-         return _input->eof() || do_quit;
-     }
-     /// command parsing
-     void parse_command(const std::string& command);
-
- private:
-     std::ostream *_output;
-     ///////////////////////////////////////////////////
-     // from here on, member functions that implement
-     // commands. parameter is the argument to the command.
-     ///////////////////////////////////////////////////
-     void command_exit(const std::string& arg);
-     void command_help(const std::string& arg);
-     void command_prob(const std::string& arg);
-     void command_save(const std::string& arg);
-     void command_train(const std::string& arg);
-     void command_normalize(const std::string& arg);
-     ///////////////////////////////////////////////////
-     /// a generic function to toggle various features
-     /// the Cycle may offer.
-     void switch_feature(const std::string& desc,
-                         const std::string& arg,
-                         std::function<void(Cycle*, bool)> set,
-                         std::function<bool(Cycle*)> check);
-     bool do_quit = false;
-     const char *prompt = "> ",
-                *intro  = "\nEnter any wordform to normalize it."
-                          "\nPrefix a word with '!' to issue commands. "
-                          "For a list of all commands, type '!help'.\n"
-                          "Exit with CTRL+D or '!exit'.";
-     std::map<std::string, std::string> _helptxt
-         = { { "exit", "Exits the program, saving data if necessary." },
-             { "prob", "Turn the printing of probabilities on or off, "
-                       "or show the current setting." },
-             { "save", "Save the parameter files of all active "
-                       "normalizers." },
-             { "train", "Turn the 'training' option on or off, or show "
-                        "the current setting." },
-             { "normalize", "Turn the 'normalizing' option on or off, or"
-                            "show the current setting." } };
-     std::map<std::string,
-         std::function<void(ShellInput*, const std::string&)>> _commands
-     = { { "exit", &ShellInput::command_exit },
-         { "help", &ShellInput::command_help },
-         { "prob", &ShellInput::command_prob },
-         { "save", &ShellInput::command_save },
-         { "normalize", &ShellInput::command_normalize },
-         { "train", &ShellInput::command_train } };
-};
 }  // namespace Norma
 #endif  // INTERFACE_INPUT_H_
 

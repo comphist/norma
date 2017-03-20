@@ -24,6 +24,7 @@ class MapperTest(unittest.TestCase, AssertFloat):
 
     def setUp(self):
         self.norm = Normalizer.Mapper()
+        self.norm.name = "Mapper"
 
     def testName(self):
         self.assertEquals(self.norm.name, "Mapper")
@@ -49,6 +50,32 @@ class MapperTest(unittest.TestCase, AssertFloat):
         r1 = [("in", 0.75, "Mapper"), ("ihn", 0.20, "Mapper"), ("inne", 0.05, "Mapper")]
         self.assertEquals(self.norm.normalize("jn", 3), r1)
         self.assertEquals(self.norm.normalize("jn", 10), r1)
+
+    def testLogMessageForSuccess(self):
+        self.norm.mapfile = self.mapfile
+        self.norm.init()
+        result = self.norm("vnd")
+        self.assertEquals(result, ("und", 1.0, "Mapper"))
+        log = result.messages
+        self.assertEquals(len(log), 1)
+        self.assertEquals(len(log[0]), 3)
+        (level, origin, message) = log[0]
+        self.assertEquals(level, "TRACE")
+        self.assertEquals(origin, "Mapper")
+        self.assertEquals(message, "absolute count: 25")
+
+    def testLogMessageForFailure(self):
+        self.norm.mapfile = self.mapfile
+        self.norm.init()
+        result = self.norm("foo")
+        self.assertEquals(result, ("foo", 0.0, "Mapper"))
+        log = result.messages
+        self.assertEquals(len(log), 1)
+        self.assertEquals(len(log[0]), 3)
+        (level, origin, message) = log[0]
+        self.assertEquals(level, "TRACE")
+        self.assertEquals(origin, "Mapper")
+        self.assertEquals(message, "word not found")
 
     def testTrain(self):
         self.norm.init()

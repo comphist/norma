@@ -25,9 +25,8 @@
 #include"path.h"
 
 namespace Gfsm {
-    Cascade::Cascade(std::mutex* m, unsigned int depth, SemiringType sr) {
-    gfsm_mutex = m;
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
+Cascade::Cascade(unsigned int depth, SemiringType sr)
+    : cascade_mutex(new std::mutex()) {
     _csc = gfsmxl_cascade_new_full(depth, static_cast<gfsmSRType>(sr));
     _cl  = gfsmxl_cascade_lookup_new();
     gfsmxl_cascade_clear(_csc, FALSE);
@@ -35,8 +34,7 @@ namespace Gfsm {
 }
 
 Cascade::Cascade(const Cascade& a) {
-    this->gfsm_mutex = a.gfsm_mutex;
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
+    this->cascade_mutex = std::unique_ptr<std::mutex>(new std::mutex());
     // there is no clone function, so we have to do this manually ...
     _csc = gfsmxl_cascade_new_full(a._csc->depth, a._csc->sr->type);
     gfsmxl_cascade_clear(_csc, FALSE);
@@ -53,21 +51,20 @@ Cascade::Cascade(const Cascade& a) {
                                          a._cl->max_ops);
 }
 
-Cascade::Cascade(Cascade&& a) : Cascade(gfsm_mutex) {
+Cascade::Cascade(Cascade&& a) : Cascade() {
     std::swap(_cl,  a._cl);
     std::swap(_csc, a._csc);
-    std::swap(gfsm_mutex, a.gfsm_mutex);
+    std::swap(cascade_mutex, a.cascade_mutex);
 }
 
 Cascade& Cascade::operator=(Cascade a) {
     std::swap(_cl,  a._cl);
     std::swap(_csc, a._csc);
-    std::swap(gfsm_mutex, a.gfsm_mutex);
+    std::swap(cascade_mutex, a.cascade_mutex);
     return *this;
 }
 
 Cascade::~Cascade() throw() {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     // this also frees _csc and its indexed automata:
     if (_cl != nullptr)
         gfsmxl_cascade_lookup_free(_cl);
@@ -86,29 +83,27 @@ double Cascade::get_max_weight() const {
 }
 
 void Cascade::set_max_paths(unsigned int n) {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
+    std::lock_guard<std::mutex> guard(*cascade_mutex);
     _cl->max_paths = n;
 }
 
 void Cascade::set_max_ops(unsigned int n) {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
+    std::lock_guard<std::mutex> guard(*cascade_mutex);
     _cl->max_ops = n;
 }
 
 void Cascade::set_max_weight(double w) {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
+    std::lock_guard<std::mutex> guard(*cascade_mutex);
     _cl->max_w = w;
 }
 
 void Cascade::append(const Automaton* a) {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsmIndexedAutomaton* xfsm = gfsm_automaton_to_indexed(a->_fsm, NULL);
     gfsmxl_cascade_append_indexed(_csc, xfsm);
     _size++;
 }
 
 void Cascade::sort() {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
     gfsmArcCompMask mask = gfsm_acmask_from_args(gfsmACLower, gfsmACWeight,
                                                  gfsmACUpper, gfsmACTarget,
                                                  gfsmACNone);
@@ -116,12 +111,11 @@ void Cascade::sort() {
 }
 
 std::set<Path> Cascade::lookup_nbest(const LabelVector& v) const {
-    std::lock_guard<std::mutex> guard(*gfsm_mutex);
+    std::lock_guard<std::mutex> guard(*cascade_mutex);  // necessary
     gfsmAutomaton* result_fsm = gfsmxl_cascade_lookup_nbest(_cl, v._vec, NULL);
-    std::mutex dummy;
-    Gfsm::Automaton result(&dummy, static_cast<SemiringType>(_csc->sr->type));
+    Gfsm::Automaton result(static_cast<SemiringType>(_csc->sr->type));
     result.set_gfsm_automaton(result_fsm);
-    return result.find_accepted_paths(true);
+    return result.accepted_paths();
 }
 
 std::set<Path> Cascade::lookup_nbest(const LabelVector& v,

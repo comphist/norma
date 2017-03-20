@@ -10,15 +10,22 @@ execute_process(
 
 ########## command line arguments {{{
 set(STRING_IMPL "ICU" CACHE STRING "String implementation to use (ICU|STD)")
+set(NORMA_DEFAULT_PLUGIN_BASE
+    "${CMAKE_INSTALL_PREFIX}/share/norma/plugins" CACHE STRING
+    "Default directory for normalizer plugins")
 set(WITH_PYTHON OFF CACHE BOOL "Whether to make Python buildings/embed")
 set(WITH_TAGS OFF CACHE BOOL "Whether to generate ctags/cscope in build")
 set(WITH_LINT OFF CACHE BOOL "Whether to include a lint (code check) target")
+set(WITH_COVERAGE OFF CACHE BOOL "Whether to generate test coverage information")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules")
 if (WITH_LINT)
     include(cpplint)
 endif()
 if (WITH_TAGS)
     include(CTAGS)
+endif()
+if (WITH_COVERAGE)
+    include(CodeCoverage)
 endif()
 enable_testing()
 include(AddSources)
@@ -59,7 +66,6 @@ if(WITH_PYTHON)
     find_package(PythonLibs 2.7 REQUIRED)
     find_package(PythonInterp 2.7 REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
-    set (EMBED_PYTHON TRUE)
 endif()
 # }}}
 ########## configure headers {{{
@@ -72,30 +78,32 @@ include_directories( "${CMAKE_BINARY_DIR}/src" )
 # }}}
 ########## compiler setting and flags {{{
 if(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -pedantic")
-    if(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "4.7.99")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
+    if(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "4.8.99")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
     else()
-        message(FATAL_ERROR "You need at least g++ >= 4.8! Your version is ${CMAKE_CXX_COMPILER_VERSION}")
+        message(FATAL_ERROR "You need at least g++ >= 4.9! Your version is ${CMAKE_CXX_COMPILER_VERSION}")
     endif()
     set(CMAKE_CXX_FLAGS_DEBUG
-        "${CMAKE_CXX_FLAGS_DEBUG} -O0 -ggdb -fno-inline")
+        "${CMAKE_CXX_FLAGS_DEBUG} -Og -ggdb")
 endif()
-if (MSVC)
-    message(FATAL_ERROR "Sorry, compilation won't work with MSVC due to incomplete C++11 support")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++14")
+endif()
+if (WITH_COVERAGE)
+    set(CMAKE_CXX_FLAGS_DEBUG
+        "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -fprofile-arcs -ftest-coverage")
 endif()
 # }}}
 ########## main source directories {{{
 add_subdirectory(src)
 add_subdirectory(src/interface)
 add_subdirectory(src/normalizer)
-add_subdirectory(src/normalizer/wld)
-add_subdirectory(src/normalizer/rulebased)
 add_subdirectory(src/gfsm)
+add_subdirectory(src/lexicon)
 include_directories(src src/normalizer src/interface src/gfsm)
-
 if(WITH_PYTHON)
-    add_subdirectory(src/normalizer/external)
     add_subdirectory(src/python)
 endif()
 # }}}
@@ -106,15 +114,16 @@ target_link_libraries(norma
     ${STRING_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_REGEX_LIBRARY}
+    ${CMAKE_DL_LIBS}
     LINK_PRIVATE
     ${PYTHON_LIBRARIES}
-    ${Boost_REGEX_LIBRARY}
     ${LIBGFSM_LIBRARIES}
 )
 add_executable(normalize src/main.cpp)
-target_link_libraries(normalize norma ${Boost_PROGRAM_OPTIONS_LIBRARY})
-add_executable(norma_lexicon src/normalizer/lexicon_main.cpp)
-target_link_libraries(norma_lexicon norma ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(normalize
+                      norma
+                      ${Boost_PROGRAM_OPTIONS_LIBRARY})
 # }}}
 ########## tests {{{
 add_custom_target(buildtests)
@@ -129,6 +138,10 @@ else()
         --force-new-ctest-process --output-on-failure)
 endif()
 add_dependencies(check buildtests)
+if (WITH_COVERAGE)
+    add_dependencies(coverage buildtests)
+    setup_coverage("${CMAKE_SOURCE_DIR}/src/tests")
+endif()
 # }}}
 ########## install {{{
 if (NOT CMAKE_INSTALL_LIBDIR)
@@ -143,9 +156,8 @@ set(NORMA_DOCDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}/doc/${CMA
 # library
 install(TARGETS norma DESTINATION "${NORMA_LIBDIR}")
 # binary
-install(TARGETS normalize norma_lexicon DESTINATION "${NORMA_BINDIR}")
+install(TARGETS normalize DESTINATION "${NORMA_BINDIR}")
 # docs/examples
-set(docdest "${DESTINATION}/share/doc/norma-${CMAKE_PROJECT_VERSION}")
 install(FILES "${CMAKE_SOURCE_DIR}/README.md"
               "${CMAKE_SOURCE_DIR}/doc/UserGuide.md"
               "${CMAKE_SOURCE_DIR}/doc/PythonBindings.md"
@@ -153,23 +165,11 @@ install(FILES "${CMAKE_SOURCE_DIR}/README.md"
               DESTINATION "${NORMA_DOCDIR}")
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/doc/example/"
                   DESTINATION "${NORMA_DOCDIR}/example")
-# headers
-# this is kind of a hack. it would probably be best to somehow move the header installation
-# to the subdirectory's CMakeLists.txt TODO(fpetran)
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/src/"
-        DESTINATION "${CMAKE_INSTALL_PREFIX}/include/norma"
-        FILES_MATCHING
-            PATTERN "*.h"
-            PATTERN "doc" EXCLUDE
-            PATTERN "tests" EXCLUDE
-            PATTERN "example" EXCLUDE
-            PATTERN "scripts" EXCLUDE
-            PATTERN "CMakeModules" EXCLUDE
-            PATTERN "python" EXCLUDE
-            PATTERN "data" EXCLUDE
-            PATTERN ".git" EXCLUDE)
+# headers are installed from the source directory they live in
+# except for configured headers. config.h only contains
+# build related stuff and doesn't need to be installed
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/src/defines.h"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/include/norma")
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/include/${CMAKE_PROJECT_NAME}")
 # }}}
 ########## documentation {{{
 find_package(Doxygen)

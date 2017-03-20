@@ -21,10 +21,13 @@
 # This file defines global functions that create and initialize
 # normalizer objects at the same time
 
-import norma as cpp
+import norma
+import mapper as MapperLib
+import wld as WLDLib
+import rulebased as RulebasedLib
 import ChainNormalizer
 
-class Mapper(cpp.MapperNormalizer):
+class Mapper(MapperLib.MapperNormalizer):
     """Normalizer that uses a dictionary of word forms.
 
     This normalizer works by storing a dictionary, or "mapping", of
@@ -44,14 +47,14 @@ class Mapper(cpp.MapperNormalizer):
 
         This constructor automatically calls init() with all supplied
         arguments.
-        
+
         Optional arguments:
           file -- Name of the parameter file
         """
         super(Mapper, self).__init__()
         self.init(*args)
 
-class Rulebased(cpp.RulebasedNormalizer):
+class Rulebased(RulebasedLib.RulebasedNormalizer):
     """Normalizer that uses context-aware character rewrite rules.
 
     Implements the normalization technique first described in:
@@ -64,13 +67,13 @@ class Rulebased(cpp.RulebasedNormalizer):
     <http://www.linguistics.rub.de/~bollmann/pub/ranlp11.pdf>
 
     """
-    
+
     def __init__(self, *args):
         """Construct and initialize the normalizer.
 
         This constructor automatically calls init() with all supplied
         arguments.
-        
+
         Optional arguments:
           file -- Name of the parameter file
            lex -- Lexicon object to set for this normalizer
@@ -80,7 +83,7 @@ class Rulebased(cpp.RulebasedNormalizer):
 
 RuleBased = Rulebased
 
-class WLD(cpp.WLDNormalizer):
+class WLD(WLDLib.WLDNormalizer):
     """Normalizer that uses a weighted Levenshtein distance measure.
 
     Implements the normalization technique described in section 3.1.4
@@ -92,13 +95,13 @@ class WLD(cpp.WLDNormalizer):
     <http://www.linguistics.rub.de/bla/013-bollmann2013.pdf>
 
     """
-    
+
     def __init__(self, *args):
         """Construct and initialize the normalizer.
 
         This constructor automatically calls init() with all supplied
         arguments.
-        
+
         Optional arguments:
           file -- Name of the parameter file
            lex -- Lexicon object to set for this normalizer

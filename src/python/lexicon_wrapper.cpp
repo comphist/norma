@@ -18,7 +18,7 @@
 #include"lexicon_wrapper.h"
 #include<string>
 #include<boost/python.hpp>  //NOLINT[build/include_order]
-#include"normalizer/lexicon.h"
+#include"lexicon/lexicon.h"
 
 namespace Norma {
 namespace Python {

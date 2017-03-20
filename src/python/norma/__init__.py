@@ -18,4 +18,5 @@
 # with Norma.  If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
 
-from norma import NormaInitError
+from norma import NormaInitError, Result
+from NormaCfgParser import NormaCfgParser

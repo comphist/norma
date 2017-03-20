@@ -24,21 +24,22 @@
 #include<string>
 #include<tuple>
 #include<vector>
-#include"exceptions.h"
-#include"result.h"
+#include"normalizer/exceptions.h"
+#include"normalizer/result.h"
 
 using std::map;
 using std::string;
 
 namespace Norma {
 namespace Normalizer {
+namespace Mapper {
 
 void Mapper::set_from_params(const std::map<std::string, std::string>& params) {
-    if (params.count("Mapper.mapfile") != 0)
-        set_mapfile(to_absolute(params.at("Mapper.mapfile"), params));
+    if (params.count(_name + ".mapfile") != 0)
+        set_mapfile(to_absolute(params.at(_name + ".mapfile"), params));
     else if (params.count("perfilemode.input") != 0)
         set_mapfile(with_extension(params.at("perfilemode.input"),
-                                   "Mapper.mapfile"));
+                                   _name + ".mapfile"));
 }
 
 void Mapper::init() {
@@ -51,18 +52,21 @@ void Mapper::clear() {
     _map.clear();
 }
 
-Result Mapper::operator()(const string_impl& word) const {
+Result Mapper::do_normalize(const string_impl& word) const {
     // this will probably perform worse than the implementation it had before
     // since an entire list is sorted instead of just returning the best result,
     // but it's a cleaner implementation. if the performance hit is significant,
     // it should be changed to how it was before.
     ResultSet resultset = make_all_results(word);
-    if (resultset.size() == 0)
-        return make_result(word, 0.0);
+    if (resultset.size() == 0) {
+        Result not_found = make_result(word, 0.0);
+        log_message(&not_found, LogLevel::TRACE, "word not found");
+        return not_found;
+    }
     return resultset.front();
 }
 
-ResultSet Mapper::operator()(const string_impl& word, unsigned int n) const {
+ResultSet Mapper::do_normalize(const string_impl& word, unsigned int n) const {
     ResultSet resultset = make_all_results(word);
     if (resultset.size() > n)
         resultset.resize(n);
@@ -77,9 +81,12 @@ ResultSet Mapper::make_all_results(const string_impl& word) const {
     double total_count = 0.0;
 
     for (auto& entry : row) {
+        Result result = make_result(entry.first, entry.second);
+        std::ostringstream message;
+        message << "absolute count: " << entry.second;
+        log_message(&result, LogLevel::TRACE, message.str());
+        resultset.push_back(result);
         total_count += entry.second;
-        resultset.push_back(make_result(entry.first, entry.second));
-        resultset.back().origin = std::string(name());
     }
 
     for (auto& result : resultset)
@@ -88,16 +95,16 @@ ResultSet Mapper::make_all_results(const string_impl& word) const {
     return resultset;
 }
 
-bool Mapper::train(TrainingData* data) {
+bool Mapper::do_train(TrainingData* data) {
     for (auto pp = data->rbegin(); pp != data->rend(); ++pp) {
         if (pp->is_used())
             break;
-        this->train(pp->source(), pp->target(), 1);
+        this->do_train(pp->source(), pp->target(), 1);
     }
     return true;
 }
 
-void Mapper::train(const string_impl& word,
+void Mapper::do_train(const string_impl& word,
                    const string_impl& modern,
                    int count) {
     if (_map.count(word) == 0 || _map[word].count(modern) == 0)
@@ -106,7 +113,7 @@ void Mapper::train(const string_impl& word,
         _map[word][modern] += count;
 }
 
-void Mapper::save_params() {
+void Mapper::do_save_params() {
     write_mapfile(_mapfile);
 }
 
@@ -126,7 +133,7 @@ bool Mapper::read_mapfile(const std::string& fname) {
         int count;
         iss >> word >> modern >> count;
         if (iss)
-            train(word, modern, count);
+            do_train(word, modern, count);
         else
             ++invalid_line_count;
     }
@@ -153,5 +160,7 @@ bool Mapper::write_mapfile(const std::string& fname) {
     file.close();
     return true;
 }
+}  // namespace Mapper
 }  // namespace Normalizer
 }  // namespace Norma
+

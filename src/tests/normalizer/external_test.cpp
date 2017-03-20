@@ -17,6 +17,7 @@
  */
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE Normalizer_External
+#include<Python.h>
 #include<map>
 #include<string>
 #include"tests/tests.h"
@@ -36,6 +37,7 @@ struct ExternalFixture {
 
     ExternalFixture() {
         e = new External();
+        e->set_name("External");
         params["External.path"] = TEST_PATH;
         params["External.script"] = "normalize";
         e->set_from_params(params);

@@ -51,10 +51,13 @@ LabelVector::~LabelVector() {
 }
 
 bool LabelVector::operator==(const LabelVector& that) const {
-    if (_vec->len != that._vec->len)
-        return false;
-    for (unsigned int i = 0; i < _vec->len; ++i) {
-        if (get(i) != that.get(i))
+    size_t i = 0, j = 0;
+    while (i < this->_vec->len && j < that._vec->len) {
+        while (this->get(i) == EPSILON_LABEL)
+            ++i;
+        while (that.get(j) == EPSILON_LABEL)
+            ++j;
+        if (this->get(i++) != that.get(j++))
             return false;
     }
     return true;

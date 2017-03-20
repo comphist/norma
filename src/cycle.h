@@ -18,84 +18,63 @@
 #ifndef CYCLE_H_
 #define CYCLE_H_
 #include<map>
-#include<vector>
 #include<string>
-#include<fstream>
-#include<stdexcept>
-#include<functional>
 #include"string_impl.h"
 #include"training_data.h"
+#include"normalizer/result.h"
+#include"results_queue.h"
 
 namespace Norma {
 class Input;
 class Output;
-class Applicator;
+class PluginSocket;
 
 /// the main application cycle
 /** This class contains the main loop for input and output.
- *  It connects Input, Output, and Applicator classes.
- *  At some point it should support multiple Applicator instances
- *  and supply a way of choosing between their input, but right
- *  now, it's just the one.
+ *  It connects Input, Output, and PluginSocket classes.
  *
  *  Usually, an application should need just one Cycle object,
  *  but it's conceivable to have multiple ones, e.g. when
  *  normalizing several files parallel.
  **/
+
 class Cycle {
  public:
-     Cycle(Input* in, Output* out,
-           const std::string& chain_definition,
-           const std::map<std::string, std::string>& params);
-     Cycle() = delete;
-     Cycle(const Cycle& c) = delete;
-     Cycle& operator=(const Cycle& c) = delete;
+     Cycle() = default;
      ~Cycle();
-     /// start processing data
-     void start();
+     void init(Input* input, Output* output,
+               const std::map<std::string, std::string>& params);
+     void init_chain(const std::string& chain_definition,
+                     const std::string& plugin_base);
 
-     /// save all normalizer parameter files
+     void start();
      void save_params();
-     /// turn printing probabilities on/off
-     inline void do_print_prob(bool status) {
-         _prob = status;
+     void set(const std::string setting, bool val) {
+         settings[setting] = val;
      }
-     inline bool print_prob() {
-         return _prob;
+     bool get(const std::string setting) const {
+         return settings.at(setting);
      }
-     /// set training on/off
-     inline void do_train(bool status) {
-         _train = status;
-     }
-     inline bool train() {
-         return _train;
-     }
-     /// set normalizing on/off
-     inline void do_norm(bool status) {
-         _norm = status;
-     }
-     inline bool norm() {
-         return _norm;
-     }
-     void set_thread(bool status) {
-         _thread = status;
+     void set_thread(bool val) {
+         policy = val ? std::launch::async : std::launch::deferred;
      }
 
  private:
-     /// check input for training pair and add them to
-     /// in/out history if appropriate
      bool training_pair(const string_impl& line);
-     void each_applicator(std::function<void(Applicator*)> fun);
-     bool _train = true,
-          _norm  = true,
-          _prob  = true,
-          _thread = false;
-     TrainingData* _data;
-     Input*  _in;
-     Output* _out;
-     std::vector<Applicator*> _applicators;
+
+     std::map<std::string, std::string> _params;
+     Normalizer::LogLevel _max_log_level = Normalizer::LogLevel::WARN;
+     std::map<std::string, bool> settings = {
+         { "train", true },
+         { "normalize", true },
+         { "prob", true } };
+     TrainingData* _data = nullptr;
+     PluginSocket* _plugins = nullptr;
+     Input* _in = nullptr;
+     Output* _out = nullptr;
+
+     std::launch policy = std::launch::async|std::launch::deferred;
 };
 }  // namespace Norma
-
 #endif  // CYCLE_H_
 

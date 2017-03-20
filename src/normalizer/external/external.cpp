@@ -71,10 +71,10 @@ void External::set_from_params(const std::map<std::string, std::string>&
 
 PyObject* External::get_function_ptr(const char* name) {
     std::string fun_name;
-    if (_params->count("External." + std::string(name)) == 0)
+    if (_params->count(_name + name) == 0)
         fun_name = name;
     else
-        fun_name = _params->at("External." + std::string(name));
+        fun_name = _params->at(_name + name);
 
     PyObject *fun = PyObject_GetAttrString(script, fun_name.c_str());
     if (fun == nullptr || !PyCallable_Check(fun)) {
@@ -104,19 +104,19 @@ void External::init() {
     std::lock_guard<std::mutex> guard(*python_mutex);
     PyEval_AcquireLock();
     temp_state = PyThreadState_Swap(my_threadstate);
-    if (_params->count("External.path") != 0)
-        set_path(_params->at("External.path").c_str());
+    if (_params->count(_name + ".path") != 0)
+        set_path(_params->at(_name + ".path").c_str());
 
     PyObject *sname =
-        PyString_FromString(_params->at("External.script").c_str());
+        PyString_FromString(_params->at(_name + ".script").c_str());
     script = PyImport_Import(sname);
     Py_DECREF(sname);
     if (script == nullptr)
         throw std::runtime_error
-            (_params->at("External.script") + ".py not found!");
+            (_params->at(_name +".script") + ".py not found!");
 
-    if (_params->count("External.name") != 0)
-        _name = _params->at("External.name");
+    if (_params->count(_name + ".name") != 0)
+        _name = _params->at(_name + ".name");
 
     // set all function pointers
     normalize_fun = get_function_ptr("do_normalize");
@@ -135,7 +135,7 @@ void External::init() {
     _initialized = true;
 }
 
-Result External::operator()(const string_impl& word) const {
+Result External::do_normalize(const string_impl& word) const {
     std::lock_guard<std::mutex> guard(*python_mutex);
     PyEval_AcquireLock();
     temp_state = PyThreadState_Swap(my_threadstate);
@@ -160,7 +160,8 @@ Result External::operator()(const string_impl& word) const {
     return make_result(cword, score);
 }
 
-ResultSet External::operator()(const string_impl& word, unsigned int n) const {
+ResultSet External::do_normalize(const string_impl& word, unsigned int n)
+                    const {
     std::lock_guard<std::mutex> guard(*python_mutex);
     PyEval_AcquireLock();
     temp_state = PyThreadState_Swap(my_threadstate);
@@ -195,7 +196,7 @@ ResultSet External::operator()(const string_impl& word, unsigned int n) const {
     return resultset;
 }
 
-bool External::train(TrainingData* data) {
+bool External::do_train(TrainingData* data) {
     std::lock_guard<std::mutex> guard(*python_mutex);
     PyEval_AcquireLock();
     temp_state = PyThreadState_Swap(my_threadstate);
@@ -207,7 +208,7 @@ bool External::train(TrainingData* data) {
     return true;
 }
 
-void External::save_params() {
+void External::do_save_params() {
     std::lock_guard<std::mutex> guard(*python_mutex);
     PyEval_AcquireLock();
     temp_state = PyThreadState_Swap(my_threadstate);

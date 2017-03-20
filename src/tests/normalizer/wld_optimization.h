@@ -20,11 +20,11 @@
 #include"string_impl.h"
 
 namespace {  //NOLINT[build/namespaces]
-  // Derived class to allow manipulation of the internal cascade
-  class BenchmarkWLD : public Norma::Normalizer::WLD::WLD {
-   public:
-    void set_max_weight(double w) { _cascade->set_max_weight(w); }
-    void set_max_ops(unsigned int n) { _cascade->set_max_ops(n); }
-    Norma::Normalizer::Result operator()(const string_impl& word) const;
-  };
+// Derived class to allow manipulation of the internal cascade
+class BenchmarkWLD : public Norma::Normalizer::WLD::WLD {
+ public:
+     void set_max_weight(double w) { _cascade->set_max_weight(w); }
+     void set_max_ops(unsigned int n) { _cascade->set_max_ops(n); }
+     Norma::Normalizer::Result operator()(const string_impl& word) const;
+};
 }

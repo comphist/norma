@@ -18,7 +18,6 @@
 #ifndef GFSM_AUTOMATON_H_
 #define GFSM_AUTOMATON_H_
 #include<string>
-#include<mutex>
 #include<set>
 #include"gfsmlibs.h"
 #include"semiring.h"
@@ -26,7 +25,6 @@
 
 namespace Gfsm {
 class LabelVector;
-class AutomatonBuilder;
 class Cascade;
 
 /// A finite-state automaton.
@@ -35,9 +33,10 @@ class Cascade;
     use the specialized Acceptor or Transducer classes.
  */
 class Automaton {
-    friend class AutomatonBuilder;
     friend class Cascade;
  public:
+    Automaton() : Automaton(SemiringType::TROPICAL) {}
+    explicit Automaton(SemiringType sr);
     Automaton(const Automaton& a);
     Automaton(Automaton&& a);
     Automaton& operator=(Automaton a);
@@ -68,34 +67,20 @@ class Automaton {
     /// Find all paths that are accepted by this automaton.
     /** If the automaton is cyclic, an empty set is returned, as the
         set of accepted paths would be infinite in this case.
-
-        @param eps_remove If true, epsilon labels are excluded from
-                          the returned paths.
      */
-    std::set<Path> accepted_paths(bool eps_remove = false) const;
+    std::set<Path> accepted_paths() const;
 
     /// Make sure automaton has a root state
     void ensure_root() { root(); }
 
  protected:
-    Automaton() = delete;
-    Automaton(std::mutex* m, SemiringType sr = SemiringType::TROPICAL);
     gfsmAutomaton* _fsm;             /**< Pointer to automaton object. */
     gfsmStateId _root = gfsmNoState; /**< ID of the root state. */
-    std::mutex* gfsm_mutex;          /**< Mutex for C functions. */
 
     void set_gfsm_automaton(gfsmAutomaton* fsm);
 
     /// Return ID of the root state; creates a root state if none exists.
     gfsmStateId root();
-
-    /// Find all paths that are accepted by this automaton.
-    /** This is identical to accepted_paths() but doesn't lock the
-        mutex, so it can be called from functions which are already
-        under mutex-lock.
-        @see accepted_paths()
-     */
-    std::set<Path> find_accepted_paths(bool eps_remove = false) const;
 };
 
 }  // namespace Gfsm

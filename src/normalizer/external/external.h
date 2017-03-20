@@ -22,8 +22,8 @@
 #include<string>
 #include<memory>
 #include<mutex>
-#include"base.h"
-#include"result.h"
+#include"normalizer/base.h"
+#include"normalizer/result.h"
 
 namespace Norma {
 namespace Normalizer {
@@ -61,16 +61,16 @@ class External : public Base {
      void init();
      using Base::init;
      void set_from_params(const std::map<std::string, std::string>& params);
-     Result operator()(const string_impl& word) const;
-     ResultSet operator()(const string_impl& word, unsigned int n) const;
-     bool train(TrainingData* data);
-     void save_params();
-     const char* name() const { return _name.c_str(); }
+
+ protected:
+     bool do_train(TrainingData* data);
+     Result do_normalize(const string_impl& word) const;
+     ResultSet do_normalize(const string_impl& word, unsigned int n) const;
+     void do_save_params();
 
  private:
      /// clean up stuff that was set in initialization.
      void tear_down();
-     std::string _name = "External";
      std::unique_ptr<std::mutex> python_mutex;
      const std::map<std::string, std::string>* _params;
      bool _initialized = false;
@@ -92,6 +92,14 @@ class External : public Base {
 }  // namespace External
 }  // namespace Normalizer
 }  // namespace Norma
+
+extern "C" Norma::Normalizer::Base* create_normalizer() {
+    return new Norma::Normalizer::External::External;
+}
+
+extern "C" void destroy_normalizer(Norma::Normalizer::Base* n) {
+    delete n;
+}
 
 #endif  // NORMALIZER_EXTERNAL_EXTERNAL_H_
 
