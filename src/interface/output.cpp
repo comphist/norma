@@ -51,30 +51,5 @@ void Output::log_messages(Normalizer::Result* result,
     }
 }
 
-//////////////////////////// InteractiveOutput ///////////////////////////
-
-void InteractiveOutput::put_line(Normalizer::Result* result,
-                                 bool print_prob,
-                                 Normalizer::LogLevel max_level) {
-    // can't use Output::put_line here, since what's added
-    // to the history is conditional on the validation
-    *_output << result->word;
-    if (print_prob)
-        *_output << "\t" << result->score;
-    log_messages(result, max_level);
-    *_output << std::endl
-             << validate_prompt;
-    _opposite->store_last();
-    _training->add_target(validate(result->word));
-    _request_train = true;
-}
-
-std::string InteractiveOutput::validate(const string_impl& line) {
-    std::string validate_input;
-    getline(std::cin, validate_input);
-    if (validate_input.length() != 0)
-        return validate_input;
-    return to_cstr(line);
-}
 }  // namespace Norma
 

@@ -16,19 +16,13 @@
  * with Norma.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include"input.h"
-#include<vector>
 #include<string>
 #include<iostream>
 #include<stdexcept>
-#include<algorithm>
-#include<cctype>
-#include<functional>
-#include<memory>
 #include"string_impl.h"
 #include"cycle.h"
 
 using std::string;
-using std::function;
 
 namespace Norma {
 ///////////////////////////// Input //////////////////////////////////////
@@ -63,104 +57,5 @@ string_impl FileInput::get_line() {
     return line;
 }
 
-//////////////////////////// ShellInput //////////////////////////////////
-
-ShellInput::ShellInput() {
-    _input = &std::cin;
-    _output = &std::cout;
-}
-
-string_impl ShellInput::get_line() {
-    *_output  << prompt;
-    string_impl line = Input::get_line();
-    std::string sline = to_cstr(line);
-    if (line[0] == '!') {
-        parse_command(sline);
-        return "";
-    }
-    _line = line;
-    _request_train = (string_find(line, "\t") != string_npos);
-    return line;
-}
-
-void ShellInput::parse_command(const std::string& command) {
-    if (_handler == nullptr)
-        _handler =
-            std::unique_ptr<CommandHandler>(new CommandHandler(this,
-                                                               _cycle,
-                                                               _output));
-    (*_handler)(command);
-}
-
-void CommandHandler::operator()(const string& command) {
-    std::vector<string> tokens;
-    size_t pos = 0,
-           left = 1;  // 1 to ignore leading !
-    while (pos != std::string::npos) {
-        pos = command.find(" ", left);
-        std::string token = command.substr(left, pos - left);
-        if (token.length() != 0) {
-            std::transform(token.begin(), token.end(),
-                           token.begin(), ::tolower);
-            tokens.push_back(token);
-        }
-        left = pos + 1;
-    }
-    if (tokens.size() == 1)
-        tokens.push_back("");
-    try {
-        _commands[tokens[0]](this, tokens[1]);
-    } catch(std::bad_function_call e) {
-        *_output  << "*** Unknown syntax: " << command << std::endl;
-    }
-}
-
-void CommandHandler::command_exit(const std::string& arg) {
-    _si->do_quit = true;
-}
-
-void CommandHandler::command_help(const std::string& arg) {
-    if (arg.length() == 0) {
-        *_output  << "Documented commands (type help <topic>):"
-                  << std::endl
-                  << "========================================"
-                  << std::endl;
-        for (auto helpentry : _helptxt)
-            *_output  << helpentry.first << " ";
-        *_output  << std::endl << std::endl
-                  << "Undocumented commands:" << std::endl
-                  << "========================================"
-                  << std::endl;
-        for (auto command : _commands)
-            if (_helptxt.count(command.first) == 0)
-                *_output  << command.first << " ";
-        *_output  << std::endl << std::endl;;
-    } else {
-        if (_helptxt.count(arg) != 0)
-            *_output  << _helptxt[arg] << std::endl;
-        else
-            *_output  << "*** No help for " << arg << std::endl;
-    }
-}
-void CommandHandler::command_save(const std::string& arg) {
-    _cycle->save_params();
-}
-void CommandHandler::switch_feature(const string& desc, const string& arg,
-                                    const string& feature) {
-    if (arg.length() > 0)
-        _cycle->set(feature, (arg == "on" ? true : false));
-    *_output  << "*** " << desc << " is "
-              << (_cycle->get(feature) ? "ON" : "OFF")
-              << "." << std::endl;
-}
-void CommandHandler::command_prob(const string& arg) {
-    switch_feature("Printing of probabilities", arg, "prob");
-}
-void CommandHandler::command_train(const string& arg) {
-    switch_feature("Training", arg, "train");
-}
-void CommandHandler::command_normalize(const string& arg) {
-    switch_feature("Normalizing", arg, "normalize");
-}
 }  // namespace Norma
 

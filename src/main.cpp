@@ -34,17 +34,12 @@ int main(int argc, char* argv[]) {
     cfg::options_description desc("Interface options");
     desc.add_options()
         ("help,h", "Display this helpful message.")
-        ("batch,b", cfg::bool_switch()->default_value(false),
-         "Run in batch mode.")
-        ("interactive,i", cfg::bool_switch()->default_value(false),
-         "Run in (semi-)interactive mode.")
         ("config,c", cfg::value<std::string>(),
          "Configuration file to be loaded on start-up")
         ("file,f", cfg::value<std::string>(),
          "Input file for the normalization; can contain either one or two "
          "wordforms (tab-separated) per line.  Two wordforms per line are "
-         "interpreted as training pairs of historical and modern cognates, "
-         "and will always cause the script to run in batch mode.")
+         "interpreted as training pairs of historical and modern cognates.")
         ("perfilemode,p", cfg::bool_switch()->default_value(false),
          "Use per-file mode for normalizer parameters.  With this mode, if "
          "a parameter file is not specified in the configuration file, "
@@ -140,12 +135,11 @@ int main(int argc, char* argv[]) {
             if (m["perfilemode"].as<bool>())
                 file_opts["perfilemode.input"] = m["file"].as<std::string>();
         } else {
-            input = new Norma::ShellInput();
+            std::cerr << "Please specify an input file! (see -h for help"
+                      << std::endl;
+            return 1;
         }
-        if (m["batch"].as<bool>() || !m["interactive"].as<bool>())
-            output = new Norma::Output();
-        else
-            output = new Norma::InteractiveOutput();
+        output = new Norma::Output();
         Norma::Cycle c;
         c.init(input, output, file_opts);
         c.init_chain(m["normalizers"].as<std::string>(),

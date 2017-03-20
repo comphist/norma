@@ -46,21 +46,6 @@ class Output : public IOBase {
      std::ostream *_output;
 };
 
-/// Interactive output class that asks the user for validation of
-/// each normalization.
-class InteractiveOutput : public Output {
- public:
-     void put_line(Normalizer::Result* result,
-                   bool print_prob,
-                   Normalizer::LogLevel max_level);
-     std::string validate(const string_impl& line);
-     bool thread_suitable() {
-         return false;
-     }
-
- private:
-     const char *validate_prompt = "? ";
-};
 }  // namespace Norma
 #endif  // INTERFACE_OUTPUT_H_
 
