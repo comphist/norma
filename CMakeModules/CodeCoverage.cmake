@@ -117,9 +117,14 @@ ENDIF() # NOT CMAKE_BUILD_TYPE STREQUAL "Debug"
 
 # _output: where to put coverage report
 # _testsrc: directory where the test sources live
-FUNCTION(SETUP_COVERAGE _output _testsrc)
-    SET(COVERAGE_OUTPUT_DIR ${_output} CACHE INTERNAL "COVERAGE_OUTPUT_DIR")
-    SET(COVERAGE_TESTS_SRC ${_testsrc} CACHE INTERNAL "COVERAGE_TESTS_SRC")
+FUNCTION(SETUP_COVERAGE _testsrc)
+    ADD_CUSTOM_COMMAND(TARGET coverage POST_BUILD
+        COMMAND ${LCOV_PATH} --remove "coverage.raw" '${_testsrc}/*' '/usr/*' --output-file "coverage.info"
+        COMMAND ${GENHTML_PATH} -o coverage "coverage.info"
+        COMMAND ${CMAKE_COMMAND} -E remove "coverage.raw"
+        COMMENT "Open ./coverage/index.html in your browser to view the coverage report."
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
 ENDFUNCTION()
 
 # global coverage target
@@ -129,13 +134,6 @@ ADD_CUSTOM_TARGET(coverage_setup
                   COMMENT "Resetting code coverage counters to zero."
                   COMMENT "Processing code coverage counters and generating report.")
 ADD_DEPENDENCIES(coverage coverage_setup)
-ADD_CUSTOM_COMMAND(TARGET coverage POST_BUILD
-    COMMAND ${LCOV_PATH} --remove "${COVERAGE_OUTPUT_DIR}.info" '${COVERAGE_TESTS_SRC}/*' '/usr/*' --output-file "${COVERAGE_OUTPUT_DIR}.cleaned"
-    COMMAND ${GENHTML_PATH} -o ${COVERAGE_OUTPUT_DIR} "${COVERAGE_OUTPUT_DIR}.cleaned"
-    COMMAND ${CMAKE_COMMAND} -E remove "${COVERAGE_OUTPUT_DIR}.info" "${COVERAGE_OUTPUT_DIR}.cleaned"
-    COMMENT "Open ./${COVERAGE_OUTPUT_DIR}/index.html in your browser to view the coverage report."
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-)
 
 # Param _testrunner     The name of the target which runs the tests.
 #                  MUST return ZERO always, even on errors.
@@ -159,7 +157,7 @@ FUNCTION(SETUP_TARGET_FOR_COVERAGE _testrunner)
       # Run tests
       COMMAND ${test_command} ${ARGV3}
       # Capturing lcov counters and generating report
-      COMMAND ${LCOV_PATH} -q --directory . --capture --output-file ${COVERAGE_OUTPUT_DIR}.info
+      COMMAND ${LCOV_PATH} -q --directory . --capture --output-file "coverage.raw"
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
    )
    ADD_DEPENDENCIES(coverage "${_testrunner}_coverage")

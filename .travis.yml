@@ -13,7 +13,7 @@ matrix:
                  packages:
                      - g++-4.9
                      - gcc-4.9
-         env: TRAVIS_CXX=g++-4.9 TRAVIS_CC=gcc-4.9 STRINGS=STD
+         env: TRAVIS_CXX=g++-4.9 TRAVIS_CC=gcc-4.9 STRINGS=STD COVERAGE=FALSE
        - compiler: gcc
          addons:
              apt:
@@ -22,7 +22,7 @@ matrix:
                  packages:
                      - g++-4.9
                      - gcc-4.9
-         env: TRAVIS_CXX=g++-4.9 TRAVIS_CC=gcc-4.9 STRINGS=ICU
+         env: TRAVIS_CXX=g++-4.9 TRAVIS_CC=gcc-4.9 STRINGS=ICU COVERAGE=FALSE
        - compiler: gcc
          addons:
              apt:
@@ -31,7 +31,7 @@ matrix:
                  packages:
                      - g++-5
                      - gcc-5
-         env: TRAVIS_CXX=g++-5 TRAVIS_CC=gcc-5 STRINGS=STD
+         env: TRAVIS_CXX=g++-5 TRAVIS_CC=gcc-5 STRINGS=STD COVERAGE=TRUE
        - compiler: gcc
          addons:
              apt:
@@ -40,7 +40,7 @@ matrix:
                  packages:
                      - g++-5
                      - gcc-5
-         env: TRAVIS_CXX=g++-5 TRAVIS_CC=gcc-5 STRINGS=ICU
+         env: TRAVIS_CXX=g++-5 TRAVIS_CC=gcc-5 STRINGS=ICU COVERAGE=TRUE
 
 before_install:
     - sudo apt-get update -qq
@@ -58,10 +58,25 @@ install:
             CC=${TRAVIS_CC} CXX=${TRAVIS_CXX} ./configure && make && sudo make install
             popd
         done
+    - |
+        if [[ ${COVERAGE} == TRUE ]]; then
+           curl -O http://ftp.debian.org/debian/pool/main/l/lcov/lcov_1.13.orig.tar.gz
+           tar xzf lcov_1.13.orig.tar.gz
+           pushd lcov-1.13/
+           make && sudo make install
+           popd
+        fi
     - cd ..
 
 script:
     - mkdir build && cd build
-    - cmake .. -DSTRING_IMPL=${STRINGS} -DWITH_PYTHON=TRUE -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=${TRAVIS_CXX} -DCMAKE_C_COMPILER=${TRAVIS_CC}
+    - cmake .. -DSTRING_IMPL=${STRINGS} -DWITH_PYTHON=TRUE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=${TRAVIS_CXX} -DCMAKE_C_COMPILER=${TRAVIS_CC} -DWITH_COVERAGE=${COVERAGE}
     - make VERBOSE=1 && make buildtests && make check && sudo make install
+
+after_script:
+    - |
+        if [[ ${COVERAGE} == TRUE ]]; then
+           make coverage VERBOSE=1
+           bash <(curl -s https://codecov.io/bash) -X gcov -f ${TRAVIS_BUILD_DIR}/build/coverage.info
+        fi
 

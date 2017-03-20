@@ -140,7 +140,7 @@ endif()
 add_dependencies(check buildtests)
 if (WITH_COVERAGE)
     add_dependencies(coverage buildtests)
-    setup_coverage(coverage "${CMAKE_SOURCE_DIR}/src/tests")
+    setup_coverage("${CMAKE_SOURCE_DIR}/src/tests")
 endif()
 # }}}
 ########## install {{{
