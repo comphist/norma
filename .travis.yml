@@ -79,4 +79,3 @@ after_script:
            make coverage VERBOSE=1
            bash <(curl -s https://codecov.io/bash) -X gcov -f ${TRAVIS_BUILD_DIR}/build/coverage.info
         fi
-
