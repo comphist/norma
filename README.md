@@ -23,10 +23,10 @@ Norma is licensed under the
 * Needed for compilation:
     * GCC >= 4.9
     * CMake >= 2.8.10
-    * Boost >= 1.50
+    * Boost >= 1.54
         * in particular these libraries: Filesystem, Program Options, Regex, System, Test
     * pkg-config
-    * gfsm >= 0.0.11 and gfsmxl >= 0.0.11,
+    * gfsm >= 0.0.16-1 and gfsmxl >= 0.0.15,
       available from http://kaskade.dwds.de/~moocow/mirror/projects/gfsm/
     * GLib >= 2.0
 * Optionally:

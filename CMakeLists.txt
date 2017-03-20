@@ -31,7 +31,7 @@ enable_testing()
 include(AddSources)
 # }}}
 ########## find dependencies {{{
-find_package(Boost 1.50
+find_package(Boost 1.54
     COMPONENTS program_options unit_test_framework regex system filesystem
     REQUIRED)
 if(NOT PKG_CONFIG STREQUAL "")

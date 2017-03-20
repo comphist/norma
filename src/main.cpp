@@ -46,8 +46,6 @@ int main(int argc, char* argv[]) {
          "the input filename (with a parameter-specific file extension) "
          "will be used instead. "
          "Has no effect when not using the '-f' option.")
-        ("verbose,v", cfg::bool_switch()->default_value(false),
-         "Enable verbose status output to stderr")
         ("sync,s", cfg::bool_switch()->default_value(false),
          "Run synchronously (don't start multiple threads).")
         ("plugin-base,P",
