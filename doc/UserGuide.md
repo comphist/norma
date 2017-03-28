@@ -33,6 +33,10 @@ reference:
 
 ### First steps / Interactive mode
 
+_**Attention:**_ **Interactive mode is unavailable in the latest release of
+Norma, due to technical issues.  You can currently only use batch mode
+(described in the next section).**
+
 After you've installed Norma, it can be called via the `normalize` command.  If
 you call Norma without any additional command-line options, you will likely get
 the following message:

@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
             if (m["perfilemode"].as<bool>())
                 file_opts["perfilemode.input"] = m["file"].as<std::string>();
         } else {
-            std::cerr << "Please specify an input file! (see -h for help"
+            std::cerr << "Please specify an input file! (see -h for help)"
                       << std::endl;
             return 1;
         }
