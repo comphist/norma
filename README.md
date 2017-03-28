@@ -1,6 +1,7 @@
 # Norma
 
 [![Build Status](https://travis-ci.org/comphist/norma.svg?branch=master)](https://travis-ci.org/comphist/norma)
+[![codecov](https://codecov.io/gh/comphist/norma/branch/master/graph/badge.svg)](https://codecov.io/gh/comphist/norma)
 
 Norma is a tool for **automatic spelling normalization** of non-standard language data.  It
 uses a combination of different normalization techniques that typically require
@@ -58,5 +59,5 @@ messages), as well as API documentation that is generated via `make doc` (requir
 
 #### Other platforms
 
-* Norma was developed on Linux and will not work on non-Unix platforms
+* Norma was developed on Linux and will not work on non-Unix platforms.
 * Compilation with clang will probably work but is untested.
