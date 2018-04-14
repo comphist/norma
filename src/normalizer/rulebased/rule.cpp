@@ -221,7 +221,7 @@ void RuleSet::insert_epsilon_identity(const string_impl& source,
             eps._from = Symbols::EPSILON;
             eps._to   = Symbols::EPSILON;
             int j = i - 1;
-            while (_rules[j].to() == Symbols::EPSILON)
+            while (j >= 0 && _rules[j].to() == Symbols::EPSILON)
                 --j;
             eps._left = (j < 0)
                 ? Symbols::BOUNDARY

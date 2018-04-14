@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(ws_get_weight) {
 BOOST_AUTO_TEST_CASE(ws_add_weight_with_empty_string) {
     ws.add_weight("jn", "", 0.4);
     BOOST_REQUIRE_EQUAL(ws.size(), 1);
-    const StringPath& path = ws.weights().at(0);
+    const StringPath path = ws.weights().at(0);
     const std::vector<string_impl> jn {"j", "n"};
     BOOST_CHECK(path.get_input()  == jn);
     BOOST_CHECK(path.get_output() == std::vector<string_impl>());
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(ws_add_weight_with_empty_string) {
 BOOST_AUTO_TEST_CASE(ws_add_weight_with_epsilon) {
     ws.add_weight("jn", Symbols::EPS, 0.4);
     BOOST_REQUIRE_EQUAL(ws.size(), 1);
-    const StringPath& path = ws.weights().at(0);
+    const StringPath path = ws.weights().at(0);
     const std::vector<string_impl> jn {"j", "n"};
     BOOST_CHECK(path.get_input()  == jn);
     BOOST_CHECK(path.get_output() == std::vector<string_impl>());
