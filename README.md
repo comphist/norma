@@ -10,7 +10,7 @@ dictionary* (= a list of valid wordforms in the target language).
 
 If you have any questions, suggestions, or comments, please contact one of the authors:
 
-* Marcel Bollmann (<bollmann@linguistics.rub.de>)
+* Marcel Bollmann (<marcel@bollmann.me>)
 * Florian Petran (<florian.petran@gmail.com>)
 
 #### License
