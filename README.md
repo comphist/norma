@@ -8,6 +8,9 @@ uses a combination of different normalization techniques that typically require
 *training data* (= a list of manually normalized wordforms) and a *target
 dictionary* (= a list of valid wordforms in the target language).
 
+Besides this README, see also the [User Guide](doc/UserGuide.md) for more
+information on how to use Norma.
+
 If you have any questions, suggestions, or comments, please contact one of the authors:
 
 * Marcel Bollmann (<marcel@bollmann.me>)
@@ -17,6 +20,23 @@ If you have any questions, suggestions, or comments, please contact one of the a
 
 Norma is licensed under the
 [GNU Lesser General Public License (LGPL) v3](http://www.gnu.org/licenses/lgpl-3.0).
+
+#### Usage via Docker
+
+If you don't want to compile Norma and its dependencies from scratch, you can
+try to use it via a Docker image.  To do so, install
+[Docker](https://www.docker.com/) (e.g. via your system's package manager) and
+run:
+
+    docker run -v $(pwd):/home mbollmann/norma
+
+This should download the Docker image and display Norma's help output.  You can
+now add command-line arguments the same way as with the `normalize` binary; for
+example, if you cloned this repository locally, you should be able to run:
+
+    docker run -v $(pwd):/home mbollmann/norma -s -c doc/example/example.cfg -f doc/example/fnhd_sample.txt
+
+Make sure that the files you specify exist within your current working directory.
 
 #### Dependencies
 
