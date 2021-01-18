@@ -36,6 +36,10 @@ example, if you cloned this repository locally, you should be able to run:
 
     docker run -v $(pwd):/home mbollmann/norma -s -c doc/example/example.cfg -f doc/example/fnhd_sample.txt
 
+To use the `norma_lexicon` command with the docker image, run:
+
+    docker run -v $(pwd):/home --entrypoint norma_lexicon mbollmann/norma <args...>
+
 Make sure that the files you specify exist within your current working directory.
 
 #### Dependencies
